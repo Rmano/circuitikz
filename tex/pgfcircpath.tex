@@ -85,6 +85,12 @@
         \pgfmathround{\pgfmathresult}
         \edef\pgf@circ@direction{\pgfmathresult}%Calculate direction(angle) of path
         \pgfsyssoftpath@setcurrentpath{\myp@th}
+        \pgfgettransformentries\a\temp\temp\d\temp\temp
+        \typeout{DIRECTION\space\pgf@circ@direction\space A:\a\space D:\d}
+        \pgfmathsetmacro{\@@yscale}{\d*\ctikzvalof{mirror value}}
+        \pgfmathsetmacro{\@@xscale}{\a*\ctikzvalof{invert value}}
+        \pgfmathsetmacro{\@@invert}{ifthenelse(\@@xscale<0,1,0)}
+        \typeout{\space\space XSCALE=\@@xscale\space YSCALE=\@@yscale\space INVERT=\@@invert}
     }
     \pgfextra{\def\pgf@temp{open}\def\pgf@circ@temp{#1}}
     \ifx\pgf@temp\pgf@circ@temp  % if it is an open
@@ -92,9 +98,13 @@
             --($(\ctikzvalof{bipole/name}start) ! .5\pgflinewidth ! (\ctikzvalof{bipole/name}end)$) %ugly workaround to get correct linejoins(node breaks path?)
         \fi
         ($(\tikztostart) ! .5 ! (\tikztotarget)$)%%positio of middle node
-        node[#1shape, rotate=\pgf@circ@direction, yscale=\ctikzvalof{mirror value}, xscale=\ctikzvalof{invert value}]
+        node[#1shape, rotate=\pgf@circ@direction, 
+            yscale=\ctikzvalof{mirror value}, xscale=\ctikzvalof{invert value},
+            % yscale=\@@yscale, xscale=\@@xscale,
+            ]
         (\ctikzvalof{bipole/name}) {}
-        \ifpgf@circuit@bipole@inverted
+        \ifnum\@@invert = 1
+        % \ifpgf@circuit@bipole@inverted
             \ifcsname pgf@anchor@#1shape@pathstart\endcsname%if special path-anchors are defined, use them!
                 coordinate	(anchorstartnode) at (\ctikzvalof{bipole/name}.pathend)
                 coordinate	(anchorendnode) at (\ctikzvalof{bipole/name}.pathstart)
