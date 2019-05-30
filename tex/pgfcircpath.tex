@@ -80,13 +80,13 @@
     (\tikztostart) coordinate (\ctikzvalof{bipole/name}start)%necessary to get correct coordinates in the case of relative start/end or constructions like ((node1)-|(node2))
     (\tikztotarget) coordinate (\ctikzvalof{bipole/name}end)
     \pgfextra{
+        \pgfgettransformentries\a\b\c\d\temp\temp
+        \pgfmathsetmacro{\rot}{-atan2(\b,\a)}
         \pgfmathanglebetweenpoints{\pgfpointanchor{\ctikzvalof{bipole/name}start}{center}}
         {\pgfpointanchor{\ctikzvalof{bipole/name}end}{center}}
-        \pgfmathround{\pgfmathresult}
-        \edef\pgf@circ@direction{\pgfmathresult}%Calculate direction(angle) of path
+        \pgfmathsetmacro\pgf@circ@direction{round(\pgfmathresult-\rot)}%Calculate direction(angle) of path
         \pgfsyssoftpath@setcurrentpath{\myp@th}
-        \pgfgettransformentries\a\temp\temp\d\temp\temp
-        \typeout{DIRECTION\space\pgf@circ@direction\space A:\a\space D:\d}
+        \typeout{DIRECTION\space\pgf@circ@direction\space A:\a\space B:\b\space C:\c\space D:\d}
         \pgfmathsetmacro{\@@yscale}{\d*\ctikzvalof{mirror value}}
         \pgfmathsetmacro{\@@xscale}{\a*\ctikzvalof{invert value}}
         \pgfmathsetmacro{\@@invert}{ifthenelse(\@@xscale<0,1,0)}
