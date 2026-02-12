@@ -15,7 +15,7 @@ help:
 	@echo make ctan: create zip for ctan-upload
 
 # to check if it compiles, we do not need to fully build the manual; we save 2 compilation steps
-test-compile: changelog
+test-compile: changelog doc/enverb.sty
 	echo $(HAVE_CONTEXT)
 ifdef HAVE_CONTEXT
 	cd doc; TEXINPUTS=.:../tex/: context circuitikz-context.tex
@@ -63,7 +63,7 @@ else
 	echo "ConTeXt not found, check compatibility skipped"
 endif
 
-manual-latex: changelog
+manual-latex: changelog doc/enverb.sty
 	rm -f doc/circuitikzmanual.pdf
 	rm -f doc/tmp.pdf
 	cd doc; TEXINPUTS=.:../tex/: pdflatex $(PDFLATEXOPTIONS) compatibility.tex && TEXINPUTS=.:../tex/: pdflatex $(PDFLATEXOPTIONS) circuitikzmanual.tex &&  TEXINPUTS=.:../tex/: pdflatex $(PDFLATEXOPTIONS) circuitikzmanual.tex && TEXINPUTS=.:../tex/: pdflatex $(PDFLATEXOPTIONS) circuitikzmanual.tex
@@ -75,6 +75,7 @@ changelog:
 clean:
 	find doc -not -name "*.tex" -not -name "*.sty" -not -name "*.md" -not -name "circuitikz*.pdf" -not -name ".gitignore" -type f -delete
 	find tex -name "*circ*" -not -name "*.sty" -not -name "*.tex" -type f -delete
+	find doc -name "enverb.*" -delete
 
 fullclean: clean
 	rm -f circuitikz.zip circuitikzmanualgit.pdf  t-circuitikzgit.tex circuitikzgit.sty ctikzstylesgit.zip
@@ -139,3 +140,5 @@ flat:
 	sed -i 's/\\startmodule\[circuitikz\].*/\\startmodule[circuitikzgit]/' $(CTIKZ_CONTEXT_GIT_FILENAME)
 	sed -i 's/\r$$//' $(CTIKZ_CONTEXT_GIT_FILENAME)
 
+doc/enverb.sty:
+	cp $(shell kpsewhich enverb.sty) doc/enverb.sty || bash tools/install_enverb.sh
