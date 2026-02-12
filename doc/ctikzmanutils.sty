@@ -15,8 +15,7 @@
 \RequirePackage{ifthen}
 \RequirePackage{iftex}
 \RequirePackage{etoolbox}% easier lwarp support
-\RequirePackage{xparse}
-\RequirePackage{showexpl}
+\RequirePackage{listings}
 \RequirePackage{ragged2e}
 \RequirePackage{textcomp}
 \RequirePackage{booktabs}
@@ -32,20 +31,116 @@
 \usetikzlibrary{calc, fit, decorations, decorations.pathmorphing, tikzmark}
 \RequirePackage{upgreek}
 %
-% Thanks to Ulrike Fischer https://tex.stackexchange.com/a/57160/38080
-% make the listing line number invisible to copy and paste
-% it seems that sometimes it works, sometimes no!
+% Example definitions using `enverb`
 %
-\RequirePackage{accsupp}
-\newcommand{\emptyaccsupp}[1]{\BeginAccSupp{ActualText={}}#1\EndAccSupp{}}%
-%
-% The following trick is used to silence showexpl a bit, so that the
-% logs are readable... Also, make the boxes cyan as the code background
-%
-\let\SX@Info=\relax % silence showexpl a bit...
-\renewcommand\ResultBox{\fcolorbox{cyan}{white}}
-\setlength\ResultBoxSep{6pt}    % like \fboxsep
-\setlength\ResultBoxRule{0.8pt} % like \fboxrule
+\RequirePackage{enverb}
+\newcommand*\ctikz@ex@lstopts{} % collect options meant for lstlisting
+\newdimen\ctikz@ex@width % width available to the code
+\newsavebox\ctikz@ex@box % temporary box register
+\ekvdefinekeys{ctikz/examples}
+  {
+    % like showexpl but fewer choices
+     choice-store pos       = \ctikz@ex@pos{t,b,l}
+    ,initial      pos       = l
+    ,dimen        hsep      = \ctikz@ex@hsep
+    ,initial      hsep      = 1.5\columnsep
+    ,dimen        vsep      = \ctikz@ex@vsep
+    ,initial      vsep      = \bigskipamount
+    ,dimen        aboveskip = \ctikz@ex@aboveskip
+    ,initial      aboveskip = \medskipamount
+    ,dimen        belowskip = \ctikz@ex@belowskip
+    ,initial      belowskip = \medskipamount
+    % is only used for pos=t, for pos=l we always use variable width
+    ,boolTF       varwidth  = \ctikz@ex@vwidthTF
+    % handle varwidth=t
+    ,choice       varwidth  = { t = \let\ctikz@ex@vwidthTF\@firstoftwo }
+    ,boolTF       only code = \ctikz@ex@onlycodeTF
+    % collect unknown keys for lstlisting
+    ,unknown      code      = \appto\ctikz@ex@lstopts{,#1={#2}}
+    ,unknown      noval     = \appto\ctikz@ex@lstopts{,#1}
+  }
+% print the result of the collected code
+\newcommand*\ctikz@ex@printresult
+  {%
+    \ctikz@ex@vwidthTF
+      {\ctikz@ex@fbox{\enverbExecute}}%
+      {%
+        \if\ctikz@ex@pos l
+          \ctikz@ex@fbox{\enverbExecute}%
+        \else
+          \ctikz@ex@fbox
+            {\begin{minipage}{\linewidth}\enverbExecute\end{minipage}}%
+        \fi
+      }%
+  }
+\newcommand*\ctikz@ex@vcenter{\raisebox{.5\dimexpr\depth-\height\relax}}
+% output a vcentered framed box for the results
+% additionally the output (together with the framed box) will be in the box
+% register \ctikz@ex@box
+\newcommand*\ctikz@ex@fbox[1]
+  {%
+    \sbox\ctikz@ex@box
+      {%
+        \fboxsep=6pt
+        \fboxrule=0.8pt
+        \advance\linewidth-2\dimexpr\fboxsep+\fboxrule\relax
+        \fcolorbox{cyan}{white}{\ignorespaces#1\unskip}%
+      }%
+    $\vcenter{\copy\ctikz@ex@box}$% vcenter matches minipage [c]
+  }
+% output vcentered code listing
+\newcommand*\ctikz@ex@printcode
+  {%
+    \parbox[c]{\ctikz@ex@width}%
+      {%
+        \ExpandArgs{ne}\enverbListing{lstlisting}%
+          {[%
+             style=expl-code
+            ,aboveskip=6pt% we don't want skips but need to compensate listings
+            ,belowskip=0pt%
+            \unexpanded\expandafter{\ctikz@ex@lstopts}%
+          ]}%
+      }%
+  }
+\newenvironment{LTXexample}
+  {\enverb{key-set=ctikz/examples, oarg-not-enverb, more-ignore=0}}
+  {%
+    \par
+    \vskip\ctikz@ex@aboveskip
+    \noindent
+    \ctikz@ex@width=\linewidth
+    \ctikz@ex@onlycodeTF
+      {}%
+      {%
+        \if\ctikz@ex@pos b
+        \else
+          \ctikz@ex@printresult
+          \if\ctikz@ex@pos t
+            \par
+            \vskip\ctikz@ex@vsep
+            \noindent
+          \else
+            \kern\ctikz@ex@hsep
+            \advance\ctikz@ex@width-\wd\ctikz@ex@box
+            \advance\ctikz@ex@width-\ctikz@ex@hsep
+          \fi
+        \fi
+      }%
+    \ctikz@ex@printcode
+    \ctikz@ex@onlycodeTF
+      {}%
+      {%
+        \if\ctikz@ex@pos b
+          \par
+          \vskip\ctikz@ex@vsep
+          \noindent
+          \ctikz@ex@printresult
+        \fi
+      }%
+    \par
+    \vskip\ctikz@ex@belowskip
+    \@endparenv
+  }
 %
 % --- Style for the code part  ---
 % cyan block, no numbers
@@ -67,19 +162,7 @@
   aboveskip=\bigskipamount,
   belowskip=\bigskipamount,
 }
-% --- Style for the example output part  ---
-% ltxexample uses rframe=<...> for the *result* frame
-\lstset{
-  pos=l,
-  width=-99pt,
-  overhang=0pt,
-  hsep=2\columnsep,
-  vsep=\bigskipamount,
-  rframe=single,                % <- frame around the *result*
-}
-
-% Tell showexpl/LTXexample which settings to use for the code listing
-\lstset{explpreset={style=expl-code},style=expl-code}
+\lstset{style=expl-code}
 
 
 \newcommand{\email}[1]{\href{mailto:#1}{#1}}
