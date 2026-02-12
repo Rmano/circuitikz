@@ -8988,7 +8988,8 @@ Look at the following example, which is easily put into a macro.
         node[right, font=\tiny]{CLK} -- ++(-0.1,-0.1);
     \draw (C.n) -- ++(0,1) node[vcc]{};
     \draw (C.s) -- ++(0,-1) node[ground]{};
-\end{circuitikz}\end{LTXexample}
+\end{circuitikz}
+\end{LTXexample}
 
 \subsection{Seven segment displays}
 \label{sec:seven-segment-displays}
@@ -10510,7 +10511,7 @@ There is little sense in using the \texttt{vif queue add} key explicitly; it is 
 
 For example, let's suppose you like the \texttt{raised} voltage notation, but you want the plus and minus signs at a fixed distance from the label, independently on the size of the branch where the component is, and moreover you want to be able to change the color or the style of the signs. We can setup the voltage like this:
 
-\begin{lstlisting}[varwidth=true]
+\begin{lstlisting}
 %% The voltage label (the text) will be managed normally by v...={}
 %% We need just one parameter to specify the coloa/styler of the signs; we
 %% set the other argument to nothing.
@@ -10552,7 +10553,7 @@ For example, let's suppose you like the \texttt{raised} voltage notation, but yo
 
 If you have an old \LaTeX{} or are using \ConTeXt, you must add the \texttt{use auto vif} to the options of the environment; the option will not have any negative effect if it is not needed.
 
-\begin{lstlisting}[varwidth=true]
+\begin{lstlisting}
 \begin{tikzpicture}[use auto vif]
     ... as before
 \end{tikzpicture}
@@ -10568,7 +10569,7 @@ Suppose now we want to change the current indication so that we can typeset the 
     #4] at (#1-Ipos) {{\boldmath #2}}; %the double {} are needed!!!
 }
 
-\begin{lstlisting}[varwidth=true]
+\begin{lstlisting}
 %% arguments: label, style for the arrow, style for the label
 \ctikzset{my i/.style n args  = {3}{vif queue add={docurrent}{#1}{#2}{#3}}}
 \newcommand{\docurrent}[4]{
@@ -10602,7 +10603,7 @@ Suppose now we want to change the current indication so that we can typeset the 
 Sometimes, the need of using the syntax \texttt{v, my v=\dots} can result tedious; unfortunately, it is not possible to add the \texttt{v} to the key \texttt{my v} because it will reset the direction/position of the key. To avoid this problem, you can use the new command
 \verb!\!\IndexKey{ctikzactivatevoltagedirections} (and their sibling \verb!\!\IndexKey{ctikzactivatecurrentdirections} and \verb!\!\IndexKey{ctikzactivateflowdirections}) which will create the full set of personalized voltage (or current or flow) commands with the appended directions. For example, this is how we can reimplement the ``European arrow with signs'' shown in the previous section:
 
-\begin{lstlisting}[varwidth=true]
+\begin{lstlisting}
 \newcommand\eurVPM[4]{% node, label, two ignored arguments
     \draw [thin, -{Stealth[width=4pt]}, shorten >=5pt, shorten <=5pt]
     (#1-Vfrom) node[font=\tiny]{$\vphantom{+}-$}
@@ -10647,7 +10648,7 @@ You can use this trick even with styles with more than one argument, but then yo
 \ctikzset{vpms/.style 2 args={european voltages, v, vif queue add={eurVPMstyled}{#1}{#2}{}}}
 \ctikzactivatevoltagedirections{vpms}%
 
-\begin{lstlisting}[varwidth=true]
+\begin{lstlisting}
 \newcommand\eurVPMstyled[4]{% node, label, arrow style, one ignored arguments
     \draw [thin, -{Stealth[width=4pt]}, shorten >=5pt, shorten <=5pt, #3]
     (#1-Vfrom) node[font=\tiny]{$\vphantom{+}-$}
