@@ -144,11 +144,13 @@
 % output vcentered code listing
 \newcommand*\ctikz@ex@printcode
   {%
-    \if\ctikz@ex@pos l% only box up the code if necessary
-      \expanded{\unexpanded{\parbox[c]{\ctikz@ex@width}}\expandafter}%
-    \else
-      \expandafter\@firstofone
-    \fi
+    \ctikz@ex@onlycodeTF{\@firstofone}%
+      {%
+        \if\ctikz@ex@pos l% only box up the code if necessary
+          \expandafter\@secondoftwo
+        \fi
+        \@secondoftwo{\parbox[c]{\ctikz@ex@width}}%
+      }%
       {%
         \ExpandArgs{ne}\enverbListing{lstlisting}%
           {[%
