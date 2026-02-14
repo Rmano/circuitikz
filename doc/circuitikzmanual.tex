@@ -713,6 +713,7 @@ The easiest way to reuse the circuit is to put it in a macro. This is a very fle
 
 Defining a macro for our amplifier could be as easy as this:
 
+\begin{LTXexample}[exec outside]
 \ctikzset{amplifiers/fill=cyan!20, component text=left}
 \newcommand\myNIA[4]{%1: name of this amplifier, %2 start coordinate, %3 R1, %4 R2
     \draw #2 coordinate(#1-in) to[short] ++(1,0)
@@ -723,17 +724,7 @@ Defining a macro for our amplifier could be as easy as this:
     to [short, *-] ++(1,0) coordinate(#1-out)
     ;
 }
-\begin{lstlisting}
-\newcommand\myNIA[4]{%1: name of this amplifier, %2 start coordinate, %3 R1, %4 R2
-    \draw #2 coordinate(#1-in) to[short] ++(1,0)
-    node[op amp, noinv input up, anchor=+](#1-OA){\texttt{#1}}
-    (#1-OA.-) -- ++(0,-1) coordinate(#1-FB)
-    to[R=#3] ++(0,-2) node[ground]{}
-    (#1-FB) to[R=#4, *-] (#1-FB -| #1-OA.out) -- (#1-OA.out)
-    to [short, *-] ++(1,0) coordinate(#1-out)
-    ;
-}
-\end{lstlisting}
+\end{LTXexample}
 
 We remove the open poles (it's better to draw them at the end to avoid artifacts) and then we make the names of the coordinates and of the nodes unique, by prepending a parameter that we will provide at every invocation. Then we remove the labels (for simplicity here) and add a couple of coordinates that we will be able to use from the outside when building our circuit.
 
@@ -768,20 +759,14 @@ The idea is to use relative coordinates and named nodes as much as possible, so 
 
 First of all, let's define a handy function to show the position of nodes:
 
+\begin{LTXexample}[exec outside]
 \def\normalcoord(#1){coordinate(#1)}
 \def\showcoord(#1){coordinate(#1) node[circle, red, draw, inner sep=1pt,
     pin={[red, overlay, inner sep=0.5pt, font=\tiny, pin distance=0.1cm,
     pin edge={red, overlay}]45:#1}](){}}
 \let\coord=\normalcoord
 \let\coord=\showcoord
-\begin{lstlisting}
-\def\normalcoord(#1){coordinate(#1)}
-\def\showcoord(#1){coordinate(#1) node[circle, red, draw, inner sep=1pt,
-    pin={[red, overlay, inner sep=0.5pt, font=\tiny, pin distance=0.1cm,
-    pin edge={red, overlay}]45:#1}](){}}
-\let\coord=\normalcoord
-\let\coord=\showcoord
-\end{lstlisting}
+\end{LTXexample}
 
 The idea is that you can use \verb|\coord()| instead of \verb|coordinate()| in paths, and that will draw small red \emph{markers} showing them. For example:
 
@@ -813,10 +798,9 @@ I had to do draw an invisible line to take into account the text for Q1 --- the 
 
 Another thing I like to modify with respect to the standard is the position of the arrows in transistors, which are normally in the middle of the symbol. Using the following setting (see section~\ref{sec:styling-transistors}) will move the arrows to the start or end of the corresponding pin.
 
+\begin{LTXexample}[exec outside]
 \ctikzset{transistors/arrow pos=end}
-\begin{lstlisting}
-\ctikzset{transistors/arrow pos=end}
-\end{lstlisting}
+\end{LTXexample}
 
 The tricky thing about \verb|\killdepth{}| macro is the finicky details. Without the \verb|\killdepth| macro, the labels of different transistors will be adjusted so that the vertical center of the box is at the \texttt{center} anchor, and as an effect, labels with descenders (like Q) will have a different baseline than labels without. You can see this here (it's really subtle):
 
@@ -1850,6 +1834,7 @@ To define a block you use the \verb|\ctikzsubcircuitdef| macro; this macro has 3
 
 Let's see that with an example:
 
+\begin{LTXexample}[exec outside]
 \ctikzsubcircuitdef{optovishay}{in 1, out 1, in 2, out 2, center}{%
     % reference anchor is -center
     coordinate(#1-center)
@@ -1869,27 +1854,7 @@ Let's see that with an example:
     % leave the position of the path at the center
     (#1-center)
 }
-\begin{lstlisting}
-\ctikzsubcircuitdef{optovishay}{in 1, out 1, in 2, out 2, center}{%
-    % reference anchor is -center
-    coordinate(#1-center)
-    (#1-center) +(-1.2,-1) rectangle +(1.2,1)
-    (#1-center) ++(-1.2,0.8) coordinate (#1-in 1)
-    (#1-center) ++(-1.2,-0.8) coordinate (#1-in 2)
-    (#1-center) ++(1.2,0.8) coordinate (#1-out 1)
-    (#1-center) ++(1.2,-0.8) coordinate (#1-out 2)
-    (#1-center) ++(0,1) coordinate (#1-up)
-    (#1-in 1) -- ++(0.5,0) coordinate(#1-tmp)
-        to[leD*, diodes/scale=0.6, led arrows from cathode]
-        (#1-tmp|- #1-in 2) -- (#1-in 2)
-    (#1-out 1) -- ++(-0.5,0) coordinate(#1-tmp)
-        to[pD*, diodes/scale=0.4, mirror]  ++(0,-0.5)
-        edge[densely dashed] ++(0,-0.533) ++(0,-0.566)
-        to[pD*, diodes/scale=0.4,mirror] (#1-tmp|- #1-out 2) -- (#1-out 2)
-    % leave the position of the path at the center
-    (#1-center)
-}
-\end{lstlisting}
+\end{LTXexample}
 
 Our element is a symbol for an optocoupler; in this case is the symbol used for one cell of the double \href{https://www.vishay.com/docs/84639/vo1263aa.pdf}{Vishay vo1263 device}.
 
@@ -1955,33 +1920,22 @@ One possibility is to use additional macros and anchors for positioning, like in
 
 Suppose you have defined
 
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
     \ctikzsubcircuitdef{divider}{in, out}{%
         coordinate (#1-in) to[R, l=~, name=#1-rh, -*] ++(2,0)
         coordinate(#1-tmp) to[R, l=~, name=#1-rl] ++(0,-2)
         node[tlground]{} (#1-tmp) --++(0.5,0) coordinate(#1-out)
     }
-\end{lstlisting}
-
-\ctikzsubcircuitdef{divider}{in, out}{%
-    coordinate (#1-in) to[R, l=~, name=#1-rh, -*] ++(2,0)
-    coordinate(#1-tmp) to[R, l=~, name=#1-rl] ++(0,-2)
-    node[tlground]{} (#1-tmp) --++(0.5,0) coordinate(#1-out)
-}
+\end{LTXexample}
 
 then you can additionally define:
 
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
     \newcommand{\mydiv}[4]{
         \divider{#1}{#2} (#1-rh.n) node[above]{#3}
         (#1-rl.n) node[right]{#4} (#1-out)
     }
-\end{lstlisting}
-
-\newcommand{\mydiv}[4]{
-    \divider{#1}{#2} (#1-rh.n) node[above]{#3}
-    (#1-rl.n) node[right]{#4} (#1-out)
-}
+\end{LTXexample}
 
 And finally do:
 \begin{LTXexample}
@@ -2075,6 +2029,7 @@ In this case, probably an old-fashioned macro, using partway coordinate specifie
 \footnote{See \href{https://tikz.dev/tikz-coordinates\#sec-13.5.3}{\TikZ{} manual section 13.5}}
 could be the best option for this task. Below, one possible example (not optimized at all!).
 
+%% TODO: store
 \begin{lstlisting}
 \NewDocumentCommand{\ChopperByTerminals}{O{} O{0.2cm} m m m}{%
     % #1 -> options to the draw command
@@ -2107,6 +2062,7 @@ could be the best option for this task. Below, one possible example (not optimiz
 
 You can use this definition as follows, for example:
 
+%% TODO: restore
 \begin{lstlisting}
 \begin{tikzpicture}[]
     \node[op amp](A) at (0,0) {};
@@ -8148,17 +8104,13 @@ To define a specific flip-flop, you have to set a series of keys under the \verb
 To set all these keys, an auxiliary style \IndexKey{flipflop def} is defined, so that you can do the following thing:
 
 \begingroup
-\tikzset{flipflop AB/.style={flipflop,
-    flipflop def={t1=A, t3=B, t6=Q, t4={\ctikztextnot{Q}},
-        td=rst, nd=1, c2=1, n2=1, t2={\texttt{CLK}}},
-}}
 
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
 \tikzset{flipflop AB/.style={flipflop,
     flipflop def={t1=A, t3=B, t6=Q, t4={\ctikztextnot{Q}},
         td=rst, nd=1, c2=1, n2=1, t2={\texttt{CLK}}},
 }}
-\end{lstlisting}
+\end{LTXexample}
 
 to obtain:
 
@@ -8200,15 +8152,12 @@ You can also  add ``vertical'' asynchronous set and reset (active low) adding th
 If you like different pin distributions, you can easily define different flip-flops to your taste. For example, somebody likes the clock pin on the bottom pin:
 
 \begingroup
-\tikzset{flipflop myJK/.style={flipflop,
-    flipflop def={t1=J, t2=K, t6=Q, t4={\ctikztextnot{Q}}, c3=1}}
-}
 
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
 \tikzset{flipflop myJK/.style={flipflop,
     flipflop def={t1=J, t2=K, t6=Q, t4={\ctikztextnot{Q}}, c3=1}}
 }
-\end{lstlisting}
+\end{LTXexample}
 
 \begin{groupdesc}
     \circuitdesc*{flipflop myJK}{Example custom flip flop}{}
@@ -9293,6 +9242,7 @@ Notice that the four styles are designed to be used at the environment level: th
 
 The standard direction of currents, flows and voltages are changed by these options; notice that the default drops in case of passive and active elements is normally different. Take care that in the case of \texttt{noold} and \texttt{EFvoltages} also the currents can switch directions. It is much easier to understand the several behaviors by looking at the following examples, that have been generated by the code:
 
+%% TODO: LTXexample pos=b
 \begin{lstlisting}
 \foreach\element in {R, C, D, battery2, V, I, sV, cV, cI}{%
     \noindent\ttfamily
@@ -10342,19 +10292,14 @@ For example, you could like the voltage label oriented with the bipole:
 
 Or you could use the anchor to substitute the flow with a fancy one and still position the label automatically; suppose you have the following definition in your preamble (see \TikZ{} manual, ``Path decorations''):
 
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
 % requires \usetikzlibrary{decorations, decorations.pathmorphing}
 \tikzset{%
 lray/.style={decorate, decoration={
     snake, amplitude=2pt,pre length=1pt,post length=2pt, segment length=5pt,},
     -Triangle,
 }}
-\end{lstlisting}
-\tikzset{%
-lray/.style={decorate, decoration={
-    snake, amplitude=2pt,pre length=1pt,post length=2pt, segment length=5pt, },
-    -Triangle,
-}}
+\end{LTXexample}
 
 You can then define a kind of ``power flow'' style:
 
@@ -10389,7 +10334,7 @@ The normal voltage arrows length depends not on the component length but on the 
 Using the advanced voltage interface mechanism, you can for example design voltages that are of fixed lengths; in the example below the new \texttt{xparse} method for defining commands is used, so that we can have a couple of different optional arguments:
 
 
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+\begin{LTXexample}[basicstyle=\scriptsize\ttfamily, exec outside]
 \NewDocumentCommand{\fixedvlen}{O{0.5cm} m m O{}}{% [semilength]{node}{label}[extra options]
     % get the center of the standard arrow
     \coordinate (#2-Vcenter) at ($(#2-Vfrom)!0.5!(#2-Vto)$);
@@ -10398,15 +10343,7 @@ Using the advanced voltage interface mechanism, you can for example design volta
     % position the label as in the normal voltages (inner sep of voltage labels is 2pt per default)
     \node[anchor=\ctikzgetanchor{#2}{Vlab}, inner sep=2pt, #4] at (#2-Vlab) {#3};
 }
-\end{lstlisting}
-\NewDocumentCommand{\fixedvlen}{O{0.5cm} m m O{}}{% [semilength]{node}{label}[extra options]
-    % get the center of the standard arrow
-    \coordinate (#2-Vcenter) at ($(#2-Vfrom)!0.5!(#2-Vto)$);
-    % draw an arrow of a fixed size around that center and on the same line
-    \draw[-Triangle, #4] ($(#2-Vcenter)!#1!(#2-Vfrom)$) -- ($(#2-Vcenter)!#1!(#2-Vto)$);
-    % position the label as in the normal voltages
-    \node[anchor=\ctikzgetanchor{#2}{Vlab}, inner sep=2pt, #4] at (#2-Vlab) {#3};
-}
+\end{LTXexample}
 
 \begin{LTXexample}[varwidth=true, basicstyle=\scriptsize\ttfamily, pos=t]
 \begin{circuitikz}[european,]
@@ -10425,7 +10362,7 @@ You can also notice that the arrow is not exactly the same as other arrows in th
 
 Another possibility is to have the arrow length based on the length of the component; for example you can use this code:
 
-\begin{lstlisting}[basicstyle=\scriptsize\ttfamily]
+\begin{LTXexample}[basicstyle=\scriptsize\ttfamily, exec outside]
 \NewDocumentCommand{\compvlen}{O{1.5} m m O{}}{% [relative length]{node}{label}[extra options]
     % get the center of the standard arrow
     \coordinate (#2-Vcenter) at ($(#2-Vfrom)!0.5!(#2-Vto)$);
@@ -10438,20 +10375,7 @@ Another possibility is to have the arrow length based on the length of the compo
     % position the label as in the normal voltages
     \node[anchor=\ctikzgetanchor{#2}{Vlab}, #4] at (#2-Vlab) {#3};
 }
-\end{lstlisting}
-\NewDocumentCommand{\compvlen}{O{1.5} m m O{}}{% [relative length]{node}{label}[extra options]
-    % get the center of the standard arrow
-    \coordinate (#2-Vcenter) at ($(#2-Vfrom)!0.5!(#2-Vto)$);
-    % draw an arrow of a size proportional to the component length
-    % around that center and on the same line
-    % the component length is calculated using the let...in with the left and right anchors
-    % and multiplied by the relative length
-    \draw[-Triangle, #4] let \p1=(#2.left), \p2=(#2.right), \n1={0.5*#1*veclen(\x2-\x1,\y2-\y1)}
-        in ($(#2-Vcenter)!\n1!(#2-Vfrom)$) -- ($(#2-Vcenter)!\n1!(#2-Vto)$);
-    % position the label as in the normal voltages
-    \node[anchor=\ctikzgetanchor{#2}{Vlab}, #4] at (#2-Vlab) {#3};
-}
-
+\end{LTXexample}
 
 \begin{LTXexample}[varwidth=true, basicstyle=\scriptsize\ttfamily, pos=t]
 \begin{circuitikz}[european,]
@@ -10507,7 +10431,9 @@ There is little sense in using the \texttt{vif queue add} key explicitly; it is 
 
 For example, let's suppose you like the \texttt{raised} voltage notation, but you want the plus and minus signs at a fixed distance from the label, independently on the size of the branch where the component is, and moreover you want to be able to change the color or the style of the signs. We can setup the voltage like this:
 
-\begin{lstlisting}
+% TODO: Move this in the listing as well?
+\ctikzset{voltage=raised, !v sym/.style={no v symbols}}
+\begin{LTXexample}[exec outside]
 %% The voltage label (the text) will be managed normally by v...={}
 %% We need just one parameter to specify the coloa/styler of the signs; we
 %% set the other argument to nothing.
@@ -10521,18 +10447,7 @@ For example, let's suppose you like the \texttt{raised} voltage notation, but yo
     \path ($(#1voltage.center)!0.5cm!(#1-Vto)$) node[#2]{$+$};
     \path ($(#1voltage.center)!0.5cm!(#1-Vfrom)$) node[#2]{$-$};
 }
-\end{lstlisting}
-
-\ctikzset{voltage=raised, !v sym/.style={no v symbols}}
-%% my V: standard labels, drawing the signs at fixed distance.
-%% use one argument for the label (managed by `v` and one for the signs color/style
-\ctikzset{my v/.style = {
-    voltage=raised, no v symbols, vif queue add={placesigns}{#1}{}{}
-}}
-\newcommand{\placesigns}[4]{% place the +- signs at a fixed distance
-    \path ($(#1voltage.center)!0.5cm!(#1-Vto)$) node[#2]{$+$};
-    \path ($(#1voltage.center)!0.5cm!(#1-Vfrom)$) node[#2]{$-$};
-}
+\end{LTXexample}
 
 \begin{LTXexample}
 \begin{circuitikz}
@@ -10557,15 +10472,7 @@ If you have an old \LaTeX{} or are using \ConTeXt, you must add the \texttt{use 
 
 Suppose now we want to change the current indication so that we can typeset the label using \verb!\boldmath!, changing the style of the label and the color of the arrow. For example, we could define the following:
 
-\ctikzset{my i/.style n args  = {3}{vif queue add={docurrent}{#1}{#2}{#3}}}
-\newcommand{\docurrent}[4]{
-    \node [currarrow, anchor=center, rotate=\ctikzgetdirection{#1-Iarrow},
-        #3] at (#1-Ipos) {};
-    \node [anchor=\ctikzgetanchor{#1}{Ilab}, outer sep=4pt, inner sep=1pt,
-    #4] at (#1-Ipos) {{\boldmath #2}}; %the double {} are needed!!!
-}
-
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
 %% arguments: label, style for the arrow, style for the label
 \ctikzset{my i/.style n args  = {3}{vif queue add={docurrent}{#1}{#2}{#3}}}
 \newcommand{\docurrent}[4]{
@@ -10574,7 +10481,7 @@ Suppose now we want to change the current indication so that we can typeset the 
     \node [anchor=\ctikzgetanchor{#1}{Ilab}, outer sep=4pt, inner sep=1pt,
     #4] at (#1-Ipos) {{\boldmath #2}}; %the double {} are needed!!!
 }
-\end{lstlisting}
+\end{LTXexample}
 
 \begin{LTXexample}
 \begin{circuitikz}
@@ -10599,7 +10506,7 @@ Suppose now we want to change the current indication so that we can typeset the 
 Sometimes, the need of using the syntax \texttt{v, my v=\dots} can result tedious; unfortunately, it is not possible to add the \texttt{v} to the key \texttt{my v} because it will reset the direction/position of the key. To avoid this problem, you can use the new command
 \verb!\!\IndexKey{ctikzactivatevoltagedirections} (and their sibling \verb!\!\IndexKey{ctikzactivatecurrentdirections} and \verb!\!\IndexKey{ctikzactivateflowdirections}) which will create the full set of personalized voltage (or current or flow) commands with the appended directions. For example, this is how we can reimplement the ``European arrow with signs'' shown in the previous section:
 
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
 \newcommand\eurVPM[4]{% node, label, two ignored arguments
     \draw [thin, -{Stealth[width=4pt]}, shorten >=5pt, shorten <=5pt]
     (#1-Vfrom) node[font=\tiny]{$\vphantom{+}-$}
@@ -10610,18 +10517,7 @@ Sometimes, the need of using the syntax \texttt{v, my v=\dots} can result tediou
 \ctikzset{vpm/.style={european voltages, v, vif queue add={eurVPM}{#1}{}{}}}
 % do magic with vpm
 \ctikzactivatevoltagedirections{vpm}
-\end{lstlisting}
-
-\newcommand\eurVPM[4]{% node, label, two ignored arguments
-    \draw [thin, -{Stealth[width=4pt]}, shorten >=5pt, shorten <=5pt]
-    (#1-Vfrom) node[font=\tiny]{$\vphantom{+}-$}
-    .. controls (#1-Vcont1) and (#1-Vcont2)..
-    (#1-Vto) node[font=\tiny]{$+$}
-    node[pos=0.5,anchor=\ctikzgetanchor{#1}{Vlab}]{#2};
-}
-\ctikzset{vpm/.style={european voltages, v, vif queue add={eurVPM}{#1}{}{}}}
-% do magic with vpm
-\ctikzactivatevoltagedirections{vpm}
+\end{LTXexample}
 
 \begin{LTXexample}
 \begin{circuitikz}[voltage shift=0.5]
@@ -10633,18 +10529,7 @@ Sometimes, the need of using the syntax \texttt{v, my v=\dots} can result tediou
 
 You can use this trick even with styles with more than one argument, but then you have to be sure to always add both argument \emph{braced}, otherwise very strange errors will be generated.
 
-\newcommand\eurVPMstyled[4]{% node, label, arrow style, one ignored argument
-    \draw [thin, -{Stealth[width=4pt]}, shorten >=5pt, shorten <=5pt, #3]
-    (#1-Vfrom) node[font=\tiny]{$\vphantom{+}-$}
-    .. controls (#1-Vcont1) and (#1-Vcont2)..
-    (#1-Vto) node[font=\tiny]{$+$}
-    node[pos=0.5,anchor=\ctikzgetanchor{#1}{Vlab}]{#2};
-}
-
-\ctikzset{vpms/.style 2 args={european voltages, v, vif queue add={eurVPMstyled}{#1}{#2}{}}}
-\ctikzactivatevoltagedirections{vpms}%
-
-\begin{lstlisting}
+\begin{LTXexample}[exec outside]
 \newcommand\eurVPMstyled[4]{% node, label, arrow style, one ignored arguments
     \draw [thin, -{Stealth[width=4pt]}, shorten >=5pt, shorten <=5pt, #3]
     (#1-Vfrom) node[font=\tiny]{$\vphantom{+}-$}
@@ -10655,7 +10540,7 @@ You can use this trick even with styles with more than one argument, but then yo
 \ctikzset{vpms/.style 2 args={european voltages, v,
     vif queue add={eurVPMstyled}{#1}{#2}{}}}
 \ctikzactivatevoltagedirections{vpms}%
-\end{lstlisting}
+\end{LTXexample}
 
 \begin{LTXexample}
 \begin{circuitikz}[voltage shift=0.5]
@@ -11900,6 +11785,7 @@ Here a series of examples, contributed by several people, is shown with their co
 \end{circuitikz}
 } % scalebox
 
+% TODO: LTXexample with pos=t
 \begin{lstlisting}[basicstyle=\small\ttfamily]
 \ctikzloadstyle{romano}
 \scalebox{0.707}{%
