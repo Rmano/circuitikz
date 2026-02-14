@@ -236,12 +236,12 @@
           ]}%
       }%
   }
-% \begin{LTXexample}[<settings>]
+% \begin{ctikzExample}[<settings>]
 % the front level environment. <settings> can be any keys as described inside
 % \ekvdefinekeys{ctikz/examples}. The following paragraph will be indented if
-% there's a blank line between \end{LTXexample} and the first line of the
+% there's a blank line between \end{ctikzExample} and the first line of the
 % paragraph (as with lists in LaTeX).
-\newenvironment{LTXexample}
+\newenvironment{ctikzExample}
   {\enverb{key-set=ctikz/examples, oarg-not-enverb, more-ignore=0}}
   {%
     \par
@@ -288,7 +288,7 @@
 % \ctikz@ex@codeOutside the key was used and we should rerun an \enverbExecute
 % (which only works on \enverbBody contents, so we restore those outside of the
 % environment).
-\AddToHook{env/LTXexample/after}
+\AddToHook{env/ctikzExample/after}
   {%
     \ifx\ctikz@ex@codeOutside\@empty
     \else
