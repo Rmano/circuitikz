@@ -30,6 +30,7 @@
 % for some example we need them...
 \usetikzlibrary{calc, fit, decorations, decorations.pathmorphing, tikzmark}
 \RequirePackage{upgreek}
+
 %
 % Example definitions using `enverb`
 %
@@ -38,6 +39,9 @@
 \newcommand*\ctikz@ex@codeOutside{} % collect code to execute after the env
 \newdimen\ctikz@ex@width % width available to the code
 \newsavebox\ctikz@ex@box % temporary box register
+% handle the 'store' key.
+% #1: the name of the storage
+% saves the contents currently in \enverbBody to the named storage.
 \newcommand*\ctikz@ex@dostore[1]
   {%
     \@ifundefined{ctikz@ex@storage@#1}%
@@ -46,6 +50,9 @@
     \expandafter\gappto\csname ctikz@ex@storage@#1\expandafter\endcsname
       \expandafter{\enverbBody}%
   }
+% handle the 'restore' key.
+% #1: the name of the storage
+% prepends \enverbBody with the contents of the named storage.
 \newcommand*\ctikz@ex@dorestore[1]
   {%
     \@ifundefined{ctikz@ex@storage@#1}
@@ -60,41 +67,95 @@
   }
 \ekvdefinekeys{ctikz/examples}
   {
-    % like showexpl but fewer choices
+    % pos=<t|b|l>
+    %   where to output the results
+    %     t: on top of the code
+    %     b: below the code
+    %     l: left of the code
      choice-store pos       = \ctikz@ex@pos{t,b,l}
     ,initial      pos       = l
+    % hsep=<dimen>
+    %   how much separation to put between the results and the code for pos=l
     ,dimen        hsep      = \ctikz@ex@hsep
     ,initial      hsep      = 1.5\columnsep
+    % vsep=<dimen>
+    %   how much separation to put between the results and the code for pos=t/b
     ,dimen        vsep      = \ctikz@ex@vsep
     ,initial      vsep      = \bigskipamount
+    % aboveskip=<dimen>
+    %   how much space to put above the environment
     ,dimen        aboveskip = \ctikz@ex@aboveskip
     ,initial      aboveskip = \medskipamount
+    % belowskip=<dimen>
+    %   how much space to put below the environment
     ,dimen        belowskip = \ctikz@ex@belowskip
     ,initial      belowskip = \medskipamount
-    ,store        width     = \ctikz@ex@reswd % max width if pos=l and varwidth
+    % width=<dimen> (late evaluation)
+    %   the width of the results box for box=varwidth/minipage, if this is 0pt
+    %   the default values will be
+    %     pos=l: 0.5\linewidth
+    %     pos=t/b: \linewidth
+    ,store        width     = \ctikz@ex@reswd
     ,initial      width     = 0pt
+    % box=<hbox|varwidth|minipage|default>
+    %   the type of box put around the results box (not visually but how to
+    %   determine the width)
+    %     hbox: simply use a \hbox (so natural width, no \par, no vertical
+    %       material)
+    %     varwidth: Use a `varwidth` environment around it
+    %     minipage: Use a `minipage` environment around it
+    %     default: the used boxing mechanism depends on pos:
+    %       pos=l: hbox
+    %       pos=t/b: minipage
     ,choice-store box       = \ctikz@ex@boxtype
       {hbox=h, varwidth=v, minipage=m, default=d}
     ,initial      box       = default
-    % is only used for pos=t or pos=b, for pos=l we always use variable width
+    % varwidth=[<t|true|f|false>]
+    %   backwards compatibility, sets box=varwidth without a value or with
+    %   true/t, sets box=default with false/f.
     ,nmeta        varwidth  = box=varwidth
     ,choice       varwidth  =
       {
         true=\ekvmorekv{box=varwidth}, t=\ekvmorekv{box=varwidth},
         false=\ekvmorekv{box=default}, f=\ekvmorekv{box=default}
       }
+    % only code=[<true|false>]
+    %   true/-NoValue-: there'll be no results box
+    %   false: revert the setting
     ,boolTF       only code = \ctikz@ex@onlycodeTF
+    % exec outside=[<true|false>]
+    %   true/-NoValue-: the code will be executed outside the environment (using
+    %     the generic env/<env>/after hook).
+    %   false: revert this setting
+    %   This will also call 'only code' with the same value!
     ,boolTF       exec outside = \ctikz@ex@execOutsideTF
-    ,dataT        store     = \ctikz@ex@store
-    ,dataT        restore   = \ctikz@ex@restore
-    ,code         clear storage =
-      \global\expandafter\let\csname  ctikz@ex@storage@#1\endcsname\ctikz@undef
     ,also meta    exec outside = {only code={#1}}
     ,also nmeta   exec outside = only code
+    % store=<name>
+    %   if used the code will be stored in a named storage for later use (see
+    %   'restore'). Multiple environments using the same storage name will
+    %   result in the code being appended to the existing stored code in this
+    %   storage.
+    ,dataT        store     = \ctikz@ex@store
+    % restore=<name>
+    %   restore the code of the named storage, meaning it'll be prepended to the
+    %   code of this environment for the results box (but not for the listing!)
+    ,dataT        restore   = \ctikz@ex@restore
+    % clear storage=<name>
+    %   forget the contents of the named storage (handled on the spot, so a key
+    %   combination `store=foo, clear storage=foo` would first clear `foo` and
+    %   then store the environment contents into `foo` after the environment was
+    %   processed.
+    ,code         clear storage =
+      \global\expandafter\let\csname  ctikz@ex@storage@#1\endcsname\ctikz@undef
     % collect unknown keys for lstlisting
     ,unknown      code      = \appto\ctikz@ex@lstopts{,#1={#2}}
     ,unknown      noval     = \appto\ctikz@ex@lstopts{,#1}
   }
+% handle the boxing inside the results box
+% #1: default box type if 'box=default'
+% This will call \ctikz@ex@fbox with the argument based on the current
+% box-setting.
 \newcommand*\ctikz@ex@handleboxtype[1] % #1 = default case
   {%
     \if\ctikz@ex@boxtype d%
@@ -113,6 +174,9 @@
     \fi\fi\fi
   }
 % print the result of the collected code
+% Control will first be given to \ctikz@ex@handleboxtype which will call
+% \ctikz@ex@fbox eventually. But first we need to set a suitable default width
+% for 'width=0pt' (or anything that evaluates to 0pt inside \dimexpr).
 \newcommand*\ctikz@ex@printresult
   {%
     \if\ctikz@ex@pos l%
@@ -127,10 +191,11 @@
       \ctikz@ex@handleboxtype{m}%
     \fi
   }
-\newcommand*\ctikz@ex@vcenter{\raisebox{.5\dimexpr\depth-\height\relax}}
 % output a vcentered framed box for the results
 % additionally the output (together with the framed box) will be in the box
 % register \ctikz@ex@box
+% #1: the contents to box up (should be \enverbExecute nested in a suitable box
+%     construct based on the 'box' key).
 \newcommand*\ctikz@ex@fbox[1]
   {%
     \sbox\ctikz@ex@box
@@ -151,7 +216,7 @@
       }%
     $\vcenter{\copy\ctikz@ex@box}$% vcenter matches minipage [c]
   }
-% output vcentered code listing
+% output a vcentered code listing if pos=l, otherwise output a code listing
 \newcommand*\ctikz@ex@printcode
   {%
     \ctikz@ex@onlycodeTF{\@firstofone}%
@@ -171,6 +236,11 @@
           ]}%
       }%
   }
+% \begin{LTXexample}[<settings>]
+% the front level environment. <settings> can be any keys as described inside
+% \ekvdefinekeys{ctikz/examples}. The following paragraph will be indented if
+% there's a blank line between \end{LTXexample} and the first line of the
+% paragraph (as with lists in LaTeX).
 \newenvironment{LTXexample}
   {\enverb{key-set=ctikz/examples, oarg-not-enverb, more-ignore=0}}
   {%
@@ -208,12 +278,16 @@
       }%
     \par
     \vskip\ctikz@ex@belowskip
-    \@endparenv
     \ctikz@ex@store\ctikz@ex@dostore
     \ctikz@ex@execOutsideTF
       {\global\let\ctikz@ex@codeOutside\enverbBody}%
       {}%
+    \@endparenv
   }
+% handling of the 'exec outside' key. If there are contents inside
+% \ctikz@ex@codeOutside the key was used and we should rerun an \enverbExecute
+% (which only works on \enverbBody contents, so we restore those outside of the
+% environment).
 \AddToHook{env/LTXexample/after}
   {%
     \ifx\ctikz@ex@codeOutside\@empty
