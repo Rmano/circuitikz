@@ -38,6 +38,26 @@
 \newcommand*\ctikz@ex@codeOutside{} % collect code to execute after the env
 \newdimen\ctikz@ex@width % width available to the code
 \newsavebox\ctikz@ex@box % temporary box register
+\newcommand*\ctikz@ex@dostore[1]
+  {%
+    \@ifundefined{ctikz@ex@storage@#1}%
+      {\global\expandafter\let\csname ctikz@ex@storage@#1\endcsname\@empty}%
+      {}%
+    \expandafter\gappto\csname ctikz@ex@storage@#1\expandafter\endcsname
+      \expandafter{\enverbBody}%
+  }
+\newcommand*\ctikz@ex@dorestore[1]
+  {%
+    \@ifundefined{ctikz@ex@storage@#1}
+      {\PackageError{ctikz}{Unknown storage #1}{}}%
+      {%
+        \epreto\enverbBody
+          {%
+            \unexpanded\expandafter\expandafter\expandafter
+              {\csname ctikz@ex@storage@#1\endcsname}%
+          }%
+      }%
+  }
 \ekvdefinekeys{ctikz/examples}
   {
     % like showexpl but fewer choices
@@ -63,6 +83,10 @@
     ,choice-aliases varwidth  = {t=true, f=false}
     ,boolTF       only code = \ctikz@ex@onlycodeTF
     ,boolTF       exec outside = \ctikz@ex@execOutsideTF
+    ,dataT        store     = \ctikz@ex@store
+    ,dataT        restore   = \ctikz@ex@restore
+    ,code         clear storage =
+      \global\expandafter\let\csname  ctikz@ex@storage@#1\endcsname\ctikz@undef
     ,also meta    exec outside = {only code={#1}}
     ,also nmeta   exec outside = only code
     % collect unknown keys for lstlisting
@@ -112,6 +136,7 @@
         \fboxsep=6pt
         \fboxrule=0.8pt
         \advance\linewidth-2\dimexpr\fboxsep+\fboxrule\relax
+        \ctikz@ex@restore\ctikz@ex@dorestore
         \fcolorbox{cyan}{white}{\ignorespaces#1\unskip}%
       }%
     $\vcenter{\copy\ctikz@ex@box}$% vcenter matches minipage [c]
@@ -172,6 +197,7 @@
     \par
     \vskip\ctikz@ex@belowskip
     \@endparenv
+    \ctikz@ex@store\ctikz@ex@dostore
     \ctikz@ex@execOutsideTF
       {\global\let\ctikz@ex@codeOutside\enverbBody}%
       {}%
