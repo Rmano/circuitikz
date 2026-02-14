@@ -133,11 +133,19 @@
   {%
     \sbox\ctikz@ex@box
       {%
+        % fboxsep=6pt, fboxrule=0.8pt -> 13.6pt less for linewidth
+        \advance\linewidth-13.6pt
+        \ctikz@ex@restore\ctikz@ex@dorestore
+        \ignorespaces#1\unskip
+      }%
+    \sbox\ctikz@ex@box
+      {%
         \fboxsep=6pt
         \fboxrule=0.8pt
-        \advance\linewidth-2\dimexpr\fboxsep+\fboxrule\relax
-        \ctikz@ex@restore\ctikz@ex@dorestore
-        \fcolorbox{cyan}{white}{\ignorespaces#1\unskip}%
+        \rlap{\fcolorbox{cyan}{white}{\phantom{\usebox\ctikz@ex@box}}}%
+        \kern\fboxrule
+        \kern\fboxsep
+        \usebox\ctikz@ex@box
       }%
     $\vcenter{\copy\ctikz@ex@box}$% vcenter matches minipage [c]
   }

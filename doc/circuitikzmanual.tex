@@ -764,18 +764,19 @@ First of all, let's define a handy function to show the position of nodes:
 \def\showcoord(#1){coordinate(#1) node[circle, red, draw, inner sep=1pt,
     pin={[red, overlay, inner sep=0.5pt, font=\tiny, pin distance=0.1cm,
     pin edge={red, overlay}]45:#1}](){}}
-\let\coord=\normalcoord
 \let\coord=\showcoord
 \end{LTXexample}
 
 The idea is that you can use \verb|\coord()| instead of \verb|coordinate()| in paths, and that will draw small red \emph{markers} showing them. For example:
 
 \begin{LTXexample}
-\begin{circuitikz}[american,]
+\begin{circuitikz}[american]
     \draw (0,0) node[npn](Q){};
     \path (Q.center) \coord(center)
     (Q.B) \coord(B) (Q.C) \coord(C)
     (Q.E) \coord(E);
+    \useasboundingbox
+      (Q.south west) (Q.north east) +(.75,.3);
 \end{circuitikz}
 \end{LTXexample}
 
@@ -786,10 +787,10 @@ So let's start with the first stage transistor; given that my preferred way of d
 \ctikzset{tripoles/mos style/arrows}
 \def\killdepth#1{{\raisebox{0pt}[\height][0pt]{#1}}}
 \begin{LTXexample}
-\begin{circuitikz}[american,]
+\begin{circuitikz}[american]
 \ctikzset{tripoles/mos style/arrows}
 \def\killdepth#1{{\raisebox{0pt}[\height][0pt]{#1}}}
-\path (0,0) -- (2,0); % bounding box
+\path (0,0) -- (.5,0); % bounding box
 \draw (0,0) node[nmos](Q1){\killdepth{Q1}};
 \end{circuitikz}
 \end{LTXexample}
