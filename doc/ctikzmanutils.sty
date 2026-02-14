@@ -33,7 +33,7 @@
 %
 % Example definitions using `enverb`
 %
-\RequirePackage{enverb}
+\RequirePackage{enverb,varwidth}
 \newcommand*\ctikz@ex@lstopts{} % collect options meant for lstlisting
 \newdimen\ctikz@ex@width % width available to the code
 \newsavebox\ctikz@ex@box % temporary box register
@@ -50,28 +50,52 @@
     ,initial      aboveskip = \medskipamount
     ,dimen        belowskip = \ctikz@ex@belowskip
     ,initial      belowskip = \medskipamount
+    ,store        width     = \ctikz@ex@reswd % max width if pos=l and varwidth
+    ,initial      width     = 0pt
+    ,choice-store box       = \ctikz@ex@boxtype
+      {hbox=h, varwidth=v, minipage=m, default=d}
+    ,initial      box       = default
     % is only used for pos=t or pos=b, for pos=l we always use variable width
-    ,boolTF       varwidth  = \ctikz@ex@vwidthTF
-    % handle varwidth=t
-    ,choice       varwidth  = { t = \let\ctikz@ex@vwidthTF\@firstoftwo }
+    ,nmeta        varwidth  = box=varwidth
+    ,choice       varwidth  =
+      {true=\ekvmorekv{box=varwidth}, false=\ekvmorekv{box=default}}
+    ,choice-aliases varwidth  = {t=true, f=false}
     ,boolTF       only code = \ctikz@ex@onlycodeTF
     % collect unknown keys for lstlisting
     ,unknown      code      = \appto\ctikz@ex@lstopts{,#1={#2}}
     ,unknown      noval     = \appto\ctikz@ex@lstopts{,#1}
   }
+\newcommand*\ctikz@ex@handleboxtype[1] % #1 = default case
+  {%
+    \if\ctikz@ex@boxtype d%
+      \def\ctikz@ex@boxtype{#1}%
+    \fi
+    \if\ctikz@ex@boxtype h%
+      \ctikz@ex@fbox{\enverbExecute}%
+    \else\if\ctikz@ex@boxtype v%
+      \ctikz@ex@fbox
+        {\begin{varwidth}{\dimeval\ctikz@ex@reswd}\enverbExecute\end{varwidth}}%
+    \else\if\ctikz@ex@boxtype m%
+      \ctikz@ex@fbox
+        {\begin{minipage}{\dimeval\ctikz@ex@reswd}\enverbExecute\end{minipage}}%
+    \else
+      \PackageError{ctikz}{Unknown example box type \ctikz@ex@boxtype}{}%
+    \fi\fi\fi
+  }
 % print the result of the collected code
 \newcommand*\ctikz@ex@printresult
   {%
-    \ctikz@ex@vwidthTF
-      {\ctikz@ex@fbox{\enverbExecute}}%
-      {%
-        \if\ctikz@ex@pos l
-          \ctikz@ex@fbox{\enverbExecute}%
-        \else
-          \ctikz@ex@fbox
-            {\begin{minipage}{\linewidth}\enverbExecute\end{minipage}}%
-        \fi
-      }%
+    \if\ctikz@ex@pos l%
+      \ifdim\dimeval\ctikz@ex@reswd=\z@
+        \def\ctikz@ex@reswd{.5\linewidth}%
+      \fi
+      \ctikz@ex@handleboxtype{h}%
+    \else
+      \ifdim\dimeval\ctikz@ex@reswd=\z@
+        \def\ctikz@ex@reswd{\linewidth}%
+      \fi
+      \ctikz@ex@handleboxtype{m}%
+    \fi
   }
 \newcommand*\ctikz@ex@vcenter{\raisebox{.5\dimexpr\depth-\height\relax}}
 % output a vcentered framed box for the results
@@ -91,7 +115,11 @@
 % output vcentered code listing
 \newcommand*\ctikz@ex@printcode
   {%
-    \parbox[c]{\ctikz@ex@width}%
+    \if\ctikz@ex@pos l% only box up the code if necessary
+      \expanded{\unexpanded{\parbox[c]{\ctikz@ex@width}}\expandafter}%
+    \else
+      \expandafter\@firstofone
+    \fi
       {%
         \ExpandArgs{ne}\enverbListing{lstlisting}%
           {[%
@@ -120,7 +148,7 @@
             \vskip\ctikz@ex@vsep
             \noindent
           \else
-            \kern\ctikz@ex@hsep
+            \hfill
             \advance\ctikz@ex@width-\wd\ctikz@ex@box
             \advance\ctikz@ex@width-\ctikz@ex@hsep
           \fi
