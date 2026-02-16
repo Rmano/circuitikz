@@ -14,6 +14,7 @@
         \par\medskip
     }%
 }
+\ifbool{warpingprint}{}{%
 \renewcommand{\twopartbox}[2]{%
     \par\noindent
     \fbox{%
@@ -22,4 +23,4 @@
         \makebox[0.66\linewidth][l]{\RaggedRight\hbadness=9500 #2}%
     }%
     \par\medskip
-}
+}}
