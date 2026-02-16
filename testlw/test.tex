@@ -109,5 +109,18 @@ Plotted using \TikZ\ version \pgfversion{} and Circui\TikZ\ version \pgfcircvers
         {[current point is local] to[R] +(2,0)} +(0,0) -- ++(0,-1);
 \end{tikzpicture}
 \end{ctikzExample}
-\end{document}
 
+Another example. First we define a helper
+\begin{ctikzExample}[store=foo, only code]
+\newcommand\foo{bar}
+\end{ctikzExample}
+then we use it
+\begin{ctikzExample}[restore=foo]
+\foo
+\end{ctikzExample}
+
+Yet another thingy thing
+\begin{ctikzExample}[exec outside]
+  \newcommand\foo{BAR}\foo
+\end{ctikzExample}
+\end{document}
