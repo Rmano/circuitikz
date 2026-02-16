@@ -148,9 +148,21 @@
     %   processed.
     ,code         clear storage =
       \global\expandafter\let\csname  ctikz@ex@storage@#1\endcsname\ctikz@undef
+    % dollar=[<true|false>]
+    %   Whether to fix the dollar category code while code is executed. We set
+    %   the boolean globally but if used it's turned to false again in the
+    %   after-block. Will only take effect during lwarp's HTML creation.
+    ,gboolTF      dollar    = \ctikz@ex@dollarTF
     % collect unknown keys for lstlisting
     ,unknown      code      = \appto\ctikz@ex@lstopts{,#1={#2}}
     ,unknown      noval     = \appto\ctikz@ex@lstopts{,#1}
+  }
+% wrap enverbExecute to handle 'dollar=true'
+\newcommand*\ctikz@ex@execute
+  {%
+    \ctikz@ex@dollarTF{\pushdollarcat}{}%
+    \enverbExecute
+    \ctikz@ex@dollarTF{\popdollarcat}{}%
   }
 % handle the boxing inside the results box
 % #1: default box type if 'box=default'
@@ -162,13 +174,13 @@
       \def\ctikz@ex@boxtype{#1}%
     \fi
     \if\ctikz@ex@boxtype h%
-      \ctikz@ex@fbox{\enverbExecute}%
+      \ctikz@ex@fbox{\ctikz@ex@execute}%
     \else\if\ctikz@ex@boxtype v%
       \ctikz@ex@fbox
-        {\begin{varwidth}{\dimeval\ctikz@ex@reswd}\enverbExecute\end{varwidth}}%
+        {\begin{varwidth}{\dimeval\ctikz@ex@reswd}\ctikz@ex@execute\end{varwidth}}%
     \else\if\ctikz@ex@boxtype m%
       \ctikz@ex@fbox
-        {\begin{minipage}{\dimeval\ctikz@ex@reswd}\enverbExecute\end{minipage}}%
+        {\begin{minipage}{\dimeval\ctikz@ex@reswd}\ctikz@ex@execute\end{minipage}}%
     \else
       \PackageError{ctikz}{Unknown example box type \ctikz@ex@boxtype}{}%
     \fi\fi\fi
@@ -294,8 +306,9 @@
     \else
       \let\enverbBody\ctikz@ex@codeOutside
       \global\let\ctikz@ex@codeOutside\@empty
-      \enverbExecute
+      \ctikz@ex@execute
     \fi
+    \ctikz@ex@dollarTF{\global\let\ctikz@ex@dollarTF\@secondoftwo}{}%
   }
 %
 % --- Style for the code part  ---
@@ -320,6 +333,11 @@
 }
 \lstset{style=expl-code}
 
+% in lwarp's warpingprint-false case we need to temporarily change the category
+% code of $ to be mathshift again. These macros will do that in that case
+% (they're redefined in `ctikz-lwarp-late.tex`).
+\newcommand*\pushdollarcat{}
+\newcommand*\popdollarcat{}
 
 \newcommand{\email}[1]{\href{mailto:#1}{#1}}
 \long\def\comment#1{}
