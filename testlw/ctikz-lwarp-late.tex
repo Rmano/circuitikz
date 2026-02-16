@@ -2,6 +2,16 @@
 \ifbool{warpingprint}{%
         % nothing: using enverb
 }{%
+    \renewcommand*\pushdollarcat
+      {%
+        \edef\popdollarcat
+          {%
+            \unexpanded{\catcode`\$}=\the\catcode`\$%
+            \def\noexpand\popdollarcat
+              {\unexpanded\expandafter{\popdollarcat}}%
+          }%
+        \catcode`\$=3
+      }
     % HTML: reimplement ctikzExample using a verbatim-to-file capture
     \renewenvironment{ctikzExample}
       % Start verbatim capture of the environment body to a file:
@@ -21,7 +31,7 @@
                   \begin{minipage}[t]
                     {\dimeval{\linewidth-2\fboxsep-2\fboxrule}}%
                     \ctikz@ex@restore\ctikz@ex@dorestore
-                    \enverbExecute
+                    \ctikz@ex@execute
                   \end{minipage}%
                 }%
             \end{minipage}

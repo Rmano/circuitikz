@@ -994,6 +994,7 @@ and you will obtain the following diagram with the exact same code (I just remov
         logic ports=ieee,
         logic ports/scale=0.7,
 }
+\pushdollarcat
 \newcommand*{\myblock}[1]{% the parameter will be prepended to the relevant node names
     node[sr-ff](#1-FF){} (#1-FF.bup) node[above]{SR-FF}
         (#1-FF.pin 1) -- ++(-1,0) node[and port, anchor=out](#1-AND1){}
@@ -1011,6 +1012,7 @@ and you will obtain the following diagram with the exact same code (I just remov
         to[inline not] (#1-in |- #1-AND2.in 2) -- (#1-AND2.in 2)
         % no ; to end the path, must add in usage!
 }
+\popdollarcat
 \newcommand*{\fullcirc}[1][]{%
 \begin{circuitikz}
     \draw (0,0) \myblock{A};
@@ -2062,7 +2064,7 @@ could be the best option for this task. Below, one possible example (not optimiz
 
 You can use this definition as follows, for example:
 
-\begin{ctikzExample}[pos=b, restore=ChopperByTerminals]
+\begin{ctikzExample}[pos=b, restore=ChopperByTerminals, dollar]
 \begin{tikzpicture}[]
     \node[op amp](A) at (0,0) {};
     \ChopperByTerminals[draw=red][-0.2cm]{A.-}{A.+}{chopper in}
@@ -2362,11 +2364,13 @@ For the \texttt{photoresistor} and the two ``flavors'' of the light-dependent re
     \draw[ultra thick] (0,0) to[R, resistors/thickness=#1] ++(2,0);
 \end{tikzpicture}%
 }
+\ifbool{warpingprint}{}{\StartDefiningTabulars}
 \newcommand{\splat}{\begin{center}\ttfamily\scriptsize\begin{tabular}{cccc}
         \showjoin{1}&\showjoin{2}&\showjoin{3}&\showjoin{4}\\
         thickness=1 & thickness=2 & thickness=3 & thickness=4 \\
     \end{tabular}\end{center}%
 }
+\ifbool{warpingprint}{}{\StopDefiningTabulars}
 \newcommand{\rdivider}[1]{\begin{tikzpicture}
         \ctikzset{resistors/thickness=#1}
         \draw (0,0) node[ground]{} to[V] ++(0,2) to[R] ++(2,0)
@@ -5050,7 +5054,7 @@ You can tweak the appearance of transistor's bodydiodes; see ~\ref{sec:trans-bod
 
 For more complex snubs or protections, you can use the \IndexKey[bodydiode anchors]{body ...} anchors to add more or different things to the transistors in addition (or instead) of the flyback\IndexKey[flyback diode]{} diode.
 
-\begin{ctikzExample}
+\begin{ctikzExample}[dollar]
 \def\snubb#1#2{% add a snubber to a transistor
     \draw (#1.body C #2) to[short, *-, nodes width=0.02]
     ++(0.3,0) coordinate(tmp) to [R, resistors/scale=0.3]
@@ -10257,7 +10261,7 @@ The normal voltage arrows length depends not on the component length but on the 
 Using the advanced voltage interface mechanism, you can for example design voltages that are of fixed lengths; in the example below the new \texttt{xparse} method for defining commands is used, so that we can have a couple of different optional arguments:
 
 
-\begin{ctikzExample}[basicstyle=\scriptsize\ttfamily, exec outside]
+\begin{ctikzExample}[basicstyle=\scriptsize\ttfamily, exec outside, dollar]
 \NewDocumentCommand{\fixedvlen}{O{0.5cm} m m O{}}{% [semilength]{node}{label}[extra options]
     % get the center of the standard arrow
     \coordinate (#2-Vcenter) at ($(#2-Vfrom)!0.5!(#2-Vto)$);
@@ -10285,7 +10289,7 @@ You can also notice that the arrow is not exactly the same as other arrows in th
 
 Another possibility is to have the arrow length based on the length of the component; for example you can use this code:
 
-\begin{ctikzExample}[basicstyle=\scriptsize\ttfamily, exec outside]
+\begin{ctikzExample}[basicstyle=\scriptsize\ttfamily, exec outside, dollar]
 \NewDocumentCommand{\compvlen}{O{1.5} m m O{}}{% [relative length]{node}{label}[extra options]
     % get the center of the standard arrow
     \coordinate (#2-Vcenter) at ($(#2-Vfrom)!0.5!(#2-Vto)$);
@@ -10356,7 +10360,7 @@ For example, let's suppose you like the \texttt{raised} voltage notation, but yo
 
 % TODO: Move this in the listing as well?
 \ctikzset{voltage=raised, !v sym/.style={no v symbols}}
-\begin{ctikzExample}[exec outside]
+\begin{ctikzExample}[exec outside, dollar]
 %% The voltage label (the text) will be managed normally by v...={}
 %% We need just one parameter to specify the coloa/styler of the signs; we
 %% set the other argument to nothing.
@@ -11658,7 +11662,7 @@ Here a series of examples, contributed by several people, is shown with their co
 \subsection{A styled low noise input stage}
 \label{sec:a-styled-low}
 
-\begin{ctikzExample}[pos=t, box=hbox]
+\begin{ctikzExample}[pos=t, box=hbox, dollar]
 \ctikzloadstyle{romano}
 \scalebox{0.707}{%
 \begin{circuitikz}[american, romano circuit style]
@@ -11808,7 +11812,8 @@ Here a series of examples, contributed by several people, is shown with their co
 \label{sec:example-auto-vif}
 
 
-\begin{ctikzExample}[varwidth=true,pos=t, basicstyle=\footnotesize\ttfamily]
+\begin{ctikzExample}
+  [varwidth=true,pos=t, basicstyle=\footnotesize\ttfamily, dollar]
 %% This can go to your preamble and/or a style file!
 %% setup voltage drawing macro: european style, but adding "+" and "-"
 \newcommand\eurVPMstyled[4]{% node, label, style, one ignored arguments
