@@ -33,13 +33,16 @@
 \fi
 %%
 %% The early lwarp code will be inserted here.
-\InputIfFileExists{ctikz-lwarp-early.tex}{}{%
-    %% define a couple of fake conditional for lwarp support
-    \providebool{warpingHTML}
-    \providebool{warpingprint}
-    % Default: PDF build
-    \boolfalse{warpingHTML}
-    \booltrue{warpingprint}
+\InputIfFileExists{ctikz-lwarp-early.tex}{%
+        % this comment seems to be needed to avoid confusing lwarpmk
+        % usepackage{lwarp}
+    }{%
+        %% define a couple of fake conditional for lwarp support
+        \providebool{warpingHTML}
+        \providebool{warpingprint}
+        % Default: PDF build
+        \boolfalse{warpingHTML}
+        \booltrue{warpingprint}
 }
 %
 %
@@ -63,7 +66,7 @@
 %
 %% The late lwarp code will be inserted here.
 %% {{{lwarp-late}}}
-\InputIfFileExists{ctikz-lwarp-late.tex}{}{}
+\ifbool{warpingprint}{}{\InputIfFileExists{ctikz-lwarp-late.tex}{}{}}
 %
 
 \begin{document}
