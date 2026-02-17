@@ -22,7 +22,7 @@
 
 %% The late lwarp code will be inserted here.
 %% {{{lwarp-late}}}
-\InputIfFileExists{ctikz-lwarp-late.tex}{}{}
+\ifbool{warpingprint}{}{\InputIfFileExists{ctikz-lwarp-late.tex}{}{}}
 %
 \usepackage[showframe]{geometry}
 \begin{document}
