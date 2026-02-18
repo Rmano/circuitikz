@@ -48,4 +48,10 @@
     }%
     \par\medskip
 }
+\AtBeginDocument{% lwarp loads cleveref and then warns about this. Silence, please.
+  \@ifpackageloaded{cleveref}{%
+    \crefname{paragraph}{section}{sections}%
+    \Crefname{paragraph}{Section}{Sections}%
+  }{}%
+}
 \makeatother

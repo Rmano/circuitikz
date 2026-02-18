@@ -4,15 +4,17 @@
 %% The early lwarp code will be inserted here.
 \usepackage{iftex}
 \usepackage{etoolbox}% for the fake-lwarp boolean
-\InputIfFileExists{ctikz-lwarp-early.tex}{
-    % usepackage{lwarp}
-}{%
-    %% define a couple of fake conditional for lwarp support
-    \providebool{warpingHTML}
-    \providebool{warpingprint}
-    % Default: PDF build
-    \boolfalse{warpingHTML}
-    \booltrue{warpingprint}
+%% The early lwarp code will be inserted here.
+\InputIfFileExists{ctikz-lwarp-early.tex}{%
+        % this comment seems to be needed to avoid confusing lwarpmk
+        % usepackage{lwarp}
+    }{%
+        %% define a couple of fake conditional for lwarp support
+        \providebool{warpingHTML}
+        \providebool{warpingprint}
+        % Default: PDF build
+        \boolfalse{warpingHTML}
+        \booltrue{warpingprint}
 }
 \usepackage[siunitx, RPvoltages]{circuitikz}
 \usepackage{ctikzmanutils}
