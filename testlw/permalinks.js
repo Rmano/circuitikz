@@ -165,109 +165,103 @@ document.addEventListener("DOMContentLoaded", () => {
 // footnotes
 
 (function () {
-  function pageKey() {
-    // makes ids stable per-page (works for multi-page output)
-    return location.pathname.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "page";
-  }
-
-  function isNumericSup(el) {
-    return el && el.tagName === "SUP" && /^\d+$/.test(el.textContent.trim());
-  }
-
-  function looksLikeFootnoteParagraph(p) {
-    if (!p || p.tagName !== "P") return false;
-    // first *element* child is <sup>n</sup>
-    const firstEl = p.firstElementChild;
-    if (!isNumericSup(firstEl)) return false;
-
-    // often followed by a text node starting with NBSP, or a literal &nbsp; rendered as \u00A0
-    const next = firstEl.nextSibling;
-    if (!next) return true; // still treat as footnote if pattern matches
-    if (next.nodeType === Node.TEXT_NODE && /^\u00a0/.test(next.nodeValue)) return true;
-
-    // Sometimes the NBSP gets wrapped weirdly; be permissive
-    return true;
-  }
-
-  function linkifyFootnotes(root) {
-    root = root || document;
-
-    // 1) Collect footnote paragraphs
-    const footnotePs = [];
-    const ps = Array.from(root.querySelectorAll("p"));
-    for (const p of ps) {
-      if (looksLikeFootnoteParagraph(p)) footnotePs.push(p);
-    }
-    if (!footnotePs.length) return; // nothing to do on this page
-
-    const pk = pageKey();
-    const numToId = new Map();
-
-    for (const p of footnotePs) {
-      const n = p.firstElementChild.textContent.trim();
-      const noteId = `fn-${pk}-${n}`;
-      const refId  = `fnref-${pk}-${n}`;
-
-      // assign id to the footnote paragraph (only if not already set)
-      if (!p.id) p.id = noteId;
-      numToId.set(n, { noteId: p.id || noteId, refId });
-
-      // add backlink once
-      if (!p.querySelector("a.footnote-backref")) {
-        const back = document.createElement("a");
-        back.href = `#${refId}`;
-        back.className = "footnote-backref";
-        back.setAttribute("aria-label", `Back to footnote reference ${n}`);
-        back.textContent = " ↩︎";
-        p.appendChild(back);
-      }
+    function pageKey() {
+        // makes ids stable per-page (works for multi-page output)
+        return location.pathname.replace(/[^a-z0-9]+/gi, "-").replace(/^-|-$/g, "") || "page";
     }
 
-    // 2) Wrap in-text <sup>n</sup> markers that match existing footnotes
-    const allSups = Array.from(root.querySelectorAll("sup"));
-    for (const sup of allSups) {
-      if (!isNumericSup(sup)) continue;
-      if (sup.closest("a")) continue; // already linked
+    function linkifyFootnotes(root) {
+        root = root || document;
 
-      // don't linkify the <sup> in the footnote paragraph itself
-      const parentP = sup.closest("p");
-      if (parentP && looksLikeFootnoteParagraph(parentP) && parentP.firstElementChild === sup) continue;
+        // Find all footnote containers. lwarp commonly uses div.footnotes with role="note".
+        const footnoteDivs = Array.from(
+            root.querySelectorAll('div.footnotes[role="note"], div.footnotes')
+        );
 
-      const n = sup.textContent.trim();
-      const info = numToId.get(n);
-      if (!info) continue;
+        if (!footnoteDivs.length) return; // no footnotes on this page
 
-      const a = document.createElement("a");
-      a.href = `#${info.noteId}`;
-      a.id = info.refId;
-      a.className = "footnote-ref";
-      a.setAttribute("aria-label", `Footnote ${n}`);
+        const pk = pageKey();
+        const numToIds = new Map(); // "9" -> { noteId, refId }
+        const noteEls = [];         // cache actual note paragraph elements
 
-      sup.replaceWith(a);
-      a.appendChild(sup);
+        // 1) Collect real footnote paragraphs ONLY from inside the footnote containers.
+        for (const div of footnoteDivs) {
+            const ps = Array.from(div.querySelectorAll("p"));
+            for (const p of ps) {
+                // A real footnote paragraph begins with <sup>n</sup> as first element child.
+                const sup = p.firstElementChild;
+                if (!sup || sup.tagName !== "SUP") continue;
+                const n = sup.textContent.trim();
+                if (!/^\d+$/.test(n)) continue;
+
+                // If the paragraph already has an id (as in your example), keep it.
+                // Otherwise assign a stable id.
+                if (!p.id) p.id = `fn-${pk}-${n}`;
+
+                const noteId = p.id;
+                const refId = `fnref-${pk}-${n}`;
+
+                numToIds.set(n, { noteId, refId });
+                noteEls.push(p);
+
+                // Ensure there's a backlink (optional, but nice).
+                if (!p.querySelector("a.footnote-backref")) {
+                    const back = document.createElement("a");
+                    back.href = `#${refId}`;
+                    back.className = "footnote-backref";
+                    back.setAttribute("aria-label", `Back to footnote reference ${n}`);
+                    back.textContent = " ↩︎";
+                    p.appendChild(back);
+                }
+            }
+        }
+
+        if (!numToIds.size) return;
+
+        // 2) Linkify inline <sup>n</sup> OUTSIDE footnote containers only.
+        const allSups = Array.from(root.querySelectorAll("sup"));
+        for (const sup of allSups) {
+            if (!/^\d+$/.test(sup.textContent.trim())) continue;
+            if (sup.closest("a")) continue; // already linked
+
+            // Never touch superscripts inside the footnote block itself.
+            if (sup.closest('div.footnotes[role="note"], div.footnotes')) continue;
+
+            const n = sup.textContent.trim();
+            const ids = numToIds.get(n);
+            if (!ids) continue; // only linkify numbers that exist as footnotes
+
+            const a = document.createElement("a");
+            a.href = `#${ids.noteId}`;
+            a.id = ids.refId;
+            a.className = "footnote-ref";
+            a.setAttribute("aria-label", `Footnote ${n}`);
+
+            sup.replaceWith(a);
+            a.appendChild(sup);
+        }
     }
-  }
 
-  // Run once now
-  linkifyFootnotes(document);
+    // Run once now
+    linkifyFootnotes(document);
 
-  // Run again on SPA-style navigation or content replacement
-  let scheduled = false;
-  function schedule() {
-    if (scheduled) return;
-    scheduled = true;
-    requestAnimationFrame(() => {
-      scheduled = false;
-      linkifyFootnotes(document);
-    });
-  }
+    // Run again on SPA-style navigation or content replacement
+    let scheduled = false;
+    function schedule() {
+        if (scheduled) return;
+        scheduled = true;
+        requestAnimationFrame(() => {
+            scheduled = false;
+            linkifyFootnotes(document);
+        });
+    }
 
-  window.addEventListener("popstate", schedule);
-  window.addEventListener("hashchange", schedule);
+    window.addEventListener("popstate", schedule);
+    window.addEventListener("hashchange", schedule);
 
-  // MutationObserver catches your sidebar/page loader if it swaps content in-place
-  const mo = new MutationObserver(schedule);
-  mo.observe(document.documentElement, { childList: true, subtree: true });
+    // MutationObserver catches your sidebar/page loader if it swaps content in-place
+    const mo = new MutationObserver(schedule);
+    mo.observe(document.documentElement, { childList: true, subtree: true });
 
 })();
 

@@ -205,5 +205,5 @@ MathJax = {
     src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
 ></script>
 
-<script type="text/javascript" src="permalinks.js"></script>
+<script src="permalinks.js" defer></script>
 
