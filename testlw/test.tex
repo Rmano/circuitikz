@@ -158,9 +158,7 @@ Yet another thingy thing
 
 You can use this definition as follows, for example:
 
-\begingroup
-\catcode`\$=3
-\begin{ctikzExample}[pos=b, restore=ChopperByTerminals]
+\begin{ctikzExample}[pos=b, restore=ChopperByTerminals, dollar]
 \begin{tikzpicture}[]
     \node[op amp](A) at (0,0) {};
     \ChopperByTerminals[draw=red][-0.2cm]{A.-}{A.+}{chopper in}
@@ -179,5 +177,48 @@ You can use this definition as follows, for example:
             at (C-\a) {};
 \end{tikzpicture}
 \end{ctikzExample}
-\endgroup
+
+Let's see that with an example:
+
+\begin{ctikzExample}[exec outside]
+\ctikzsubcircuitdef{optovishay}{in 1, out 1, in 2, out 2, center}{%
+    % reference anchor is -center
+    coordinate(#1-center)
+    (#1-center) +(-1.2,-1) rectangle +(1.2,1)
+    (#1-center) ++(-1.2,0.8) coordinate (#1-in 1)
+    (#1-center) ++(-1.2,-0.8) coordinate (#1-in 2)
+    (#1-center) ++(1.2,0.8) coordinate (#1-out 1)
+    (#1-center) ++(1.2,-0.8) coordinate (#1-out 2)
+    (#1-center) ++(0,1) coordinate (#1-up)
+    (#1-in 1) -- ++(0.5,0) coordinate(#1-tmp)
+        to[leD*, diodes/scale=0.6, led arrows from cathode]
+        (#1-tmp|- #1-in 2) -- (#1-in 2)
+    (#1-out 1) -- ++(-0.5,0) coordinate(#1-tmp)
+        to[pD*, diodes/scale=0.4, mirror]  ++(0,-0.5)
+        edge[densely dashed] ++(0,-0.533) ++(0,-0.566)
+        to[pD*, diodes/scale=0.4,mirror] (#1-tmp|- #1-out 2) -- (#1-out 2)
+    % leave the position of the path at the center
+    (#1-center)
+}
+\end{ctikzExample}
+
+Our element is a symbol for an optocoupler; in this case is the symbol used for one cell of the double \href{https://www.vishay.com/docs/84639/vo1263aa.pdf}{Vishay vo1263 device}.
+
+To use the subcircuit, an additional step is needed. Somewhere you have to \emph{activate} it. This is needed to calculate the relative positions of anchors using the current set of style parameters. The normal place is to activate it just before usage; to do that you use the command \verb|\ctikzsubcircuitactivate| with the name of the subcircuit. That will define a new command, \texttt{\textbackslash\emph{nameofthesubcircuit}} that you can use then in your paths.
+
+So to check your subcircuit while defining it you can use this simple snippet:
+
+\begin{ctikzExample}[dollar]
+% \ctikzsubcircuitactivate{optovishay}
+\begin{tikzpicture}
+\ctikzsubcircuitactivate{optovishay}
+    \draw (0,0) \optovishay{one}{};
+    \node [above] at (one-up) {O1};
+    \draw[color=blue] (one-out 1) -- ++(1,0)
+        \optovishay{two}{in 1};
+    \node [above] at (two-up) {O2};
+\end{tikzpicture}
+\end{ctikzExample}
+
+
 \end{document}
