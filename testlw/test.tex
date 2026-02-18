@@ -19,7 +19,11 @@
 \usepackage[siunitx, RPvoltages]{circuitikz}
 \usepackage{ctikzmanutils}
 \usepackage{imakeidx}
-\makeindex[title=Index, intoc=true]
+\ifbool{warpingprint}{%
+    \makeindex[title=Index, intoc=true]
+}{%
+    \makeindex[options={-s lwarp.ist}]
+}
 \indexprologue{Here you will find, in alphabetical order, all the components, keys, and styles defined by the package. Components have the page number in straight text, while keys and styles have \emph{italic} page numbers.}
 \renewcommand*\seealso[2]{#2, \emph{\alsoname} #1}
 
@@ -212,15 +216,37 @@ To use the subcircuit, an additional step is needed. Somewhere you have to \emph
 
 So to check your subcircuit while defining it you can use this simple snippet:
 
-\begin{ctikzExample}[dollar]
-% \ctikzsubcircuitactivate{optovishay}
-\begin{tikzpicture}
+
+\begin{ctikzExample}[only code]
 \ctikzsubcircuitactivate{optovishay}
+\end{ctikzExample}
+% \ctikzsubcircuitactivate{optovishay}
+
+
+\begin{ctikzExample}
+\begin{tikzpicture}
+% \ctikzsubcircuitactivate{optovishay}
     \draw (0,0) \optovishay{one}{};
     \node [above] at (one-up) {O1};
     \draw[color=blue] (one-out 1) -- ++(1,0)
         \optovishay{two}{in 1};
     \node [above] at (two-up) {O2};
+\end{tikzpicture}
+\end{ctikzExample}
+
+\begin{ctikzExample}[only code]
+\ctikzsubcircuitactivate{optovishay}
+\end{ctikzExample}
+
+\begin{ctikzExample}
+\begin{tikzpicture}[scale=0.8, transform shape]
+\ctikzsubcircuitactivate{optovishay}
+    \draw (0,0) \optovishay{three}{};
+    \draw (three-out 1) -- ++(0.5,0) coordinate(here);
+    \begin{scope}[xscale=-1,rotate=-45,transform shape]
+        \draw (here) \optovishay{four}{out 1};
+    \end{scope}
+    \draw[blue] (three-out 2) -| (four-out 2);
 \end{tikzpicture}
 \end{ctikzExample}
 

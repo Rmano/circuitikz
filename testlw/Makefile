@@ -9,4 +9,9 @@ html:
 	TEXINPUTS=.:../tex:../doc: lwarpmk html1 # force redo
 	TEXINPUTS=.:../tex:../doc: lwarpmk limages
 
+index:
+	TEXINPUTS=.:../tex:../doc: lwarpmk html1 # force redo
+	TEXINPUTS=.:../tex:../doc: lwarpmk htmlindex
+	TEXINPUTS=.:../tex:../doc: lwarpmk html1 # force redo
+	TEXINPUTS=.:../tex:../doc: lwarpmk limages
 
