@@ -18,6 +18,10 @@
 }
 \usepackage[siunitx, RPvoltages]{circuitikz}
 \usepackage{ctikzmanutils}
+\usepackage{imakeidx}
+\makeindex[title=Index, intoc=true]
+\indexprologue{Here you will find, in alphabetical order, all the components, keys, and styles defined by the package. Components have the page number in straight text, while keys and styles have \emph{italic} page numbers.}
+\renewcommand*\seealso[2]{#2, \emph{\alsoname} #1}
 
 \makeatletter
 \makeatother
@@ -112,7 +116,7 @@ Plotted using \TikZ\ version \pgfversion{} and Circui\TikZ\ version \pgfcircvers
 \end{tikzpicture}
 \end{ctikzExample}
 
-Another example. First we define a helper
+Another example. First we define a \IndexKey{helper}
 \begin{ctikzExample}[store=foo, only code]
 \newcommand\foo[1]{bar#1bar}
 \end{ctikzExample}
@@ -220,5 +224,6 @@ So to check your subcircuit while defining it you can use this simple snippet:
 \end{tikzpicture}
 \end{ctikzExample}
 
+\printindex
 
 \end{document}
