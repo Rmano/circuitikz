@@ -1,7 +1,7 @@
 .PHONY: full html clean
 full:
-	TEXINPUTS=.:../tex:../doc: latexmk -pdf -f -norc test.tex
 	TEXINPUTS=.:../tex:../doc: lwarpmk cleanall test
+	TEXINPUTS=.:../tex:../doc: latexmk -pdf -f -norc test.tex
 	TEXINPUTS=.:../tex:../doc: lwarpmk html test
 	TEXINPUTS=.:../tex:../doc: lwarpmk limages test
 

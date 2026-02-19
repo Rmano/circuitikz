@@ -250,6 +250,35 @@ So to check your subcircuit while defining it you can use this simple snippet:
 \end{tikzpicture}
 \end{ctikzExample}
 
+
+\subsection{An example with the \texttt{compatibility} option}
+\label{ex:compatibility}
+
+\IfFileExists{compatibility.pdf}{\fbox{\includegraphics{compatibility.pdf}}}{}%
+
+\begin{lstlisting}
+\documentclass{standalone}
+
+\usepackage{tikz}
+\usetikzlibrary{circuits.ee.IEC}
+\usetikzlibrary{positioning}
+
+\usepackage[compatibility]{circuitikzgit}
+\ctikzset{bipoles/length=.9cm}
+
+\begin{document}
+ \begin{tikzpicture}[circuit ee IEC]
+  \draw (0,0) to [resistor={name=R}] (0,2)
+	to[diode={name=D}] (3,2);
+  \draw (0,0) to[*R=$R_1$] (1.5,0) to[*Tnpn] (3,0)
+    to[*D](3,2);
+ \end{tikzpicture}
+\end{document}
+\end{lstlisting}
+
+
+\section*{index}
+
 \printindex
 
 \end{document}
