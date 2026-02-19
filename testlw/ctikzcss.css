@@ -1,6 +1,10 @@
 
 @import url("lwarp.css") ;
 
+html, body {
+    background: #ffffff !important;
+}
+
 /* Stop minipages acting like floats (prevents “spill/wrap-around”) */
 div.minipage {
   float: none !important;
@@ -125,7 +129,7 @@ a.footnote-backref { text-decoration: none; margin-left: .25em; }
   padding: 0.6em 0.8em;
   border: 1px solid rgba(0,0,0,0.25);
   border-radius: 8px;
-  background: var(--lwarp-background, #fff);
+  background: #FDF6B2; /* #FFF8B0; // var(--lwarp-background, #fff); */
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   font-size: 0.95em;
   line-height: 1.35;

@@ -36,6 +36,53 @@
 \renewcommand*\seealso[2]{#2, \emph{\alsoname} #1}
 
 \makeatletter
+
+% A no-op replacement for lwarp's lateximage environment, swallowing up to TWO optional args.
+\newcommand*\ctikz@DisableLateximageEnv{%
+  % Define begin-macro \lateximage to eat optional args if present:
+  \def\lateximage{%
+    \@ifnextchar[{\ctikz@lateximage@optA}{\ctikz@lateximage@done}%
+  }%
+  \def\ctikz@lateximage@optA[##1]{%
+    \@ifnextchar[{\ctikz@lateximage@optB}{\ctikz@lateximage@done}%
+  }%
+  \def\ctikz@lateximage@optB[##1]{%
+    \ctikz@lateximage@done
+  }%
+  \def\ctikz@lateximage@done{}%
+  \let\endlateximage\relax
+}
+
+% Convenience wrapper: run code with lateximage disabled
+\newcommand{\ctikz@DisableLateximage}[1]{%
+  \begingroup
+    \ctikz@DisableLateximageEnv
+    #1%
+  \endgroup
+}
+
+\newbox\ctikz@scratchbox
+\pgfutil@protected\def\ctikzsubcircuitdef#1#2#3{%
+    \expandafter\gdef\csname #1@Anchor\endcsname{}%
+    \expandafter\gdef\csname #1@setanchors\endcsname{%
+        \ctikz@DisableLateximage{%
+            \setbox\ctikz@scratchbox=\vbox{%
+            \tikzpicture
+            \draw (0,0) \csname#1\endcsname{T-#1}{};
+            \foreach [count=\i] \anchor in {#2}
+            % reference anchor is -center
+            \draw (0,{2-\i/2}) let \p1 = ($(T-#1-subckt@reference)-(T-#1-\anchor)$) in
+            node[right]{\anchor: \x1,\y1 \expandafter\xdef\csname #1@Anchor\anchor\endcsname{++(\x1,\y1)}};
+            \endtikzpicture
+        }%
+    }
+    }%
+    \expandafter\gdef\csname#1\endcsname##1##2{%
+        \csname #1@Anchor##2\endcsname coordinate(##1-subckt@reference)#3%
+    }%
+}
+\long\def\ctikzsubcircuitactivate#1{\csname #1@setanchors\endcsname}
+
 \makeatother
 
 %% The late lwarp code will be inserted here.
@@ -224,16 +271,17 @@ To use the subcircuit, an additional step is needed. Somewhere you have to \emph
 
 So to check your subcircuit while defining it you can use this simple snippet:
 
-
-\begin{ctikzExample}[only code]
-\ctikzsubcircuitactivate{optovishay}
-\end{ctikzExample}
-% \ctikzsubcircuitactivate{optovishay}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% subcircuits (experimental)
+%%
+%% introduced by Romano Giannetti around April 2021
+%% changes suggested by Jonathan P. Spratte
+%%
 
 
 \begin{ctikzExample}
+\ctikzsubcircuitactivate{optovishay}
 \begin{tikzpicture}
-% \ctikzsubcircuitactivate{optovishay}
     \draw (0,0) \optovishay{one}{};
     \node [above] at (one-up) {O1};
     \draw[color=blue] (one-out 1) -- ++(1,0)
@@ -242,13 +290,9 @@ So to check your subcircuit while defining it you can use this simple snippet:
 \end{tikzpicture}
 \end{ctikzExample}
 
-\begin{ctikzExample}[only code]
-\ctikzsubcircuitactivate{optovishay}
-\end{ctikzExample}
-
 \begin{ctikzExample}
-\begin{tikzpicture}[scale=0.8, transform shape]
 \ctikzsubcircuitactivate{optovishay}
+\begin{tikzpicture}[scale=0.8, transform shape]
     \draw (0,0) \optovishay{three}{};
     \draw (three-out 1) -- ++(0.5,0) coordinate(here);
     \begin{scope}[xscale=-1,rotate=-45,transform shape]
