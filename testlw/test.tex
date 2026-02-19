@@ -16,13 +16,21 @@
         \boolfalse{warpingHTML}
         \booltrue{warpingprint}
 }
+\usepackage{imakeidx}
+\ifbool{warpingprint}{%
+    \makeindex[title=Index, intoc=true]
+}{%
+    \makeindex[title=Index, intoc=true, options={-s lwarp.ist}]
+}
+\indexprologue{Here you will find, in alphabetical order, all the components, keys, and styles defined by the package. Components have the page number in straight text, while keys and styles have \emph{italic} page numbers.}
+\renewcommand*\seealso[2]{#2, \emph{\alsoname} #1}
 \usepackage[siunitx, RPvoltages]{circuitikz}
 \usepackage{ctikzmanutils}
 \usepackage{imakeidx}
 \ifbool{warpingprint}{%
     \makeindex[title=Index, intoc=true]
 }{%
-    \makeindex[options={-s lwarp.ist}]
+    \makeindex[title=Index, intoc=true, options={-s lwarp.ist}]
 }
 \indexprologue{Here you will find, in alphabetical order, all the components, keys, and styles defined by the package. Components have the page number in straight text, while keys and styles have \emph{italic} page numbers.}
 \renewcommand*\seealso[2]{#2, \emph{\alsoname} #1}
