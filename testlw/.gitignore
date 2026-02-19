@@ -15,5 +15,5 @@ lwarpmk.conf
 test-images*
 *.cut
 *.sidetoc
-
+!compatibility.pdf
 
