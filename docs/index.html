@@ -1,0 +1,2841 @@
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="generator" content="LaTeX Lwarp package" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>circuitikzmanual</title>
+<link rel="stylesheet" type="text/css" href="ctikzcss.css" />
+
+<script>
+// Lwarp MathJax emulation code
+//
+// Based on code by Davide P. Cervone.
+// Equation numbering: https://github.com/mathjax/MathJax/issues/2427
+// Starred and ifnextchar macros: https://github.com/mathjax/MathJax/issues/2428
+// \left, \right delimiters: https://github.com/mathjax/MathJax/issues/2535
+//
+// Modified by Brian Dunn to adjust equation numbering and add subequations.
+//
+// LaTeX can use \seteqnumber{subequations?}{section}{number} before each equation.
+// subequations? is 0 usually, 1 if inside subequations.
+// section is a string printed as-is, or empty.
+// number is auto-incremented by MathJax between equations.
+//
+MathJax = {
+  subequations: "0",
+  section: "",
+  loader: {
+    load: ['[tex]/tagformat', '[tex]/textmacros'],
+  },
+  startup: {
+    ready() {
+      // These would be replaced by import commands if you wanted to make
+      // a proper extension.
+      const Configuration = MathJax._.input.tex.Configuration.Configuration;
+      const CommandMap = MathJax._.input.tex.SymbolMap.CommandMap;
+      const Macro = MathJax._.input.tex.Symbol.Macro;
+      const TexError = MathJax._.input.tex.TexError.default;
+      const ParseUtil = MathJax._.input.tex.ParseUtil.default;
+      const expandable = MathJax._.util.Options.expandable;
+
+        // Insert the replacement string into the TeX string, and check
+        // that there haven't been too many maxro substitutions (prevents
+        // infinite loops).
+        const useArgument = (parser, text) => {
+          parser.string = ParseUtil.addArgs(parser, text, parser.string.slice(parser.i));
+          parser.i = 0;
+          if (++parser.macroCount > parser.configuration.options.maxMacros) {
+            throw new TexError('MaxMacroSub1',
+            'MathJax maximum macro substitution count exceeded; ' +
+            'is there a recursive macro call?');
+          }
+        }
+
+        // Create the command map for:
+        //     \ifstar, \ifnextchar, \ifblank, \ifstrequal, \gsub, \seteqnumber
+        new CommandMap('Lwarp-macros', {
+          ifstar: 'IfstarFunction',
+          ifnextchar: 'IfnextcharFunction',
+          ifblank: 'IfblankFunction',
+          ifstrequal: 'IfstrequalFunction',
+          gsubstitute: 'GsubstituteFunction',
+          seteqnumber: 'SeteqnumberFunction'
+        }, {
+          // This function implements an ifstar macro.
+          IfstarFunction(parser, name) {
+             const resultstar = parser.GetArgument(name);
+             const resultnostar = parser.GetArgument(name);
+             const star = parser.GetStar();                 // true if there is a *
+             useArgument(parser, star ? resultstar : resultnostar);
+          },
+
+          // This function implements an ifnextchar macro.
+          IfnextcharFunction(parser, name) {
+            let whichchar = parser.GetArgument(name);
+            if (whichchar.match(/^(?:0x[0-9A-F]+|[0-9]+)$/i)) {
+              // $ syntax highlighting
+              whichchar = String.fromCodePoint(parseInt(whichchar));
+            }
+            const resultnextchar = parser.GetArgument(name);
+            const resultnotnextchar = parser.GetArgument(name);
+            const gotchar = (parser.GetNext() === whichchar);
+            useArgument(parser, gotchar ? resultnextchar : resultnotnextchar);
+          },
+
+          // This function implements an ifblank macro.
+          IfblankFunction(parser, name) {
+            const blankarg = parser.GetArgument(name);
+            const resultblank = parser.GetArgument(name);
+            const resultnotblank = parser.GetArgument(name);
+            const isblank = (blankarg.trim() == "");
+            useArgument(parser, isblank ? resultblank : resultnotblank);
+          },
+
+          // This function implements an ifstrequal macro.
+          IfstrequalFunction(parser, name) {
+            const strequalfirst = parser.GetArgument(name);
+            const strequalsecond = parser.GetArgument(name);
+            const resultequal = parser.GetArgument(name);
+            const resultnotequal = parser.GetArgument(name);
+            const isequal = (strequalfirst == strequalsecond);
+            useArgument(parser, isequal ? resultequal : resultnotequal);
+          },
+
+          // This function implements a gsub macro.
+          GsubstituteFunction(parser, name) {
+            const gsubfirst = parser.GetArgument(name);
+            const gsubsecond = parser.GetArgument(name);
+            const gsubthird = parser.GetArgument(name);
+            let gsubresult=gsubfirst.replace(gsubsecond, gsubthird);
+            useArgument(parser, gsubresult);
+          },
+
+          // This function modifies the equation numbers.
+          SeteqnumberFunction(parser, name) {
+              // Get the macro parameters
+              const star = parser.GetStar();                  // true if there is a *
+              const optBrackets = parser.GetBrackets(name);   // contents of optional brackets
+              const newsubequations = parser.GetArgument(name); // the subequations argument
+              const neweqsection = parser.GetArgument(name); // the eq section argument
+              const neweqnumber = parser.GetArgument(name);   // the eq number argument
+              MathJax.config.subequations=newsubequations ;   // a string with boolean meaning
+              MathJax.config.section=neweqsection ;           // a string with numeric meaning
+              parser.tags.counter = parser.tags.allCounter = neweqnumber ;
+          }
+
+        });
+
+        // Create the Lwarp-macros package
+        Configuration.create('Lwarp-macros', {
+          handler: {macro: ['Lwarp-macros']}
+        });
+
+        MathJax.startup.defaultReady();
+
+        // For forward references:
+        MathJax.startup.input[0].preFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              MathJax.config.subequations = math.inputData.recompile.subequations;
+              MathJax.config.section = math.inputData.recompile.section;
+          }
+        });
+        MathJax.startup.input[0].postFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              math.inputData.recompile.subequations = MathJax.config.subequations;
+              math.inputData.recompile.section = MathJax.config.section;
+          }
+        });
+
+          // For \left, \right with unicode-math:
+          const {DelimiterMap} = MathJax._.input.tex.SymbolMap;
+          const {Symbol} = MathJax._.input.tex.Symbol;
+          const {MapHandler} = MathJax._.input.tex.MapHandler;
+          const delimiter = MapHandler.getMap('delimiter');
+          delimiter.add('\\lBrack', new Symbol('\\lBrack', '\u27E6'));
+          delimiter.add('\\rBrack', new Symbol('\\rBrack', '\u27E7'));
+          delimiter.add('\\lAngle', new Symbol('\\lAngle', '\u27EA'));
+          delimiter.add('\\rAngle', new Symbol('\\rAngle', '\u27EB'));
+          delimiter.add('\\lbrbrak', new Symbol('\\lbrbrak', '\u2772'));
+          delimiter.add('\\rbrbrak', new Symbol('\\rbrbrak', '\u2773'));
+          delimiter.add('\\lbag', new Symbol('\\lbag', '\u27C5'));
+          delimiter.add('\\rbag', new Symbol('\\rbag', '\u27C6'));
+          delimiter.add('\\llparenthesis', new Symbol('\\llparenthesis', '\u2987'));
+          delimiter.add('\\rrparenthesis', new Symbol('\\rrparenthesis', '\u2988'));
+          delimiter.add('\\llangle', new Symbol('\\llangle', '\u2989'));
+          delimiter.add('\\rrangle', new Symbol('\\rrangle', '\u298A'));
+          delimiter.add('\\Lbrbrak', new Symbol('\\Lbrbrak', '\u27EC'));
+          delimiter.add('\\Rbrbrak', new Symbol('\\Rbrbrak', '\u27ED'));
+          delimiter.add('\\lBrace', new Symbol('\\lBrace', '\u2983'));
+          delimiter.add('\\rBrace', new Symbol('\\rBrace', '\u2984'));
+          delimiter.add('\\lParen', new Symbol('\\lParen', '\u2985'));
+          delimiter.add('\\rParen', new Symbol('\\rParen', '\u2986'));
+          delimiter.add('\\lbrackubar', new Symbol('\\lbrackubar', '\u298B'));
+          delimiter.add('\\rbrackubar', new Symbol('\\rbrackubar', '\u298C'));
+          delimiter.add('\\lbrackultick', new Symbol('\\lbrackultick', '\u298D'));
+          delimiter.add('\\rbracklrtick', new Symbol('\\rbracklrtick', '\u298E'));
+          delimiter.add('\\lbracklltick', new Symbol('\\lbracklltick', '\u298F'));
+          delimiter.add('\\rbrackurtick', new Symbol('\\rbrackurtick', '\u2990'));
+          delimiter.add('\\langledot', new Symbol('\\langledot', '\u2991'));
+          delimiter.add('\\rangledot', new Symbol('\\rangledot', '\u2992'));
+          delimiter.add('\\lparenless', new Symbol('\\lparenless', '\u2993'));
+          delimiter.add('\\rparengtr', new Symbol('\\rparengtr', '\u2994'));
+          delimiter.add('\\Lparengtr', new Symbol('\\Lparengtr', '\u2995'));
+          delimiter.add('\\Rparenless', new Symbol('\\Rparenless', '\u2996'));
+          delimiter.add('\\lblkbrbrak', new Symbol('\\lblkbrbrak', '\u2997'));
+          delimiter.add('\\rblkbrbrak', new Symbol('\\rblkbrbrak', '\u2998'));
+          delimiter.add('\\lvzigzag', new Symbol('\\lvzigzag', '\u29D8'));
+          delimiter.add('\\rvzigzag', new Symbol('\\rvzigzag', '\u29D9'));
+          delimiter.add('\\Lvzigzag', new Symbol('\\Lvzigzag', '\u29DA'));
+          delimiter.add('\\Rvzigzag', new Symbol('\\Rvzigzag', '\u29DB'));
+          delimiter.add('\\lcurvyangle', new Symbol('\\lcurvyangle', '\u29FC'));
+          delimiter.add('\\rcurvyangle', new Symbol('\\rcurvyangle', '\u29FD'));
+          delimiter.add('\\Vvert', new Symbol('\\Vvert', '\u2980'));
+    }     // ready
+  },      // startup
+
+  tex: {
+    packages: {'[+]': ['tagformat', 'Lwarp-macros', 'textmacros']},
+    tags: "ams",
+         tagformat: {
+             number: function (n) {
+                 if(MathJax.config.subequations==0)
+                     return(MathJax.config.section + n);
+                 else
+                     return(MathJax.config.section + String.fromCharCode(96+n));
+             },
+         },
+  }
+}
+</script>
+
+<script
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+></script>
+
+<script src="permalinks.js" defer></script>
+
+
+</head>
+<body>
+
+
+<div class="homepagegrid">
+
+
+<main class="bodycontainer">
+
+
+<section class="textbody">
+
+<a id="circuitikzmanual-autofile-0"></a>
+
+<!--MathJax customizations:-->
+<div data-nosnippet
+    style="display:none"
+>
+
+\(\newcommand{\footnotename}{footnote}\)
+
+\(\def \LWRfootnote {1}\)
+
+\(\newcommand {\footnote }[2][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\newcommand {\footnotemark }[1][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\let \LWRorighspace \hspace \)
+
+\(\renewcommand {\hspace }{\ifstar \LWRorighspace \LWRorighspace }\)
+
+\(\newcommand {\TextOrMath }[2]{#2}\)
+
+\(\newcommand {\mathnormal }[1]{{#1}}\)
+
+\(\newcommand \ensuremath [1]{#1}\)
+
+\(\newcommand {\LWRframebox }[2][]{\fbox {#2}} \newcommand {\framebox }[1][]{\LWRframebox } \)
+
+\(\newcommand {\setlength }[2]{}\)
+
+\(\newcommand {\addtolength }[2]{}\)
+
+\(\newcommand {\setcounter }[2]{}\)
+
+\(\newcommand {\addtocounter }[2]{}\)
+
+\(\newcommand {\arabic }[1]{}\)
+
+\(\newcommand {\number }[1]{}\)
+
+\(\newcommand {\noalign }[1]{\text {#1}\notag \\}\)
+
+\(\newcommand {\cline }[1]{}\)
+
+\(\newcommand {\directlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\luatexdirectlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\protect }{}\)
+
+\(\def \LWRabsorbnumber #1 {}\)
+
+\(\def \LWRabsorbquotenumber &quot;#1 {}\)
+
+\(\newcommand {\LWRabsorboption }[1][]{}\)
+
+\(\newcommand {\LWRabsorbtwooptions }[1][]{\LWRabsorboption }\)
+
+\(\def \mathchar {\ifnextchar &quot;\LWRabsorbquotenumber \LWRabsorbnumber }\)
+
+\(\def \mathcode #1={\mathchar }\)
+
+\(\let \delcode \mathcode \)
+
+\(\let \delimiter \mathchar \)
+
+\(\def \oe {\unicode {x0153}}\)
+
+\(\def \OE {\unicode {x0152}}\)
+
+\(\def \ae {\unicode {x00E6}}\)
+
+\(\def \AE {\unicode {x00C6}}\)
+
+\(\def \aa {\unicode {x00E5}}\)
+
+\(\def \AA {\unicode {x00C5}}\)
+
+\(\def \o {\unicode {x00F8}}\)
+
+\(\def \O {\unicode {x00D8}}\)
+
+\(\def \l {\unicode {x0142}}\)
+
+\(\def \L {\unicode {x0141}}\)
+
+\(\def \ss {\unicode {x00DF}}\)
+
+\(\def \SS {\unicode {x1E9E}}\)
+
+\(\def \dag {\unicode {x2020}}\)
+
+\(\def \ddag {\unicode {x2021}}\)
+
+\(\def \P {\unicode {x00B6}}\)
+
+\(\def \copyright {\unicode {x00A9}}\)
+
+\(\def \pounds {\unicode {x00A3}}\)
+
+\(\let \LWRref \ref \)
+
+\(\renewcommand {\ref }{\ifstar \LWRref \LWRref }\)
+
+\( \newcommand {\multicolumn }[3]{#3}\)
+
+\(\require {textcomp}\)
+
+\(\newcommand {\tothe }[1]{^{#1}}\)
+
+\(\newcommand {\raiseto }[2]{{#2}^{#1}}\)
+
+\(\newcommand {\LWRsiunitxEND }{}\)
+
+\(\def \LWRsiunitxang #1;#2;#3;#4\LWRsiunitxEND {\ifblank {#1}{}{\num {#1}\degree }\ifblank {#2}{}{\num {#2}^{\unicode {x2032}}}\ifblank {#3}{}{\num {#3}^{\unicode {x2033}}}}\)
+
+\(\newcommand {\ang }[2][]{\LWRsiunitxang #2;;;\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxdistribunit {}\)
+
+\(\newcommand {\LWRsiunitxENDTWO }{}\)
+
+\(\def \LWRsiunitxprintdecimalsubtwo #1,#2,#3\LWRsiunitxENDTWO {\ifblank {#1}{0}{\mathrm {#1}}\ifblank {#2}{}{{\LWRsiunitxdecimal }\mathrm {#2}}}\)
+
+\(\def \LWRsiunitxprintdecimalsub #1.#2.#3\LWRsiunitxEND {\LWRsiunitxprintdecimalsubtwo #1,,\LWRsiunitxENDTWO \ifblank {#2}{}{{\LWRsiunitxdecimal }\LWRsiunitxprintdecimalsubtwo #2,,\LWRsiunitxENDTWO }}\)
+
+\(\newcommand {\LWRsiunitxprintdecimal }[1]{\LWRsiunitxprintdecimalsub #1...\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxnumplus #1+#2+#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxprintdecimal {#1}}{\ifblank {#1}{\LWRsiunitxprintdecimal {#2}}{\LWRsiunitxprintdecimal {#1}\unicode {x02B}\LWRsiunitxprintdecimal {#2}}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumminus #1-#2-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumplus #1+++\LWRsiunitxEND }{\ifblank {#1}{}{\LWRsiunitxprintdecimal {#1}}\unicode {x02212}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpmmacro #1\pm #2\pm #3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumminus #1---\LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpm #1+-#2+-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpmmacro #1\pm \pm \pm \LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\newcommand {\LWRsiunitxnumscientific }[2]{\ifblank {#1}{}{\ifstrequal {#1}{-}{-}{\LWRsiunitxprintdecimal {#1}\times }}10^{\LWRsiunitxprintdecimal {#2}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumD #1D#2D#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpm #1+-+-\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumd #1d#2d#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumD #1DDD\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumE #1E#2E#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumd #1ddd\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnume #1e#2e#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumE #1EEE\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumx #1x#2x#3x#4\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnume #1eee\LWRsiunitxEND }{\ifblank {#3}{\LWRsiunitxnume #1eee\LWRsiunitxEND \times \LWRsiunitxnume #2eee\LWRsiunitxEND }{\LWRsiunitxnume #1eee\LWRsiunitxEND
+\times \LWRsiunitxnume #2eee\LWRsiunitxEND \times \LWRsiunitxnume #3eee\LWRsiunitxEND }}}\)
+
+\(\newcommand {\num }[2][]{\LWRsiunitxnumx #2xxxxx\LWRsiunitxEND }\)
+
+\(\newcommand {\si }[2][]{\mathrm {\gsubstitute {#2}{~}{\,}}}\)
+
+\(\def \LWRsiunitxSIopt #1[#2]#3{\def \LWRsiunitxdistribunit {\,\si {#3}}{#2}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\LWRsiunitxSI }[2]{\def \LWRsiunitxdistribunit {\,\si {#2}}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\SI }[2][]{\ifnextchar [{\LWRsiunitxSIopt {#2}}{\LWRsiunitxSI {#2}}}\)
+
+\(\newcommand {\numlist }[2][]{\text {#2}}\)
+
+\(\newcommand {\numrange }[3][]{\num {#2}\ \LWRsiunitxrangephrase \ \num {#3}}\)
+
+\(\newcommand {\SIlist }[3][]{\text {#2}\,\si {#3}}\)
+
+\(\newcommand {\SIrange }[4][]{\num {#2}\,#4\ \LWRsiunitxrangephrase \ \num {#3}\,#4}\)
+
+\(\newcommand {\tablenum }[2][]{\mathrm {#2}}\)
+
+\(\newcommand {\ampere }{\mathrm {A}}\)
+
+\(\newcommand {\candela }{\mathrm {cd}}\)
+
+\(\newcommand {\kelvin }{\mathrm {K}}\)
+
+\(\newcommand {\kilogram }{\mathrm {kg}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\mole }{\mathrm {mol}}\)
+
+\(\newcommand {\second }{\mathrm {s}}\)
+
+\(\newcommand {\becquerel }{\mathrm {Bq}}\)
+
+\(\newcommand {\degreeCelsius }{\unicode {x2103}}\)
+
+\(\newcommand {\coulomb }{\mathrm {C}}\)
+
+\(\newcommand {\farad }{\mathrm {F}}\)
+
+\(\newcommand {\gray }{\mathrm {Gy}}\)
+
+\(\newcommand {\hertz }{\mathrm {Hz}}\)
+
+\(\newcommand {\henry }{\mathrm {H}}\)
+
+\(\newcommand {\joule }{\mathrm {J}}\)
+
+\(\newcommand {\katal }{\mathrm {kat}}\)
+
+\(\newcommand {\lumen }{\mathrm {lm}}\)
+
+\(\newcommand {\lux }{\mathrm {lx}}\)
+
+\(\newcommand {\newton }{\mathrm {N}}\)
+
+\(\newcommand {\ohm }{\mathrm {\Omega }}\)
+
+\(\newcommand {\pascal }{\mathrm {Pa}}\)
+
+\(\newcommand {\radian }{\mathrm {rad}}\)
+
+\(\newcommand {\siemens }{\mathrm {S}}\)
+
+\(\newcommand {\sievert }{\mathrm {Sv}}\)
+
+\(\newcommand {\steradian }{\mathrm {sr}}\)
+
+\(\newcommand {\tesla }{\mathrm {T}}\)
+
+\(\newcommand {\volt }{\mathrm {V}}\)
+
+\(\newcommand {\watt }{\mathrm {W}}\)
+
+\(\newcommand {\weber }{\mathrm {Wb}}\)
+
+\(\newcommand {\day }{\mathrm {d}}\)
+
+\(\newcommand {\degree }{\mathrm {^\circ }}\)
+
+\(\newcommand {\hectare }{\mathrm {ha}}\)
+
+\(\newcommand {\hour }{\mathrm {h}}\)
+
+\(\newcommand {\litre }{\mathrm {l}}\)
+
+\(\newcommand {\liter }{\mathrm {L}}\)
+
+\(\newcommand {\arcminute }{^\prime }\)
+
+\(\newcommand {\minute }{\mathrm {min}}\)
+
+\(\newcommand {\arcsecond }{^{\prime \prime }}\)
+
+\(\newcommand {\tonne }{\mathrm {t}}\)
+
+\(\newcommand {\astronomicalunit }{au}\)
+
+\(\newcommand {\atomicmassunit }{u}\)
+
+\(\newcommand {\bohr }{\mathit {a}_0}\)
+
+\(\newcommand {\clight }{\mathit {c}_0}\)
+
+\(\newcommand {\dalton }{\mathrm {D}_\mathrm {a}}\)
+
+\(\newcommand {\electronmass }{\mathit {m}_{\mathrm {e}}}\)
+
+\(\newcommand {\electronvolt }{\mathrm {eV}}\)
+
+\(\newcommand {\elementarycharge }{\mathit {e}}\)
+
+\(\newcommand {\hartree }{\mathit {E}_{\mathrm {h}}}\)
+
+\(\newcommand {\planckbar }{\mathit {\unicode {x210F}}}\)
+
+\(\newcommand {\angstrom }{\mathrm {\unicode {x212B}}}\)
+
+\(\let \LWRorigbar \bar \)
+
+\(\newcommand {\bar }{\mathrm {bar}}\)
+
+\(\newcommand {\barn }{\mathrm {b}}\)
+
+\(\newcommand {\bel }{\mathrm {B}}\)
+
+\(\newcommand {\decibel }{\mathrm {dB}}\)
+
+\(\newcommand {\knot }{\mathrm {kn}}\)
+
+\(\newcommand {\mmHg }{\mathrm {mmHg}}\)
+
+\(\newcommand {\nauticalmile }{\mathrm {M}}\)
+
+\(\newcommand {\neper }{\mathrm {Np}}\)
+
+\(\newcommand {\yocto }{\mathrm {y}}\)
+
+\(\newcommand {\zepto }{\mathrm {z}}\)
+
+\(\newcommand {\atto }{\mathrm {a}}\)
+
+\(\newcommand {\femto }{\mathrm {f}}\)
+
+\(\newcommand {\pico }{\mathrm {p}}\)
+
+\(\newcommand {\nano }{\mathrm {n}}\)
+
+\(\newcommand {\micro }{\mathrm {\unicode {x00B5}}}\)
+
+\(\newcommand {\milli }{\mathrm {m}}\)
+
+\(\newcommand {\centi }{\mathrm {c}}\)
+
+\(\newcommand {\deci }{\mathrm {d}}\)
+
+\(\newcommand {\deca }{\mathrm {da}}\)
+
+\(\newcommand {\hecto }{\mathrm {h}}\)
+
+\(\newcommand {\kilo }{\mathrm {k}}\)
+
+\(\newcommand {\mega }{\mathrm {M}}\)
+
+\(\newcommand {\giga }{\mathrm {G}}\)
+
+\(\newcommand {\tera }{\mathrm {T}}\)
+
+\(\newcommand {\peta }{\mathrm {P}}\)
+
+\(\newcommand {\exa }{\mathrm {E}}\)
+
+\(\newcommand {\zetta }{\mathrm {Z}}\)
+
+\(\newcommand {\yotta }{\mathrm {Y}}\)
+
+\(\newcommand {\percent }{\mathrm {\%}}\)
+
+\(\newcommand {\meter }{\mathrm {m}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\gram }{\mathrm {g}}\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\of }[1]{_{\mathrm {#1}}}\)
+
+\(\newcommand {\squared }{^2}\)
+
+\(\newcommand {\square }[1]{\mathrm {#1}^2}\)
+
+\(\newcommand {\cubed }{^3}\)
+
+\(\newcommand {\cubic }[1]{\mathrm {#1}^3}\)
+
+\(\newcommand {\per }{\,\mathrm {/}}\)
+
+\(\newcommand {\celsius }{\unicode {x2103}}\)
+
+\(\newcommand {\fg }{\femto \gram }\)
+
+\(\newcommand {\pg }{\pico \gram }\)
+
+\(\newcommand {\ng }{\nano \gram }\)
+
+\(\newcommand {\ug }{\micro \gram }\)
+
+\(\newcommand {\mg }{\milli \gram }\)
+
+\(\newcommand {\g }{\gram }\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\amu }{\mathrm {u}}\)
+
+\(\newcommand {\pm }{\pico \metre }\)
+
+\(\newcommand {\nm }{\nano \metre }\)
+
+\(\newcommand {\um }{\micro \metre }\)
+
+\(\newcommand {\mm }{\milli \metre }\)
+
+\(\newcommand {\cm }{\centi \metre }\)
+
+\(\newcommand {\dm }{\deci \metre }\)
+
+\(\newcommand {\m }{\metre }\)
+
+\(\newcommand {\km }{\kilo \metre }\)
+
+\(\newcommand {\as }{\atto \second }\)
+
+\(\newcommand {\fs }{\femto \second }\)
+
+\(\newcommand {\ps }{\pico \second }\)
+
+\(\newcommand {\ns }{\nano \second }\)
+
+\(\newcommand {\us }{\micro \second }\)
+
+\(\newcommand {\ms }{\milli \second }\)
+
+\(\newcommand {\s }{\second }\)
+
+\(\newcommand {\fmol }{\femto \mol }\)
+
+\(\newcommand {\pmol }{\pico \mol }\)
+
+\(\newcommand {\nmol }{\nano \mol }\)
+
+\(\newcommand {\umol }{\micro \mol }\)
+
+\(\newcommand {\mmol }{\milli \mol }\)
+
+\(\newcommand {\mol }{\mol }\)
+
+\(\newcommand {\kmol }{\kilo \mol }\)
+
+\(\newcommand {\pA }{\pico \ampere }\)
+
+\(\newcommand {\nA }{\nano \ampere }\)
+
+\(\newcommand {\uA }{\micro \ampere }\)
+
+\(\newcommand {\mA }{\milli \ampere }\)
+
+\(\newcommand {\A }{\ampere }\)
+
+\(\newcommand {\kA }{\kilo \ampere }\)
+
+\(\newcommand {\ul }{\micro \litre }\)
+
+\(\newcommand {\ml }{\milli \litre }\)
+
+\(\newcommand {\l }{\litre }\)
+
+\(\newcommand {\hl }{\hecto \litre }\)
+
+\(\newcommand {\uL }{\micro \liter }\)
+
+\(\newcommand {\mL }{\milli \liter }\)
+
+\(\newcommand {\L }{\liter }\)
+
+\(\newcommand {\hL }{\hecto \liter }\)
+
+\(\newcommand {\mHz }{\milli \hertz }\)
+
+\(\newcommand {\Hz }{\hertz }\)
+
+\(\newcommand {\kHz }{\kilo \hertz }\)
+
+\(\newcommand {\MHz }{\mega \hertz }\)
+
+\(\newcommand {\GHz }{\giga \hertz }\)
+
+\(\newcommand {\THz }{\tera \hertz }\)
+
+\(\newcommand {\mN }{\milli \newton }\)
+
+\(\newcommand {\N }{\newton }\)
+
+\(\newcommand {\kN }{\kilo \newton }\)
+
+\(\newcommand {\MN }{\mega \newton }\)
+
+\(\newcommand {\Pa }{\pascal }\)
+
+\(\newcommand {\kPa }{\kilo \pascal }\)
+
+\(\newcommand {\MPa }{\mega \pascal }\)
+
+\(\newcommand {\GPa }{\giga \pascal }\)
+
+\(\newcommand {\mohm }{\milli \ohm }\)
+
+\(\newcommand {\kohm }{\kilo \ohm }\)
+
+\(\newcommand {\Mohm }{\mega \ohm }\)
+
+\(\newcommand {\pV }{\pico \volt }\)
+
+\(\newcommand {\nV }{\nano \volt }\)
+
+\(\newcommand {\uV }{\micro \volt }\)
+
+\(\newcommand {\mV }{\milli \volt }\)
+
+\(\newcommand {\V }{\volt }\)
+
+\(\newcommand {\kV }{\kilo \volt }\)
+
+\(\newcommand {\W }{\watt }\)
+
+\(\newcommand {\uW }{\micro \watt }\)
+
+\(\newcommand {\mW }{\milli \watt }\)
+
+\(\newcommand {\kW }{\kilo \watt }\)
+
+\(\newcommand {\MW }{\mega \watt }\)
+
+\(\newcommand {\GW }{\giga \watt }\)
+
+\(\newcommand {\J }{\joule }\)
+
+\(\newcommand {\uJ }{\micro \joule }\)
+
+\(\newcommand {\mJ }{\milli \joule }\)
+
+\(\newcommand {\kJ }{\kilo \joule }\)
+
+\(\newcommand {\eV }{\electronvolt }\)
+
+\(\newcommand {\meV }{\milli \electronvolt }\)
+
+\(\newcommand {\keV }{\kilo \electronvolt }\)
+
+\(\newcommand {\MeV }{\mega \electronvolt }\)
+
+\(\newcommand {\GeV }{\giga \electronvolt }\)
+
+\(\newcommand {\TeV }{\tera \electronvolt }\)
+
+\(\newcommand {\kWh }{\kilo \watt \hour }\)
+
+\(\newcommand {\F }{\farad }\)
+
+\(\newcommand {\fF }{\femto \farad }\)
+
+\(\newcommand {\pF }{\pico \farad }\)
+
+\(\newcommand {\K }{\mathrm {K}}\)
+
+\(\newcommand {\dB }{\mathrm {dB}}\)
+
+\(\newcommand {\kibi }{\mathrm {Ki}}\)
+
+\(\newcommand {\mebi }{\mathrm {Mi}}\)
+
+\(\newcommand {\gibi }{\mathrm {Gi}}\)
+
+\(\newcommand {\tebi }{\mathrm {Ti}}\)
+
+\(\newcommand {\pebi }{\mathrm {Pi}}\)
+
+\(\newcommand {\exbi }{\mathrm {Ei}}\)
+
+\(\newcommand {\zebi }{\mathrm {Zi}}\)
+
+\(\newcommand {\yobi }{\mathrm {Yi}}\)
+
+\(\let \unit \si \)
+
+\(\let \qty \SI \)
+
+\(\let \qtylist \SIlist \)
+
+\(\let \qtyrange \SIrange \)
+
+\(\let \numproduct \num \)
+
+\(\let \qtyproduct \SI \)
+
+\(\let \complexnum \num \)
+
+\(\newcommand {\complexqty }[3][]{(\complexnum {#2})\si {#3}}\)
+
+\(\newcommand {\toprule }[1][]{\hline }\)
+
+\(\let \midrule \toprule \)
+
+\(\let \bottomrule \toprule \)
+
+\(\def \LWRbooktabscmidruleparen (#1)#2{}\)
+
+\(\newcommand {\LWRbooktabscmidrulenoparen }[1]{}\)
+
+\(\newcommand {\cmidrule }[1][]{\ifnextchar (\LWRbooktabscmidruleparen \LWRbooktabscmidrulenoparen }\)
+
+\(\newcommand {\morecmidrules }{}\)
+
+\(\newcommand {\specialrule }[3]{\hline }\)
+
+\(\newcommand {\addlinespace }[1][]{}\)
+
+\(\require {upgreek}\)
+
+\(\def \LWRsiunitxrangephrase {\TextOrMath          { }{\ }\protect \mbox {to}\TextOrMath        { }{\ }}\)
+
+\(\def \LWRsiunitxdecimal {.}\)
+
+</div>
+
+<a id="circuitikzmanual-autopage-1"></a>
+<div class="titlepage">
+
+<h1>
+<div class="center">
+
+<p>
+<span
+    id="lateximage-circuitikzmanual-1"
+    class="lateximagesource"
+><!--
+40   39   38   37   36   35   34   33   32   31   30   29   28   27   26   25   24   23   22   21
+
+
+
+                                    CircuiTikZ
+1    2    3    4    5    6    7    8    9    10   11   12   13   14   15   16   17   18   19   20
+
+
+
+
+                                                                Massimo A. Redaelli
+                                                             m.redaelli@gmail.com
+
+
+
+                                                                     Stefan Lindner
+                                                            stefan.lindner@fau.de
+
+
+
+                                                                     Stefan Erhardt
+                                                            stefan.erhardt@fau.de
+
+
+
+                                                              Romano Giannetti
+                                                   romano.giannetti@gmail.com
+--><img
+    src="circuitikzmanual-images/image-1.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span>
+</p>
+
+
+
+
+<p>
+CircuiTi<em>k</em>Z<br />
+version 1.8.6-unreleased (2026/02/10)
+</p>
+</div>
+
+<p>
+</h1>
+<div class="author">
+
+
+<div class="oneauthor">
+
+<p>
+Massimo A. Redaelli (<a href="mailto:m.redaelli@gmail.com" target="_blank" >m.redaelli@gmail.com</a>)<br />
+Stefan Lindner (<a href="mailto:stefan.lindner@fau.de" target="_blank" >stefan.lindner@fau.de</a>)<br />
+Stefan Erhardt (<a href="mailto:stefan.erhardt@fau.de" target="_blank" >stefan.erhardt@fau.de</a>)<br />
+Romano Giannetti (<a href="mailto:romano.giannetti@gmail.com" target="_blank" >romano.giannetti@gmail.com</a>)
+</p>
+</div>
+
+</div>
+
+
+<div class="titledate">
+
+<p>
+February 20, 2026
+</p>
+</div>
+
+</div>
+<!--
+...... section Contents ......
+-->
+<h4 id="autosec-6">Contents</h4>
+<a id="circuitikzmanual-autopage-6"></a>
+
+
+
+<nav class="toc">
+
+<p>
+<a href="node-Introduction.html#autosec-10" class="tocsection" >
+<span class="sectionnumber">1</span>&#x2003;Introduction</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-12" class="tocsubsection" >
+<span class="sectionnumber">1.1</span>&#x2003;About</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-13" class="tocsubsection" >
+<span class="sectionnumber">1.2</span>&#x2003;License</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-14" class="tocsubsection" >
+<span class="sectionnumber">1.3</span>&#x2003;Loading the package</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-23" class="tocsubsection" >
+<span class="sectionnumber">1.4</span>&#x2003;Installing a new version of the package.</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-25" class="tocsubsection" >
+<span class="sectionnumber">1.5</span>&#x2003;Requirements</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-26" class="tocsubsection" >
+<span class="sectionnumber">1.6</span>&#x2003;Incompatible packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-27" class="tocsubsection" >
+<span class="sectionnumber">1.7</span>&#x2003;Related and extension packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-28" class="tocsubsubsection" >
+<span class="sectionnumber">1.7.1</span>&#x2003;Related packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-29" class="tocsubsubsection" >
+<span class="sectionnumber">1.7.2</span>&#x2003;Extension packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-31" class="tocsubsection" >
+<span class="sectionnumber">1.8</span>&#x2003;Known bugs and limitation</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-37" class="tocsubsection" >
+<span class="sectionnumber">1.9</span>&#x2003;Scale factor inaccuracies</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-48" class="tocsubsection" >
+<span class="sectionnumber">1.10</span>&#x2003;Incompatibilities between versions</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-56" class="tocsubsection" >
+<span class="sectionnumber">1.11</span>&#x2003;Feedback</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-57" class="tocsubsection" >
+<span class="sectionnumber">1.12</span>&#x2003;Package options</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-74" class="tocsection" >
+<span class="sectionnumber">2</span>&#x2003;Tutorials</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-76" class="tocsubsection" >
+<span class="sectionnumber">2.1</span>&#x2003;Getting started with CircuiTi<em>k</em>Z: a current shunt</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-112" class="tocsubsection" >
+<span class="sectionnumber">2.2</span>&#x2003;A non-inverting op-amp amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-141" class="tocsubsubsection" >
+<span class="sectionnumber">2.2.1</span>&#x2003;Reusing the circuit: the easy way</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-148" class="tocsubsection" >
+<span class="sectionnumber">2.3</span>&#x2003;A transistor-based amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-182" class="tocsubsection" >
+<span class="sectionnumber">2.4</span>&#x2003;A logic circuit</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-222" class="tocsection" >
+<span class="sectionnumber">3</span>&#x2003;The components: usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-223" class="tocsubsection" >
+<span class="sectionnumber">3.1</span>&#x2003;Path-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-225" class="tocsubsubsection" >
+<span class="sectionnumber">3.1.1</span>&#x2003;Anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-239" class="tocsubsubsection" >
+<span class="sectionnumber">3.1.2</span>&#x2003;Border anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-264" class="tocsubsubsection" >
+<span class="sectionnumber">3.1.3</span>&#x2003;Relative coordinates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-276" class="tocsubsubsection" >
+<span class="sectionnumber">3.1.4</span>&#x2003;Customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-277" class="tocparagraph" >
+<span class="sectionnumber">3.1.4.1</span>&#x2003;Components size</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-298" class="tocparagraph" >
+<span class="sectionnumber">3.1.4.2</span>&#x2003;Mirroring and flipping path-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-304" class="tocparagraph" >
+<span class="sectionnumber">3.1.4.3</span>&#x2003;Thickness of the lines</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-312" class="tocparagraph" >
+<span class="sectionnumber">3.1.4.4</span>&#x2003;Shape of the components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-329" class="tocsubsubsection" >
+<span class="sectionnumber">3.1.5</span>&#x2003;Descriptions</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-336" class="tocsubsection" >
+<span class="sectionnumber">3.2</span>&#x2003;Node-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-341" class="tocsubsubsection" >
+<span class="sectionnumber">3.2.1</span>&#x2003;Mirroring and flipping</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-352" class="tocsubsubsection" >
+<span class="sectionnumber">3.2.2</span>&#x2003;Anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-353" class="tocparagraph" >
+<span class="sectionnumber">3.2.2.1</span>&#x2003;Text anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-354" class="tocsubsubsection" >
+<span class="sectionnumber">3.2.3</span>&#x2003;Descriptions</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-363" class="tocsubsection" >
+<span class="sectionnumber">3.3</span>&#x2003;Styling circuits and components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-368" class="tocsubsubsection" >
+<span class="sectionnumber">3.3.1</span>&#x2003;Relative size</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-376" class="tocsubsubsection" >
+<span class="sectionnumber">3.3.2</span>&#x2003;Fill color</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-380" class="tocsubsubsection" >
+<span class="sectionnumber">3.3.3</span>&#x2003;Line thickness</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-384" class="tocsubsubsection" >
+<span class="sectionnumber">3.3.4</span>&#x2003;Style files</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-399" class="tocsubsubsection" >
+<span class="sectionnumber">3.3.5</span>&#x2003;Style files: how to write them</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-404" class="tocsubsection" >
+<span class="sectionnumber">3.4</span>&#x2003;Subcircuits</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-405" class="tocsubsubsection" >
+<span class="sectionnumber">3.4.1</span>&#x2003;Subcircuit definition</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-407" class="tocsubsubsection" >
+<span class="sectionnumber">3.4.2</span>&#x2003;Using the subcircuit</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-413" class="tocparagraph" >
+<span class="sectionnumber">3.4.2.1</span>&#x2003;Scaling, flipping and rotating subcircuits</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-419" class="tocsubsubsection" >
+<span class="sectionnumber">3.4.3</span>&#x2003;Parameters in subcircuits</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-427" class="tocsubsubsection" >
+<span class="sectionnumber">3.4.4</span>&#x2003;Using <kbd>pic</kbd>s (with parameters)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-446" class="tocsubsubsection" >
+<span class="sectionnumber">3.4.5</span>&#x2003;Using macros</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-456" class="tocsection" >
+<span class="sectionnumber">4</span>&#x2003;The components: list</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-457" class="tocsubsection" >
+<span class="sectionnumber">4.1</span>&#x2003;Grounds and supply voltages</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-458" class="tocsubsubsection" >
+<span class="sectionnumber">4.1.1</span>&#x2003;Grounds</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-479" class="tocparagraph" >
+<span class="sectionnumber">4.1.1.1</span>&#x2003;Grounds anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-484" class="tocparagraph" >
+<span class="sectionnumber">4.1.1.2</span>&#x2003;Grounds customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-486" class="tocsubsubsection" >
+<span class="sectionnumber">4.1.2</span>&#x2003;Power supplies</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-491" class="tocparagraph" >
+<span class="sectionnumber">4.1.2.1</span>&#x2003;Power supply anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-496" class="tocparagraph" >
+<span class="sectionnumber">4.1.2.2</span>&#x2003;Power supplies customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-510" class="tocsubsection" >
+<span class="sectionnumber">4.2</span>&#x2003;Resistive bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-562" class="tocsubsubsection" >
+<span class="sectionnumber">4.2.1</span>&#x2003;Potentiometers: wiper position</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-574" class="tocsubsubsection" >
+<span class="sectionnumber">4.2.2</span>&#x2003;Generic sensors anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-580" class="tocsubsubsection" >
+<span class="sectionnumber">4.2.3</span>&#x2003;Resistive components customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-581" class="tocparagraph" >
+<span class="sectionnumber">4.2.3.1</span>&#x2003;Geometry.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-587" class="tocparagraph" >
+<span class="sectionnumber">4.2.3.2</span>&#x2003;Thickness.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-593" class="tocparagraph" >
+<span class="sectionnumber">4.2.3.3</span>&#x2003;Arrows</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-599" class="tocparagraph" >
+<span class="sectionnumber">4.2.3.4</span>&#x2003;Details of American (“zig-zag”) resistors.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-673" class="tocsubsection" >
+<span class="sectionnumber">4.3</span>&#x2003;Capacitors and inductors: dynamical bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-674" class="tocsubsubsection" >
+<span class="sectionnumber">4.3.1</span>&#x2003;Capacitors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-697" class="tocsubsubsection" >
+<span class="sectionnumber">4.3.2</span>&#x2003;Capacitive sensors anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-698" class="tocsubsubsection" >
+<span class="sectionnumber">4.3.3</span>&#x2003;Capacitors customizations</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-709" class="tocsubsubsection" >
+<span class="sectionnumber">4.3.4</span>&#x2003;Inductors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-730" class="tocsubsubsection" >
+<span class="sectionnumber">4.3.5</span>&#x2003;Inductors customizations</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-736" class="tocparagraph" >
+<span class="sectionnumber">4.3.5.1</span>&#x2003;Chokes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-742" class="tocsubsubsection" >
+<span class="sectionnumber">4.3.6</span>&#x2003;Inductors anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-743" class="tocparagraph" >
+<span class="sectionnumber">4.3.6.1</span>&#x2003;Taps.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-749" class="tocparagraph" >
+<span class="sectionnumber">4.3.6.2</span>&#x2003;Core anchors.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-755" class="tocparagraph" >
+<span class="sectionnumber">4.3.6.3</span>&#x2003;Dot anchors.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-767" class="tocsubsection" >
+<span class="sectionnumber">4.4</span>&#x2003;Diodes and such</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-838" class="tocsubsubsection" >
+<span class="sectionnumber">4.4.1</span>&#x2003;Tripole-like diodes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-912" class="tocsubsubsection" >
+<span class="sectionnumber">4.4.2</span>&#x2003;Thyristors anchors and customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-923" class="tocsubsubsection" >
+<span class="sectionnumber">4.4.3</span>&#x2003;Diode customizations</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-929" class="tocparagraph" >
+<span class="sectionnumber">4.4.3.1</span>&#x2003;Optical devices arrows</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-942" class="tocparagraph" >
+<span class="sectionnumber">4.4.3.2</span>&#x2003;Zener and TVS diode options</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-949" class="tocsubsection" >
+<span class="sectionnumber">4.5</span>&#x2003;Sources and generators</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-950" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.1</span>&#x2003;Batteries</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-962" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.2</span>&#x2003;Stationary sources</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-976" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.3</span>&#x2003;Sinusoidal sources</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-987" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.4</span>&#x2003;Controlled sources</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1007" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.5</span>&#x2003;Noise sources</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1027" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.6</span>&#x2003;Special sources</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1059" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.7</span>&#x2003;Nullator and norator</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1075" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.8</span>&#x2003;DC sources</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1085" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.9</span>&#x2003;Sources customizations</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1086" class="tocparagraph" >
+<span class="sectionnumber">4.5.9.1</span>&#x2003;Size.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1097" class="tocparagraph" >
+<span class="sectionnumber">4.5.9.2</span>&#x2003;Waveform symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1103" class="tocparagraph" >
+<span class="sectionnumber">4.5.9.3</span>&#x2003;Polarity symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1109" class="tocparagraph" >
+<span class="sectionnumber">4.5.9.4</span>&#x2003;Orientation of the polarity symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1115" class="tocparagraph" >
+<span class="sectionnumber">4.5.9.5</span>&#x2003;Three-phase symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1121" class="tocparagraph" >
+<span class="sectionnumber">4.5.9.6</span>&#x2003;Rotating the three-phase symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1128" class="tocsubsubsection" >
+<span class="sectionnumber">4.5.10</span>&#x2003;Source borders</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1139" class="tocparagraph" >
+<span class="sectionnumber">4.5.10.1</span>&#x2003;Additional winding.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1145" class="tocparagraph" >
+<span class="sectionnumber">4.5.10.2</span>&#x2003;Additional winding anchors.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1157" class="tocsubsection" >
+<span class="sectionnumber">4.6</span>&#x2003;Instruments</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1158" class="tocsubsubsection" >
+<span class="sectionnumber">4.6.1</span>&#x2003;Basic round instruments</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1175" class="tocsubsubsection" >
+<span class="sectionnumber">4.6.2</span>&#x2003;Square instruments</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1184" class="tocsubsubsection" >
+<span class="sectionnumber">4.6.3</span>&#x2003;Oscilloscopes and current probes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1194" class="tocsubsubsection" >
+<span class="sectionnumber">4.6.4</span>&#x2003;Instruments customizations</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1195" class="tocparagraph" >
+<span class="sectionnumber">4.6.4.1</span>&#x2003;Current probes.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1203" class="tocparagraph" >
+<span class="sectionnumber">4.6.4.2</span>&#x2003;Square instruments index position.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1209" class="tocparagraph" >
+<span class="sectionnumber">4.6.4.3</span>&#x2003;Oscilloscope waveform.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1221" class="tocsubsubsection" >
+<span class="sectionnumber">4.6.5</span>&#x2003;Rotation-invariant elements</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1232" class="tocsubsubsection" >
+<span class="sectionnumber">4.6.6</span>&#x2003;Instruments as node elements</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1238" class="tocsubsubsection" >
+<span class="sectionnumber">4.6.7</span>&#x2003;Measuring voltage and currents, multiple ways</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1290" class="tocsubsection" >
+<span class="sectionnumber">4.7</span>&#x2003;Mechanical Analogy</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1302" class="tocsubsubsection" >
+<span class="sectionnumber">4.7.1</span>&#x2003;Mechanical elements customizations</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1303" class="tocsubsection" >
+<span class="sectionnumber">4.8</span>&#x2003;Miscellaneous bipoles and symbols</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1304" class="tocsubsubsection" >
+<span class="sectionnumber">4.8.1</span>&#x2003;Miscellaneous bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1363" class="tocsubsubsection" >
+<span class="sectionnumber">4.8.2</span>&#x2003;Miscellaneous element customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1364" class="tocparagraph" >
+<span class="sectionnumber">4.8.2.1</span>&#x2003;Wiggly fuses.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1370" class="tocparagraph" >
+<span class="sectionnumber">4.8.2.2</span>&#x2003;Neon lamps.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1376" class="tocparagraph" >
+<span class="sectionnumber">4.8.2.3</span>&#x2003;Spark gap.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1382" class="tocsubsubsection" >
+<span class="sectionnumber">4.8.3</span>&#x2003;Miscellaneous symbols</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1392" class="tocsubsubsection" >
+<span class="sectionnumber">4.8.4</span>&#x2003;Customization of ac/dc symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1398" class="tocsubsection" >
+<span class="sectionnumber">4.9</span>&#x2003;Multiple wires (buses)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1411" class="tocsubsection" >
+<span class="sectionnumber">4.10</span>&#x2003;Crossings</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1433" class="tocsubsubsection" >
+<span class="sectionnumber">4.10.1</span>&#x2003;Crossing customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1442" class="tocsubsection" >
+<span class="sectionnumber">4.11</span>&#x2003;Arrows (fake and real)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1451" class="tocsubsubsection" >
+<span class="sectionnumber">4.11.1</span>&#x2003;Arrows size</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1462" class="tocsubsubsection" >
+<span class="sectionnumber">4.11.2</span>&#x2003;Generic Tunable Arrows</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1470" class="tocsubsubsection" >
+<span class="sectionnumber">4.11.3</span>&#x2003;Arrow tips</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1477" class="tocsubsection" >
+<span class="sectionnumber">4.12</span>&#x2003;Terminal shapes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1497" class="tocsubsection" >
+<span class="sectionnumber">4.13</span>&#x2003;Connectors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1498" class="tocsubsubsection" >
+<span class="sectionnumber">4.13.1</span>&#x2003;BNC connector/terminal</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1511" class="tocsubsubsection" >
+<span class="sectionnumber">4.13.2</span>&#x2003;IEC 60617 socket-plug connectors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1550" class="tocsubsubsection" >
+<span class="sectionnumber">4.13.3</span>&#x2003;Jack connectors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1558" class="tocsubsection" >
+<span class="sectionnumber">4.14</span>&#x2003;Block diagram components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1714" class="tocsubsubsection" >
+<span class="sectionnumber">4.14.1</span>&#x2003;Blocks anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1776" class="tocsubsubsection" >
+<span class="sectionnumber">4.14.2</span>&#x2003;Blocks customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1787" class="tocparagraph" >
+<span class="sectionnumber">4.14.2.1</span>&#x2003;Multi ports</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1798" class="tocparagraph" >
+<span class="sectionnumber">4.14.2.2</span>&#x2003;Labels and custom two-port boxes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1814" class="tocparagraph" >
+<span class="sectionnumber">4.14.2.3</span>&#x2003;Box option</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1820" class="tocparagraph" >
+<span class="sectionnumber">4.14.2.4</span>&#x2003;Dash optional parts</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1826" class="tocparagraph" >
+<span class="sectionnumber">4.14.2.5</span>&#x2003;Dashing the DC symbol in blocks.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1832" class="tocparagraph" >
+<span class="sectionnumber">4.14.2.6</span>&#x2003;Blocks inner drawing.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1843" class="tocparagraph" >
+<span class="sectionnumber">4.14.2.7</span>&#x2003;Plot-type filter blocks customization.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1852" class="tocsubsection" >
+<span class="sectionnumber">4.15</span>&#x2003;Transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1853" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.1</span>&#x2003;Standard bipolar transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1878" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.2</span>&#x2003;Multi-terminal bipolar transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1883" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.3</span>&#x2003;Field-effect transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1968" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.4</span>&#x2003;Transistor texts (labels)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1994" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.5</span>&#x2003;Transistors customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1995" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.1</span>&#x2003;Size.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1996" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.2</span>&#x2003;Arrows.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2024" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.3</span>&#x2003;Circles.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2030" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.4</span>&#x2003;Body diodes and similar things.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2041" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.5</span>&#x2003;HEMT customization.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2048" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.6</span>&#x2003;Schottky transistors.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2054" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.7</span>&#x2003;Ferroelectric transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2060" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.8</span>&#x2003;IGBT outer base.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2066" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.9</span>&#x2003;UJT transistors.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2072" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.10</span>&#x2003;Base/Gate terminal.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2078" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.11</span>&#x2003;Bulk terminals.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2099" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.12</span>&#x2003;Solder dots.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2105" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.13</span>&#x2003;Simplified symbols for depletion-mode MOSFETs</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2121" class="tocparagraph" >
+<span class="sectionnumber">4.15.5.14</span>&#x2003;Gate/Base gap coloring.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2128" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.6</span>&#x2003;Multiple terminal transistors customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2131" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.7</span>&#x2003;Transistor circle customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2132" class="tocparagraph" >
+<span class="sectionnumber">4.15.7.1</span>&#x2003;Position and size.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2142" class="tocparagraph" >
+<span class="sectionnumber">4.15.7.2</span>&#x2003;Line and color.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2155" class="tocparagraph" >
+<span class="sectionnumber">4.15.7.3</span>&#x2003;Partially drawn circle borders</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2170" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.8</span>&#x2003;Transistor bodydiode customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2179" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.9</span>&#x2003;Transistors anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2253" class="tocsubsubsection" >
+<span class="sectionnumber">4.15.10</span>&#x2003;Transistor paths</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2264" class="tocsubsection" >
+<span class="sectionnumber">4.16</span>&#x2003;Electronic Tubes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2282" class="tocsubsubsection" >
+<span class="sectionnumber">4.16.1</span>&#x2003;Tubes customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2292" class="tocsubsubsection" >
+<span class="sectionnumber">4.16.2</span>&#x2003;Tubes anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2304" class="tocsubsubsection" >
+<span class="sectionnumber">4.16.3</span>&#x2003;Partially drawn tube borders</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2314" class="tocsubsubsection" >
+<span class="sectionnumber">4.16.4</span>&#x2003;Multi-anode tube</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2331" class="tocsubsubsection" >
+<span class="sectionnumber">4.16.5</span>&#x2003;Other tubes-like components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2341" class="tocparagraph" >
+<span class="sectionnumber">4.16.5.1</span>&#x2003;Dynode customization.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2355" class="tocsubsection" >
+<span class="sectionnumber">4.17</span>&#x2003;RF components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2396" class="tocsubsubsection" >
+<span class="sectionnumber">4.17.1</span>&#x2003;RF elements customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2397" class="tocsubsubsection" >
+<span class="sectionnumber">4.17.2</span>&#x2003;Microstrip customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2409" class="tocsubsection" >
+<span class="sectionnumber">4.18</span>&#x2003;Electro-Mechanical Devices</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2414" class="tocsubsubsection" >
+<span class="sectionnumber">4.18.1</span>&#x2003;Electro-Mechanical Devices anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2433" class="tocsubsection" >
+<span class="sectionnumber">4.19</span>&#x2003;Double bipoles (transformers)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2453" class="tocsubsubsection" >
+<span class="sectionnumber">4.19.1</span>&#x2003;Transformer anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2475" class="tocsubsubsection" >
+<span class="sectionnumber">4.19.2</span>&#x2003;Transformers customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2499" class="tocsubsubsection" >
+<span class="sectionnumber">4.19.3</span>&#x2003;Styling transformer’s coils independently</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2516" class="tocsubsubsection" >
+<span class="sectionnumber">4.19.4</span>&#x2003;Generic double bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2534" class="tocsubsection" >
+<span class="sectionnumber">4.20</span>&#x2003;Amplifiers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2558" class="tocsubsubsection" >
+<span class="sectionnumber">4.20.1</span>&#x2003;Amplifiers anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2594" class="tocsubsubsection" >
+<span class="sectionnumber">4.20.2</span>&#x2003;Amplifiers customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2595" class="tocparagraph" >
+<span class="sectionnumber">4.20.2.1</span>&#x2003;Input polarity.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2601" class="tocparagraph" >
+<span class="sectionnumber">4.20.2.2</span>&#x2003;Input and output pins symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2613" class="tocparagraph" >
+<span class="sectionnumber">4.20.2.3</span>&#x2003;Input and output pins length.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2619" class="tocparagraph" >
+<span class="sectionnumber">4.20.2.4</span>&#x2003;Main amplifier label.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2625" class="tocparagraph" >
+<span class="sectionnumber">4.20.2.5</span>&#x2003;European-style amplifier customization.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2663" class="tocsubsubsection" >
+<span class="sectionnumber">4.20.3</span>&#x2003;Designing your own amplifier</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2669" class="tocsubsection" >
+<span class="sectionnumber">4.21</span>&#x2003;Switches, buttons and jumpers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2670" class="tocsubsubsection" >
+<span class="sectionnumber">4.21.1</span>&#x2003;Traditional switches</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2714" class="tocsubsubsection" >
+<span class="sectionnumber">4.21.2</span>&#x2003;Cute switches</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2735" class="tocparagraph" >
+<span class="sectionnumber">4.21.2.1</span>&#x2003;Cute switches anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2748" class="tocparagraph" >
+<span class="sectionnumber">4.21.2.2</span>&#x2003;Cute switches customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2760" class="tocsubsubsection" >
+<span class="sectionnumber">4.21.3</span>&#x2003;Proximity switches</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2771" class="tocsubsubsection" >
+<span class="sectionnumber">4.21.4</span>&#x2003;Rotary switches</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2779" class="tocparagraph" >
+<span class="sectionnumber">4.21.4.1</span>&#x2003;Rotary switch anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2797" class="tocparagraph" >
+<span class="sectionnumber">4.21.4.2</span>&#x2003;Rotary switch customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2809" class="tocsubsubsection" >
+<span class="sectionnumber">4.21.5</span>&#x2003;Switch arrows</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2822" class="tocparagraph" >
+<span class="sectionnumber">4.21.5.1</span>&#x2003;Rotary switch arrows.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2829" class="tocsubsubsection" >
+<span class="sectionnumber">4.21.6</span>&#x2003;Jumpers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2830" class="tocparagraph" >
+<span class="sectionnumber">4.21.6.1</span>&#x2003;Simple jumpers.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2847" class="tocparagraph" >
+<span class="sectionnumber">4.21.6.2</span>&#x2003;Two-ways (three-pins) jumpers.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2860" class="tocsubsubsection" >
+<span class="sectionnumber">4.21.7</span>&#x2003;Solder jumpers.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2878" class="tocsubsection" >
+<span class="sectionnumber">4.22</span>&#x2003;Logic gates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2879" class="tocsubsubsection" >
+<span class="sectionnumber">4.22.1</span>&#x2003;American Logic gates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2900" class="tocsubsubsection" >
+<span class="sectionnumber">4.22.2</span>&#x2003;IEEE logic gates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2930" class="tocsubsubsection" >
+<span class="sectionnumber">4.22.3</span>&#x2003;European Logic gates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2952" class="tocsubsubsection" >
+<span class="sectionnumber">4.22.4</span>&#x2003;Path-style logic ports</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2975" class="tocsubsubsection" >
+<span class="sectionnumber">4.22.5</span>&#x2003;American ports usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2981" class="tocparagraph" >
+<span class="sectionnumber">4.22.5.1</span>&#x2003;American logic port customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3011" class="tocparagraph" >
+<span class="sectionnumber">4.22.5.2</span>&#x2003;American logic port anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3041" class="tocsubsubsection" >
+<span class="sectionnumber">4.22.6</span>&#x2003;IEEE logic gates usage.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3082" class="tocparagraph" >
+<span class="sectionnumber">4.22.6.1</span>&#x2003;Stacking and aligning IEEE standard gates.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3093" class="tocparagraph" >
+<span class="sectionnumber">4.22.6.2</span>&#x2003;IEEE standard ports customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3110" class="tocparagraph" >
+<span class="sectionnumber">4.22.6.3</span>&#x2003;IEEE standard ports anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3117" class="tocparagraph" >
+<span class="sectionnumber">4.22.6.4</span>&#x2003;Transmission gate symbols.</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3127" class="tocsubsubsection" >
+<span class="sectionnumber">4.22.7</span>&#x2003;European logic port usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3133" class="tocparagraph" >
+<span class="sectionnumber">4.22.7.1</span>&#x2003;European logic port customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3144" class="tocparagraph" >
+<span class="sectionnumber">4.22.7.2</span>&#x2003;European logic port anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3148" class="tocsubsection" >
+<span class="sectionnumber">4.23</span>&#x2003;Flip-flops</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3170" class="tocsubsubsection" >
+<span class="sectionnumber">4.23.1</span>&#x2003;Custom flip-flops</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3175" class="tocsubsubsection" >
+<span class="sectionnumber">4.23.2</span>&#x2003;Flip-flops anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3181" class="tocsubsubsection" >
+<span class="sectionnumber">4.23.3</span>&#x2003;Flip-flops customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3204" class="tocsubsection" >
+<span class="sectionnumber">4.24</span>&#x2003;Multiplexer and de-multiplexer</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3221" class="tocsubsubsection" >
+<span class="sectionnumber">4.24.1</span>&#x2003;Mux-Demux: design your own shape</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3231" class="tocsubsubsection" >
+<span class="sectionnumber">4.24.2</span>&#x2003;Mux-Demux customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3237" class="tocsubsubsection" >
+<span class="sectionnumber">4.24.3</span>&#x2003;Mux-Demux anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3249" class="tocsubsubsection" >
+<span class="sectionnumber">4.24.4</span>&#x2003;Adding labels to the pins</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3250" class="tocparagraph" >
+<span class="sectionnumber">4.24.4.1</span>&#x2003;Inner pin labels</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3261" class="tocparagraph" >
+<span class="sectionnumber">4.24.4.2</span>&#x2003;Outer pin labels</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3267" class="tocparagraph" >
+<span class="sectionnumber">4.24.4.3</span>&#x2003;Border labels</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3273" class="tocparagraph" >
+<span class="sectionnumber">4.24.4.4</span>&#x2003;Clock and negation symbols</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3279" class="tocsubsubsection" >
+<span class="sectionnumber">4.24.5</span>&#x2003;Manually adding wedges or circular inversion markers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3285" class="tocsubsubsection" >
+<span class="sectionnumber">4.24.6</span>&#x2003;Adding a background drawing to the muxdemux</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3296" class="tocsubsubsection" >
+<span class="sectionnumber">4.24.7</span>&#x2003;Mux-Demux special usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3312" class="tocsubsection" >
+<span class="sectionnumber">4.25</span>&#x2003;Chips (integrated circuits)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3317" class="tocsubsubsection" >
+<span class="sectionnumber">4.25.1</span>&#x2003;DIP and QFP chips customization</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3339" class="tocsubsubsection" >
+<span class="sectionnumber">4.25.2</span>&#x2003;Chip anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3343" class="tocsubsubsection" >
+<span class="sectionnumber">4.25.3</span>&#x2003;Chip rotation</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3349" class="tocsubsubsection" >
+<span class="sectionnumber">4.25.4</span>&#x2003;Chip special usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3355" class="tocsubsection" >
+<span class="sectionnumber">4.26</span>&#x2003;Seven segment displays</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3364" class="tocsubsubsection" >
+<span class="sectionnumber">4.26.1</span>&#x2003;Seven segments anchors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3371" class="tocsubsubsection" >
+<span class="sectionnumber">4.26.2</span>&#x2003;Seven segments customization</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3380" class="tocsection" >
+<span class="sectionnumber">5</span>&#x2003;Labels, voltages and currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3416" class="tocsubsection" >
+<span class="sectionnumber">5.1</span>&#x2003;Labels and Annotations</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3417" class="tocsubsubsection" >
+<span class="sectionnumber">5.1.1</span>&#x2003;Label and annotation position</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3433" class="tocparagraph" >
+<span class="sectionnumber">5.1.1.1</span>&#x2003;Adjust label and annotation position.</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3445" class="tocsubsubsection" >
+<span class="sectionnumber">5.1.2</span>&#x2003;Special symbols in labels and annotations.</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3456" class="tocsubsubsection" >
+<span class="sectionnumber">5.1.3</span>&#x2003;Labels and annotation orientation.</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3472" class="tocsubsubsection" >
+<span class="sectionnumber">5.1.4</span>&#x2003;Stacked (two lines) labels.</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3478" class="tocsubsection" >
+<span class="sectionnumber">5.2</span>&#x2003;Currents and voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3669" class="tocsubsubsection" >
+<span class="sectionnumber">5.2.1</span>&#x2003;Common properties of voltages and currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3707" class="tocsubsubsection" >
+<span class="sectionnumber">5.2.2</span>&#x2003;Special treatment for generators</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3739" class="tocsubsection" >
+<span class="sectionnumber">5.3</span>&#x2003;Currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3816" class="tocsubsection" >
+<span class="sectionnumber">5.4</span>&#x2003;Flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3852" class="tocsubsection" >
+<span class="sectionnumber">5.5</span>&#x2003;Voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3853" class="tocsubsubsection" >
+<span class="sectionnumber">5.5.1</span>&#x2003;European style</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3919" class="tocsubsubsection" >
+<span class="sectionnumber">5.5.2</span>&#x2003;Straight European style</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3955" class="tocsubsubsection" >
+<span class="sectionnumber">5.5.3</span>&#x2003;American style</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3986" class="tocsubsubsection" >
+<span class="sectionnumber">5.5.4</span>&#x2003;Raised American style</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4017" class="tocsubsubsection" >
+<span class="sectionnumber">5.5.5</span>&#x2003;Voltage position</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4059" class="tocsubsubsection" >
+<span class="sectionnumber">5.5.6</span>&#x2003;American voltages customization</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4076" class="tocsubsubsection" >
+<span class="sectionnumber">5.5.7</span>&#x2003;Combining different styles</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4085" class="tocsubsection" >
+<span class="sectionnumber">5.6</span>&#x2003;Changing the style of labels, voltages, and other text ornaments</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4095" class="tocsubsection" >
+<span class="sectionnumber">5.7</span>&#x2003;Accessing labels text nodes</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4107" class="tocsubsection" >
+<span class="sectionnumber">5.8</span>&#x2003;Advanced voltages, currents and flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4119" class="tocsubsubsection" >
+<span class="sectionnumber">5.8.1</span>&#x2003;Using standard label with custom symbols</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4125" class="tocsubsubsection" >
+<span class="sectionnumber">5.8.2</span>&#x2003;Activating the anchors</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4138" class="tocsubsubsection" >
+<span class="sectionnumber">5.8.3</span>&#x2003;Auxiliary information</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4150" class="tocsubsubsection" >
+<span class="sectionnumber">5.8.4</span>&#x2003;Fixed voltage arrows: an example of advanced voltage usage</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4169" class="tocsubsubsection" >
+<span class="sectionnumber">5.8.5</span>&#x2003;Automatic advanced voltages, current and flows (experimental)</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4187" class="tocsubsubsection" >
+<span class="sectionnumber">5.8.6</span>&#x2003;Creating new voltage/current/flows commands</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4200" class="tocsubsection" >
+<span class="sectionnumber">5.9</span>&#x2003;Integration with siunitx</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4234" class="tocsection" >
+<span class="sectionnumber">6</span>&#x2003;Using bipoles in circuits</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4235" class="tocsubsection" >
+<span class="sectionnumber">6.1</span>&#x2003;Nodes (also called poles)</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4327" class="tocsubsubsection" >
+<span class="sectionnumber">6.1.1</span>&#x2003;Transparent poles</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4333" class="tocsubsection" >
+<span class="sectionnumber">6.2</span>&#x2003;Mirroring and Inverting</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4369" class="tocsubsection" >
+<span class="sectionnumber">6.3</span>&#x2003;Putting them together</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4380" class="tocsubsection" >
+<span class="sectionnumber">6.4</span>&#x2003;Line joins between Path Components</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4393" class="tocsection" >
+<span class="sectionnumber">7</span>&#x2003;Colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4418" class="tocsubsection" >
+<span class="sectionnumber">7.1</span>&#x2003;Shape colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4454" class="tocsubsection" >
+<span class="sectionnumber">7.2</span>&#x2003;Fill colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4475" class="tocsubsubsection" >
+<span class="sectionnumber">7.2.1</span>&#x2003;Background colors different from white</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4498" class="tocsection" >
+<span class="sectionnumber">8</span>&#x2003;FAQ: Frequently asked questions</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4499" class="tocsubsection" >
+<span class="sectionnumber">8.1</span>&#x2003;Using named nodes in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4521" class="tocsubsection" >
+<span class="sectionnumber">8.2</span>&#x2003;Using dashed (or colored) wires in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4558" class="tocsubsection" >
+<span class="sectionnumber">8.3</span>&#x2003;Errors when externalizing pictures</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4561" class="tocsubsection" >
+<span class="sectionnumber">8.4</span>&#x2003;Labels, voltages and currents woes</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4567" class="tocsubsection" >
+<span class="sectionnumber">8.5</span>&#x2003;Global scaling and rotating</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4568" class="tocsubsection" >
+<span class="sectionnumber">8.6</span>&#x2003;Tunable components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4576" class="tocsection" >
+<span class="sectionnumber">9</span>&#x2003;Defining new components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4579" class="tocsubsection" >
+<span class="sectionnumber">9.1</span>&#x2003;Suggested setup</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4590" class="tocsubsection" >
+<span class="sectionnumber">9.2</span>&#x2003;Path-style component</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4615" class="tocsubsection" >
+<span class="sectionnumber">9.3</span>&#x2003;Node-style component</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4620" class="tocsubsubsection" >
+<span class="sectionnumber">9.3.1</span>&#x2003;The internal hook system</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4622" class="tocsubsubsection" >
+<span class="sectionnumber">9.3.2</span>&#x2003;Finishing your work</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4625" class="tocsection" >
+<span class="sectionnumber">10</span>&#x2003;Examples</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4626" class="tocsubsection" >
+<span class="sectionnumber">10.1</span>&#x2003;A red diode</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4632" class="tocsubsection" >
+<span class="sectionnumber">10.2</span>&#x2003;Using the (experimental) <kbd>siunitx</kbd> syntax</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4643" class="tocsubsection" >
+<span class="sectionnumber">10.3</span>&#x2003;Photodiodes</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4649" class="tocsubsection" >
+<span class="sectionnumber">10.4</span>&#x2003;A Sallen-Key cell</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4655" class="tocsubsection" >
+<span class="sectionnumber">10.5</span>&#x2003;Mixing circuits and graphs</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4661" class="tocsubsection" >
+<span class="sectionnumber">10.6</span>&#x2003;RF circuit</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4667" class="tocsubsection" >
+<span class="sectionnumber">10.7</span>&#x2003;A styled low noise input stage</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4674" class="tocsubsection" >
+<span class="sectionnumber">10.8</span>&#x2003;An example with the <kbd>compatibility</kbd> option</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4676" class="tocsubsection" >
+<span class="sectionnumber">10.9</span>&#x2003;3-phases block schematic</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4682" class="tocsubsection" >
+<span class="sectionnumber">10.10</span>&#x2003;Using components in <kbd>pic</kbd>s (since <kbd>v1.8.0</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4688" class="tocsubsection" >
+<span class="sectionnumber">10.11</span>&#x2003;Automatic user-defined voltages, currents and flows (since <kbd>v1.8.5</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4697" class="tocsection" >
+<span class="sectionnumber">11</span>&#x2003;Changelog and Release Notes</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4701" class="tocsection" >
+Index</a>
+</p>
+</nav>
+
+</section>
+
+</main>
+
+</div><!-- grid -->
+</body>
+</html>

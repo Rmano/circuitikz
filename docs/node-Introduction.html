@@ -1,0 +1,2817 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="author" content="Massimo A. Redaelli (<a href=mailto:m.redaelli@gmail.com target=-blank >m.redaelli@gmail.com</a>)- Stefan Lindner (<a href=mailto:stefan.lindner@fau.de target=-blank >stefan.lindner@fau.de</a>)- Stefan Erhardt
+(<a href=mailto:stefan.erhardt@fau.de target=-blank >stefan.erhardt@fau.de</a>)- Romano Giannetti (<a href=mailto:romano.giannetti@gmail.com target=-blank >romano.giannetti@gmail.com</a>)" />
+<meta name="generator" content="LaTeX Lwarp package" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CircuiTikZ-version 1.8.6-unreleased (2026/02/10) — Introduction</title>
+<link rel="stylesheet" type="text/css" href="ctikzcss.css" />
+
+<script>
+// Lwarp MathJax emulation code
+//
+// Based on code by Davide P. Cervone.
+// Equation numbering: https://github.com/mathjax/MathJax/issues/2427
+// Starred and ifnextchar macros: https://github.com/mathjax/MathJax/issues/2428
+// \left, \right delimiters: https://github.com/mathjax/MathJax/issues/2535
+//
+// Modified by Brian Dunn to adjust equation numbering and add subequations.
+//
+// LaTeX can use \seteqnumber{subequations?}{section}{number} before each equation.
+// subequations? is 0 usually, 1 if inside subequations.
+// section is a string printed as-is, or empty.
+// number is auto-incremented by MathJax between equations.
+//
+MathJax = {
+  subequations: "0",
+  section: "",
+  loader: {
+    load: ['[tex]/tagformat', '[tex]/textmacros'],
+  },
+  startup: {
+    ready() {
+      // These would be replaced by import commands if you wanted to make
+      // a proper extension.
+      const Configuration = MathJax._.input.tex.Configuration.Configuration;
+      const CommandMap = MathJax._.input.tex.SymbolMap.CommandMap;
+      const Macro = MathJax._.input.tex.Symbol.Macro;
+      const TexError = MathJax._.input.tex.TexError.default;
+      const ParseUtil = MathJax._.input.tex.ParseUtil.default;
+      const expandable = MathJax._.util.Options.expandable;
+
+        // Insert the replacement string into the TeX string, and check
+        // that there haven't been too many maxro substitutions (prevents
+        // infinite loops).
+        const useArgument = (parser, text) => {
+          parser.string = ParseUtil.addArgs(parser, text, parser.string.slice(parser.i));
+          parser.i = 0;
+          if (++parser.macroCount > parser.configuration.options.maxMacros) {
+            throw new TexError('MaxMacroSub1',
+            'MathJax maximum macro substitution count exceeded; ' +
+            'is there a recursive macro call?');
+          }
+        }
+
+        // Create the command map for:
+        //     \ifstar, \ifnextchar, \ifblank, \ifstrequal, \gsub, \seteqnumber
+        new CommandMap('Lwarp-macros', {
+          ifstar: 'IfstarFunction',
+          ifnextchar: 'IfnextcharFunction',
+          ifblank: 'IfblankFunction',
+          ifstrequal: 'IfstrequalFunction',
+          gsubstitute: 'GsubstituteFunction',
+          seteqnumber: 'SeteqnumberFunction'
+        }, {
+          // This function implements an ifstar macro.
+          IfstarFunction(parser, name) {
+             const resultstar = parser.GetArgument(name);
+             const resultnostar = parser.GetArgument(name);
+             const star = parser.GetStar();                 // true if there is a *
+             useArgument(parser, star ? resultstar : resultnostar);
+          },
+
+          // This function implements an ifnextchar macro.
+          IfnextcharFunction(parser, name) {
+            let whichchar = parser.GetArgument(name);
+            if (whichchar.match(/^(?:0x[0-9A-F]+|[0-9]+)$/i)) {
+              // $ syntax highlighting
+              whichchar = String.fromCodePoint(parseInt(whichchar));
+            }
+            const resultnextchar = parser.GetArgument(name);
+            const resultnotnextchar = parser.GetArgument(name);
+            const gotchar = (parser.GetNext() === whichchar);
+            useArgument(parser, gotchar ? resultnextchar : resultnotnextchar);
+          },
+
+          // This function implements an ifblank macro.
+          IfblankFunction(parser, name) {
+            const blankarg = parser.GetArgument(name);
+            const resultblank = parser.GetArgument(name);
+            const resultnotblank = parser.GetArgument(name);
+            const isblank = (blankarg.trim() == "");
+            useArgument(parser, isblank ? resultblank : resultnotblank);
+          },
+
+          // This function implements an ifstrequal macro.
+          IfstrequalFunction(parser, name) {
+            const strequalfirst = parser.GetArgument(name);
+            const strequalsecond = parser.GetArgument(name);
+            const resultequal = parser.GetArgument(name);
+            const resultnotequal = parser.GetArgument(name);
+            const isequal = (strequalfirst == strequalsecond);
+            useArgument(parser, isequal ? resultequal : resultnotequal);
+          },
+
+          // This function implements a gsub macro.
+          GsubstituteFunction(parser, name) {
+            const gsubfirst = parser.GetArgument(name);
+            const gsubsecond = parser.GetArgument(name);
+            const gsubthird = parser.GetArgument(name);
+            let gsubresult=gsubfirst.replace(gsubsecond, gsubthird);
+            useArgument(parser, gsubresult);
+          },
+
+          // This function modifies the equation numbers.
+          SeteqnumberFunction(parser, name) {
+              // Get the macro parameters
+              const star = parser.GetStar();                  // true if there is a *
+              const optBrackets = parser.GetBrackets(name);   // contents of optional brackets
+              const newsubequations = parser.GetArgument(name); // the subequations argument
+              const neweqsection = parser.GetArgument(name); // the eq section argument
+              const neweqnumber = parser.GetArgument(name);   // the eq number argument
+              MathJax.config.subequations=newsubequations ;   // a string with boolean meaning
+              MathJax.config.section=neweqsection ;           // a string with numeric meaning
+              parser.tags.counter = parser.tags.allCounter = neweqnumber ;
+          }
+
+        });
+
+        // Create the Lwarp-macros package
+        Configuration.create('Lwarp-macros', {
+          handler: {macro: ['Lwarp-macros']}
+        });
+
+        MathJax.startup.defaultReady();
+
+        // For forward references:
+        MathJax.startup.input[0].preFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              MathJax.config.subequations = math.inputData.recompile.subequations;
+              MathJax.config.section = math.inputData.recompile.section;
+          }
+        });
+        MathJax.startup.input[0].postFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              math.inputData.recompile.subequations = MathJax.config.subequations;
+              math.inputData.recompile.section = MathJax.config.section;
+          }
+        });
+
+          // For \left, \right with unicode-math:
+          const {DelimiterMap} = MathJax._.input.tex.SymbolMap;
+          const {Symbol} = MathJax._.input.tex.Symbol;
+          const {MapHandler} = MathJax._.input.tex.MapHandler;
+          const delimiter = MapHandler.getMap('delimiter');
+          delimiter.add('\\lBrack', new Symbol('\\lBrack', '\u27E6'));
+          delimiter.add('\\rBrack', new Symbol('\\rBrack', '\u27E7'));
+          delimiter.add('\\lAngle', new Symbol('\\lAngle', '\u27EA'));
+          delimiter.add('\\rAngle', new Symbol('\\rAngle', '\u27EB'));
+          delimiter.add('\\lbrbrak', new Symbol('\\lbrbrak', '\u2772'));
+          delimiter.add('\\rbrbrak', new Symbol('\\rbrbrak', '\u2773'));
+          delimiter.add('\\lbag', new Symbol('\\lbag', '\u27C5'));
+          delimiter.add('\\rbag', new Symbol('\\rbag', '\u27C6'));
+          delimiter.add('\\llparenthesis', new Symbol('\\llparenthesis', '\u2987'));
+          delimiter.add('\\rrparenthesis', new Symbol('\\rrparenthesis', '\u2988'));
+          delimiter.add('\\llangle', new Symbol('\\llangle', '\u2989'));
+          delimiter.add('\\rrangle', new Symbol('\\rrangle', '\u298A'));
+          delimiter.add('\\Lbrbrak', new Symbol('\\Lbrbrak', '\u27EC'));
+          delimiter.add('\\Rbrbrak', new Symbol('\\Rbrbrak', '\u27ED'));
+          delimiter.add('\\lBrace', new Symbol('\\lBrace', '\u2983'));
+          delimiter.add('\\rBrace', new Symbol('\\rBrace', '\u2984'));
+          delimiter.add('\\lParen', new Symbol('\\lParen', '\u2985'));
+          delimiter.add('\\rParen', new Symbol('\\rParen', '\u2986'));
+          delimiter.add('\\lbrackubar', new Symbol('\\lbrackubar', '\u298B'));
+          delimiter.add('\\rbrackubar', new Symbol('\\rbrackubar', '\u298C'));
+          delimiter.add('\\lbrackultick', new Symbol('\\lbrackultick', '\u298D'));
+          delimiter.add('\\rbracklrtick', new Symbol('\\rbracklrtick', '\u298E'));
+          delimiter.add('\\lbracklltick', new Symbol('\\lbracklltick', '\u298F'));
+          delimiter.add('\\rbrackurtick', new Symbol('\\rbrackurtick', '\u2990'));
+          delimiter.add('\\langledot', new Symbol('\\langledot', '\u2991'));
+          delimiter.add('\\rangledot', new Symbol('\\rangledot', '\u2992'));
+          delimiter.add('\\lparenless', new Symbol('\\lparenless', '\u2993'));
+          delimiter.add('\\rparengtr', new Symbol('\\rparengtr', '\u2994'));
+          delimiter.add('\\Lparengtr', new Symbol('\\Lparengtr', '\u2995'));
+          delimiter.add('\\Rparenless', new Symbol('\\Rparenless', '\u2996'));
+          delimiter.add('\\lblkbrbrak', new Symbol('\\lblkbrbrak', '\u2997'));
+          delimiter.add('\\rblkbrbrak', new Symbol('\\rblkbrbrak', '\u2998'));
+          delimiter.add('\\lvzigzag', new Symbol('\\lvzigzag', '\u29D8'));
+          delimiter.add('\\rvzigzag', new Symbol('\\rvzigzag', '\u29D9'));
+          delimiter.add('\\Lvzigzag', new Symbol('\\Lvzigzag', '\u29DA'));
+          delimiter.add('\\Rvzigzag', new Symbol('\\Rvzigzag', '\u29DB'));
+          delimiter.add('\\lcurvyangle', new Symbol('\\lcurvyangle', '\u29FC'));
+          delimiter.add('\\rcurvyangle', new Symbol('\\rcurvyangle', '\u29FD'));
+          delimiter.add('\\Vvert', new Symbol('\\Vvert', '\u2980'));
+    }     // ready
+  },      // startup
+
+  tex: {
+    packages: {'[+]': ['tagformat', 'Lwarp-macros', 'textmacros']},
+    tags: "ams",
+         tagformat: {
+             number: function (n) {
+                 if(MathJax.config.subequations==0)
+                     return(MathJax.config.section + n);
+                 else
+                     return(MathJax.config.section + String.fromCharCode(96+n));
+             },
+         },
+  }
+}
+</script>
+
+<script
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+></script>
+
+<script src="permalinks.js" defer></script>
+
+
+</head>
+<body>
+
+
+<a id="circuitikzmanual-autopage-8"></a>
+<div class="pagegrid">
+
+
+<nav class="topnavigation"><a href="index.html" class="linkhome" >
+Home</a></nav>
+<div class="sidetoccontainer">
+
+
+<nav class="sidetoc">
+
+
+<div class="sidetoctitle">
+
+<p>
+<span class="sidetocthetitle">CircuiTi<em>k</em>Z<br />
+version 1.8.6-unreleased (2026/02/10)</span>
+</p>
+
+<p>
+Contents
+</p>
+</div>
+
+
+<div class="sidetoccontents">
+
+<p>
+<a href="index.html" class="linkhome" >
+Home</a>
+</p>
+
+<p>
+<a href="node-Introduction.html#autosec-10" class="tocsection" >
+<span class="sectionnumber">1</span>&#x2003;Introduction</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-12" class="tocsubsection" >
+<span class="sectionnumber">1.1</span>&#x2003;About</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-13" class="tocsubsection" >
+<span class="sectionnumber">1.2</span>&#x2003;License</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-14" class="tocsubsection" >
+<span class="sectionnumber">1.3</span>&#x2003;Loading the package</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-23" class="tocsubsection" >
+<span class="sectionnumber">1.4</span>&#x2003;Installing a new version of the package.</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-25" class="tocsubsection" >
+<span class="sectionnumber">1.5</span>&#x2003;Requirements</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-26" class="tocsubsection" >
+<span class="sectionnumber">1.6</span>&#x2003;Incompatible packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-27" class="tocsubsection" >
+<span class="sectionnumber">1.7</span>&#x2003;Related and extension packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-31" class="tocsubsection" >
+<span class="sectionnumber">1.8</span>&#x2003;Known bugs and limitation</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-37" class="tocsubsection" >
+<span class="sectionnumber">1.9</span>&#x2003;Scale factor inaccuracies</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-48" class="tocsubsection" >
+<span class="sectionnumber">1.10</span>&#x2003;Incompatibilities between versions</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-56" class="tocsubsection" >
+<span class="sectionnumber">1.11</span>&#x2003;Feedback</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-57" class="tocsubsection" >
+<span class="sectionnumber">1.12</span>&#x2003;Package options</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-74" class="tocsection" >
+<span class="sectionnumber">2</span>&#x2003;Tutorials</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-76" class="tocsubsection" >
+<span class="sectionnumber">2.1</span>&#x2003;Getting started with CircuiTi<em>k</em>Z: a current shunt</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-112" class="tocsubsection" >
+<span class="sectionnumber">2.2</span>&#x2003;A non-inverting op-amp amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-148" class="tocsubsection" >
+<span class="sectionnumber">2.3</span>&#x2003;A transistor-based amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-182" class="tocsubsection" >
+<span class="sectionnumber">2.4</span>&#x2003;A logic circuit</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-222" class="tocsection" >
+<span class="sectionnumber">3</span>&#x2003;The components: usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-223" class="tocsubsection" >
+<span class="sectionnumber">3.1</span>&#x2003;Path-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-336" class="tocsubsection" >
+<span class="sectionnumber">3.2</span>&#x2003;Node-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-363" class="tocsubsection" >
+<span class="sectionnumber">3.3</span>&#x2003;Styling circuits and components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-404" class="tocsubsection" >
+<span class="sectionnumber">3.4</span>&#x2003;Subcircuits</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-456" class="tocsection" >
+<span class="sectionnumber">4</span>&#x2003;The components: list</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-457" class="tocsubsection" >
+<span class="sectionnumber">4.1</span>&#x2003;Grounds and supply voltages</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-510" class="tocsubsection" >
+<span class="sectionnumber">4.2</span>&#x2003;Resistive bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-673" class="tocsubsection" >
+<span class="sectionnumber">4.3</span>&#x2003;Capacitors and inductors: dynamical bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-767" class="tocsubsection" >
+<span class="sectionnumber">4.4</span>&#x2003;Diodes and such</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-949" class="tocsubsection" >
+<span class="sectionnumber">4.5</span>&#x2003;Sources and generators</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1157" class="tocsubsection" >
+<span class="sectionnumber">4.6</span>&#x2003;Instruments</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1290" class="tocsubsection" >
+<span class="sectionnumber">4.7</span>&#x2003;Mechanical Analogy</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1303" class="tocsubsection" >
+<span class="sectionnumber">4.8</span>&#x2003;Miscellaneous bipoles and symbols</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1398" class="tocsubsection" >
+<span class="sectionnumber">4.9</span>&#x2003;Multiple wires (buses)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1411" class="tocsubsection" >
+<span class="sectionnumber">4.10</span>&#x2003;Crossings</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1442" class="tocsubsection" >
+<span class="sectionnumber">4.11</span>&#x2003;Arrows (fake and real)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1477" class="tocsubsection" >
+<span class="sectionnumber">4.12</span>&#x2003;Terminal shapes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1497" class="tocsubsection" >
+<span class="sectionnumber">4.13</span>&#x2003;Connectors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1558" class="tocsubsection" >
+<span class="sectionnumber">4.14</span>&#x2003;Block diagram components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1852" class="tocsubsection" >
+<span class="sectionnumber">4.15</span>&#x2003;Transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2264" class="tocsubsection" >
+<span class="sectionnumber">4.16</span>&#x2003;Electronic Tubes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2355" class="tocsubsection" >
+<span class="sectionnumber">4.17</span>&#x2003;RF components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2409" class="tocsubsection" >
+<span class="sectionnumber">4.18</span>&#x2003;Electro-Mechanical Devices</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2433" class="tocsubsection" >
+<span class="sectionnumber">4.19</span>&#x2003;Double bipoles (transformers)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2534" class="tocsubsection" >
+<span class="sectionnumber">4.20</span>&#x2003;Amplifiers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2669" class="tocsubsection" >
+<span class="sectionnumber">4.21</span>&#x2003;Switches, buttons and jumpers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2878" class="tocsubsection" >
+<span class="sectionnumber">4.22</span>&#x2003;Logic gates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3148" class="tocsubsection" >
+<span class="sectionnumber">4.23</span>&#x2003;Flip-flops</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3204" class="tocsubsection" >
+<span class="sectionnumber">4.24</span>&#x2003;Multiplexer and de-multiplexer</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3312" class="tocsubsection" >
+<span class="sectionnumber">4.25</span>&#x2003;Chips (integrated circuits)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3355" class="tocsubsection" >
+<span class="sectionnumber">4.26</span>&#x2003;Seven segment displays</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3380" class="tocsection" >
+<span class="sectionnumber">5</span>&#x2003;Labels, voltages and currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3416" class="tocsubsection" >
+<span class="sectionnumber">5.1</span>&#x2003;Labels and Annotations</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3478" class="tocsubsection" >
+<span class="sectionnumber">5.2</span>&#x2003;Currents and voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3739" class="tocsubsection" >
+<span class="sectionnumber">5.3</span>&#x2003;Currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3816" class="tocsubsection" >
+<span class="sectionnumber">5.4</span>&#x2003;Flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3852" class="tocsubsection" >
+<span class="sectionnumber">5.5</span>&#x2003;Voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4085" class="tocsubsection" >
+<span class="sectionnumber">5.6</span>&#x2003;Changing the style of labels, voltages, and other text ornaments</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4095" class="tocsubsection" >
+<span class="sectionnumber">5.7</span>&#x2003;Accessing labels text nodes</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4107" class="tocsubsection" >
+<span class="sectionnumber">5.8</span>&#x2003;Advanced voltages, currents and flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4200" class="tocsubsection" >
+<span class="sectionnumber">5.9</span>&#x2003;Integration with siunitx</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4234" class="tocsection" >
+<span class="sectionnumber">6</span>&#x2003;Using bipoles in circuits</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4235" class="tocsubsection" >
+<span class="sectionnumber">6.1</span>&#x2003;Nodes (also called poles)</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4333" class="tocsubsection" >
+<span class="sectionnumber">6.2</span>&#x2003;Mirroring and Inverting</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4369" class="tocsubsection" >
+<span class="sectionnumber">6.3</span>&#x2003;Putting them together</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4380" class="tocsubsection" >
+<span class="sectionnumber">6.4</span>&#x2003;Line joins between Path Components</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4393" class="tocsection" >
+<span class="sectionnumber">7</span>&#x2003;Colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4418" class="tocsubsection" >
+<span class="sectionnumber">7.1</span>&#x2003;Shape colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4454" class="tocsubsection" >
+<span class="sectionnumber">7.2</span>&#x2003;Fill colors</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4498" class="tocsection" >
+<span class="sectionnumber">8</span>&#x2003;FAQ: Frequently asked questions</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4499" class="tocsubsection" >
+<span class="sectionnumber">8.1</span>&#x2003;Using named nodes in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4521" class="tocsubsection" >
+<span class="sectionnumber">8.2</span>&#x2003;Using dashed (or colored) wires in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4558" class="tocsubsection" >
+<span class="sectionnumber">8.3</span>&#x2003;Errors when externalizing pictures</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4561" class="tocsubsection" >
+<span class="sectionnumber">8.4</span>&#x2003;Labels, voltages and currents woes</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4567" class="tocsubsection" >
+<span class="sectionnumber">8.5</span>&#x2003;Global scaling and rotating</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4568" class="tocsubsection" >
+<span class="sectionnumber">8.6</span>&#x2003;Tunable components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4576" class="tocsection" >
+<span class="sectionnumber">9</span>&#x2003;Defining new components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4579" class="tocsubsection" >
+<span class="sectionnumber">9.1</span>&#x2003;Suggested setup</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4590" class="tocsubsection" >
+<span class="sectionnumber">9.2</span>&#x2003;Path-style component</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4615" class="tocsubsection" >
+<span class="sectionnumber">9.3</span>&#x2003;Node-style component</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4625" class="tocsection" >
+<span class="sectionnumber">10</span>&#x2003;Examples</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4626" class="tocsubsection" >
+<span class="sectionnumber">10.1</span>&#x2003;A red diode</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4632" class="tocsubsection" >
+<span class="sectionnumber">10.2</span>&#x2003;Using the (experimental) <kbd>siunitx</kbd> syntax</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4643" class="tocsubsection" >
+<span class="sectionnumber">10.3</span>&#x2003;Photodiodes</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4649" class="tocsubsection" >
+<span class="sectionnumber">10.4</span>&#x2003;A Sallen-Key cell</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4655" class="tocsubsection" >
+<span class="sectionnumber">10.5</span>&#x2003;Mixing circuits and graphs</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4661" class="tocsubsection" >
+<span class="sectionnumber">10.6</span>&#x2003;RF circuit</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4667" class="tocsubsection" >
+<span class="sectionnumber">10.7</span>&#x2003;A styled low noise input stage</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4674" class="tocsubsection" >
+<span class="sectionnumber">10.8</span>&#x2003;An example with the <kbd>compatibility</kbd> option</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4676" class="tocsubsection" >
+<span class="sectionnumber">10.9</span>&#x2003;3-phases block schematic</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4682" class="tocsubsection" >
+<span class="sectionnumber">10.10</span>&#x2003;Using components in <kbd>pic</kbd>s (since <kbd>v1.8.0</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4688" class="tocsubsection" >
+<span class="sectionnumber">10.11</span>&#x2003;Automatic user-defined voltages, currents and flows (since <kbd>v1.8.5</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4697" class="tocsection" >
+<span class="sectionnumber">11</span>&#x2003;Changelog and Release Notes</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4701" class="tocsection" >
+Index</a>
+</p>
+
+
+</div>
+
+</nav>
+
+</div>
+
+
+<main class="bodycontainer">
+
+
+<section class="textbody">
+
+<h1>CircuiTi<em>k</em>Z<br />
+version 1.8.6-unreleased (2026/02/10)</h1>
+
+<!--MathJax customizations:-->
+<div data-nosnippet
+    style="display:none"
+>
+
+\(\newcommand{\footnotename}{footnote}\)
+
+\(\def \LWRfootnote {1}\)
+
+\(\newcommand {\footnote }[2][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\newcommand {\footnotemark }[1][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\let \LWRorighspace \hspace \)
+
+\(\renewcommand {\hspace }{\ifstar \LWRorighspace \LWRorighspace }\)
+
+\(\newcommand {\TextOrMath }[2]{#2}\)
+
+\(\newcommand {\mathnormal }[1]{{#1}}\)
+
+\(\newcommand \ensuremath [1]{#1}\)
+
+\(\newcommand {\LWRframebox }[2][]{\fbox {#2}} \newcommand {\framebox }[1][]{\LWRframebox } \)
+
+\(\newcommand {\setlength }[2]{}\)
+
+\(\newcommand {\addtolength }[2]{}\)
+
+\(\newcommand {\setcounter }[2]{}\)
+
+\(\newcommand {\addtocounter }[2]{}\)
+
+\(\newcommand {\arabic }[1]{}\)
+
+\(\newcommand {\number }[1]{}\)
+
+\(\newcommand {\noalign }[1]{\text {#1}\notag \\}\)
+
+\(\newcommand {\cline }[1]{}\)
+
+\(\newcommand {\directlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\luatexdirectlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\protect }{}\)
+
+\(\def \LWRabsorbnumber #1 {}\)
+
+\(\def \LWRabsorbquotenumber &quot;#1 {}\)
+
+\(\newcommand {\LWRabsorboption }[1][]{}\)
+
+\(\newcommand {\LWRabsorbtwooptions }[1][]{\LWRabsorboption }\)
+
+\(\def \mathchar {\ifnextchar &quot;\LWRabsorbquotenumber \LWRabsorbnumber }\)
+
+\(\def \mathcode #1={\mathchar }\)
+
+\(\let \delcode \mathcode \)
+
+\(\let \delimiter \mathchar \)
+
+\(\def \oe {\unicode {x0153}}\)
+
+\(\def \OE {\unicode {x0152}}\)
+
+\(\def \ae {\unicode {x00E6}}\)
+
+\(\def \AE {\unicode {x00C6}}\)
+
+\(\def \aa {\unicode {x00E5}}\)
+
+\(\def \AA {\unicode {x00C5}}\)
+
+\(\def \o {\unicode {x00F8}}\)
+
+\(\def \O {\unicode {x00D8}}\)
+
+\(\def \l {\unicode {x0142}}\)
+
+\(\def \L {\unicode {x0141}}\)
+
+\(\def \ss {\unicode {x00DF}}\)
+
+\(\def \SS {\unicode {x1E9E}}\)
+
+\(\def \dag {\unicode {x2020}}\)
+
+\(\def \ddag {\unicode {x2021}}\)
+
+\(\def \P {\unicode {x00B6}}\)
+
+\(\def \copyright {\unicode {x00A9}}\)
+
+\(\def \pounds {\unicode {x00A3}}\)
+
+\(\let \LWRref \ref \)
+
+\(\renewcommand {\ref }{\ifstar \LWRref \LWRref }\)
+
+\( \newcommand {\multicolumn }[3]{#3}\)
+
+\(\require {textcomp}\)
+
+\(\newcommand {\tothe }[1]{^{#1}}\)
+
+\(\newcommand {\raiseto }[2]{{#2}^{#1}}\)
+
+\(\newcommand {\LWRsiunitxEND }{}\)
+
+\(\def \LWRsiunitxang #1;#2;#3;#4\LWRsiunitxEND {\ifblank {#1}{}{\num {#1}\degree }\ifblank {#2}{}{\num {#2}^{\unicode {x2032}}}\ifblank {#3}{}{\num {#3}^{\unicode {x2033}}}}\)
+
+\(\newcommand {\ang }[2][]{\LWRsiunitxang #2;;;\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxdistribunit {}\)
+
+\(\newcommand {\LWRsiunitxENDTWO }{}\)
+
+\(\def \LWRsiunitxprintdecimalsubtwo #1,#2,#3\LWRsiunitxENDTWO {\ifblank {#1}{0}{\mathrm {#1}}\ifblank {#2}{}{{\LWRsiunitxdecimal }\mathrm {#2}}}\)
+
+\(\def \LWRsiunitxprintdecimalsub #1.#2.#3\LWRsiunitxEND {\LWRsiunitxprintdecimalsubtwo #1,,\LWRsiunitxENDTWO \ifblank {#2}{}{{\LWRsiunitxdecimal }\LWRsiunitxprintdecimalsubtwo #2,,\LWRsiunitxENDTWO }}\)
+
+\(\newcommand {\LWRsiunitxprintdecimal }[1]{\LWRsiunitxprintdecimalsub #1...\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxnumplus #1+#2+#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxprintdecimal {#1}}{\ifblank {#1}{\LWRsiunitxprintdecimal {#2}}{\LWRsiunitxprintdecimal {#1}\unicode {x02B}\LWRsiunitxprintdecimal {#2}}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumminus #1-#2-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumplus #1+++\LWRsiunitxEND }{\ifblank {#1}{}{\LWRsiunitxprintdecimal {#1}}\unicode {x02212}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpmmacro #1\pm #2\pm #3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumminus #1---\LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpm #1+-#2+-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpmmacro #1\pm \pm \pm \LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\newcommand {\LWRsiunitxnumscientific }[2]{\ifblank {#1}{}{\ifstrequal {#1}{-}{-}{\LWRsiunitxprintdecimal {#1}\times }}10^{\LWRsiunitxprintdecimal {#2}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumD #1D#2D#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpm #1+-+-\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumd #1d#2d#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumD #1DDD\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumE #1E#2E#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumd #1ddd\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnume #1e#2e#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumE #1EEE\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumx #1x#2x#3x#4\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnume #1eee\LWRsiunitxEND }{\ifblank {#3}{\LWRsiunitxnume #1eee\LWRsiunitxEND \times \LWRsiunitxnume #2eee\LWRsiunitxEND }{\LWRsiunitxnume #1eee\LWRsiunitxEND
+\times \LWRsiunitxnume #2eee\LWRsiunitxEND \times \LWRsiunitxnume #3eee\LWRsiunitxEND }}}\)
+
+\(\newcommand {\num }[2][]{\LWRsiunitxnumx #2xxxxx\LWRsiunitxEND }\)
+
+\(\newcommand {\si }[2][]{\mathrm {\gsubstitute {#2}{~}{\,}}}\)
+
+\(\def \LWRsiunitxSIopt #1[#2]#3{\def \LWRsiunitxdistribunit {\,\si {#3}}{#2}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\LWRsiunitxSI }[2]{\def \LWRsiunitxdistribunit {\,\si {#2}}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\SI }[2][]{\ifnextchar [{\LWRsiunitxSIopt {#2}}{\LWRsiunitxSI {#2}}}\)
+
+\(\newcommand {\numlist }[2][]{\text {#2}}\)
+
+\(\newcommand {\numrange }[3][]{\num {#2}\ \LWRsiunitxrangephrase \ \num {#3}}\)
+
+\(\newcommand {\SIlist }[3][]{\text {#2}\,\si {#3}}\)
+
+\(\newcommand {\SIrange }[4][]{\num {#2}\,#4\ \LWRsiunitxrangephrase \ \num {#3}\,#4}\)
+
+\(\newcommand {\tablenum }[2][]{\mathrm {#2}}\)
+
+\(\newcommand {\ampere }{\mathrm {A}}\)
+
+\(\newcommand {\candela }{\mathrm {cd}}\)
+
+\(\newcommand {\kelvin }{\mathrm {K}}\)
+
+\(\newcommand {\kilogram }{\mathrm {kg}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\mole }{\mathrm {mol}}\)
+
+\(\newcommand {\second }{\mathrm {s}}\)
+
+\(\newcommand {\becquerel }{\mathrm {Bq}}\)
+
+\(\newcommand {\degreeCelsius }{\unicode {x2103}}\)
+
+\(\newcommand {\coulomb }{\mathrm {C}}\)
+
+\(\newcommand {\farad }{\mathrm {F}}\)
+
+\(\newcommand {\gray }{\mathrm {Gy}}\)
+
+\(\newcommand {\hertz }{\mathrm {Hz}}\)
+
+\(\newcommand {\henry }{\mathrm {H}}\)
+
+\(\newcommand {\joule }{\mathrm {J}}\)
+
+\(\newcommand {\katal }{\mathrm {kat}}\)
+
+\(\newcommand {\lumen }{\mathrm {lm}}\)
+
+\(\newcommand {\lux }{\mathrm {lx}}\)
+
+\(\newcommand {\newton }{\mathrm {N}}\)
+
+\(\newcommand {\ohm }{\mathrm {\Omega }}\)
+
+\(\newcommand {\pascal }{\mathrm {Pa}}\)
+
+\(\newcommand {\radian }{\mathrm {rad}}\)
+
+\(\newcommand {\siemens }{\mathrm {S}}\)
+
+\(\newcommand {\sievert }{\mathrm {Sv}}\)
+
+\(\newcommand {\steradian }{\mathrm {sr}}\)
+
+\(\newcommand {\tesla }{\mathrm {T}}\)
+
+\(\newcommand {\volt }{\mathrm {V}}\)
+
+\(\newcommand {\watt }{\mathrm {W}}\)
+
+\(\newcommand {\weber }{\mathrm {Wb}}\)
+
+\(\newcommand {\day }{\mathrm {d}}\)
+
+\(\newcommand {\degree }{\mathrm {^\circ }}\)
+
+\(\newcommand {\hectare }{\mathrm {ha}}\)
+
+\(\newcommand {\hour }{\mathrm {h}}\)
+
+\(\newcommand {\litre }{\mathrm {l}}\)
+
+\(\newcommand {\liter }{\mathrm {L}}\)
+
+\(\newcommand {\arcminute }{^\prime }\)
+
+\(\newcommand {\minute }{\mathrm {min}}\)
+
+\(\newcommand {\arcsecond }{^{\prime \prime }}\)
+
+\(\newcommand {\tonne }{\mathrm {t}}\)
+
+\(\newcommand {\astronomicalunit }{au}\)
+
+\(\newcommand {\atomicmassunit }{u}\)
+
+\(\newcommand {\bohr }{\mathit {a}_0}\)
+
+\(\newcommand {\clight }{\mathit {c}_0}\)
+
+\(\newcommand {\dalton }{\mathrm {D}_\mathrm {a}}\)
+
+\(\newcommand {\electronmass }{\mathit {m}_{\mathrm {e}}}\)
+
+\(\newcommand {\electronvolt }{\mathrm {eV}}\)
+
+\(\newcommand {\elementarycharge }{\mathit {e}}\)
+
+\(\newcommand {\hartree }{\mathit {E}_{\mathrm {h}}}\)
+
+\(\newcommand {\planckbar }{\mathit {\unicode {x210F}}}\)
+
+\(\newcommand {\angstrom }{\mathrm {\unicode {x212B}}}\)
+
+\(\let \LWRorigbar \bar \)
+
+\(\newcommand {\bar }{\mathrm {bar}}\)
+
+\(\newcommand {\barn }{\mathrm {b}}\)
+
+\(\newcommand {\bel }{\mathrm {B}}\)
+
+\(\newcommand {\decibel }{\mathrm {dB}}\)
+
+\(\newcommand {\knot }{\mathrm {kn}}\)
+
+\(\newcommand {\mmHg }{\mathrm {mmHg}}\)
+
+\(\newcommand {\nauticalmile }{\mathrm {M}}\)
+
+\(\newcommand {\neper }{\mathrm {Np}}\)
+
+\(\newcommand {\yocto }{\mathrm {y}}\)
+
+\(\newcommand {\zepto }{\mathrm {z}}\)
+
+\(\newcommand {\atto }{\mathrm {a}}\)
+
+\(\newcommand {\femto }{\mathrm {f}}\)
+
+\(\newcommand {\pico }{\mathrm {p}}\)
+
+\(\newcommand {\nano }{\mathrm {n}}\)
+
+\(\newcommand {\micro }{\mathrm {\unicode {x00B5}}}\)
+
+\(\newcommand {\milli }{\mathrm {m}}\)
+
+\(\newcommand {\centi }{\mathrm {c}}\)
+
+\(\newcommand {\deci }{\mathrm {d}}\)
+
+\(\newcommand {\deca }{\mathrm {da}}\)
+
+\(\newcommand {\hecto }{\mathrm {h}}\)
+
+\(\newcommand {\kilo }{\mathrm {k}}\)
+
+\(\newcommand {\mega }{\mathrm {M}}\)
+
+\(\newcommand {\giga }{\mathrm {G}}\)
+
+\(\newcommand {\tera }{\mathrm {T}}\)
+
+\(\newcommand {\peta }{\mathrm {P}}\)
+
+\(\newcommand {\exa }{\mathrm {E}}\)
+
+\(\newcommand {\zetta }{\mathrm {Z}}\)
+
+\(\newcommand {\yotta }{\mathrm {Y}}\)
+
+\(\newcommand {\percent }{\mathrm {\%}}\)
+
+\(\newcommand {\meter }{\mathrm {m}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\gram }{\mathrm {g}}\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\of }[1]{_{\mathrm {#1}}}\)
+
+\(\newcommand {\squared }{^2}\)
+
+\(\newcommand {\square }[1]{\mathrm {#1}^2}\)
+
+\(\newcommand {\cubed }{^3}\)
+
+\(\newcommand {\cubic }[1]{\mathrm {#1}^3}\)
+
+\(\newcommand {\per }{\,\mathrm {/}}\)
+
+\(\newcommand {\celsius }{\unicode {x2103}}\)
+
+\(\newcommand {\fg }{\femto \gram }\)
+
+\(\newcommand {\pg }{\pico \gram }\)
+
+\(\newcommand {\ng }{\nano \gram }\)
+
+\(\newcommand {\ug }{\micro \gram }\)
+
+\(\newcommand {\mg }{\milli \gram }\)
+
+\(\newcommand {\g }{\gram }\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\amu }{\mathrm {u}}\)
+
+\(\newcommand {\pm }{\pico \metre }\)
+
+\(\newcommand {\nm }{\nano \metre }\)
+
+\(\newcommand {\um }{\micro \metre }\)
+
+\(\newcommand {\mm }{\milli \metre }\)
+
+\(\newcommand {\cm }{\centi \metre }\)
+
+\(\newcommand {\dm }{\deci \metre }\)
+
+\(\newcommand {\m }{\metre }\)
+
+\(\newcommand {\km }{\kilo \metre }\)
+
+\(\newcommand {\as }{\atto \second }\)
+
+\(\newcommand {\fs }{\femto \second }\)
+
+\(\newcommand {\ps }{\pico \second }\)
+
+\(\newcommand {\ns }{\nano \second }\)
+
+\(\newcommand {\us }{\micro \second }\)
+
+\(\newcommand {\ms }{\milli \second }\)
+
+\(\newcommand {\s }{\second }\)
+
+\(\newcommand {\fmol }{\femto \mol }\)
+
+\(\newcommand {\pmol }{\pico \mol }\)
+
+\(\newcommand {\nmol }{\nano \mol }\)
+
+\(\newcommand {\umol }{\micro \mol }\)
+
+\(\newcommand {\mmol }{\milli \mol }\)
+
+\(\newcommand {\mol }{\mol }\)
+
+\(\newcommand {\kmol }{\kilo \mol }\)
+
+\(\newcommand {\pA }{\pico \ampere }\)
+
+\(\newcommand {\nA }{\nano \ampere }\)
+
+\(\newcommand {\uA }{\micro \ampere }\)
+
+\(\newcommand {\mA }{\milli \ampere }\)
+
+\(\newcommand {\A }{\ampere }\)
+
+\(\newcommand {\kA }{\kilo \ampere }\)
+
+\(\newcommand {\ul }{\micro \litre }\)
+
+\(\newcommand {\ml }{\milli \litre }\)
+
+\(\newcommand {\l }{\litre }\)
+
+\(\newcommand {\hl }{\hecto \litre }\)
+
+\(\newcommand {\uL }{\micro \liter }\)
+
+\(\newcommand {\mL }{\milli \liter }\)
+
+\(\newcommand {\L }{\liter }\)
+
+\(\newcommand {\hL }{\hecto \liter }\)
+
+\(\newcommand {\mHz }{\milli \hertz }\)
+
+\(\newcommand {\Hz }{\hertz }\)
+
+\(\newcommand {\kHz }{\kilo \hertz }\)
+
+\(\newcommand {\MHz }{\mega \hertz }\)
+
+\(\newcommand {\GHz }{\giga \hertz }\)
+
+\(\newcommand {\THz }{\tera \hertz }\)
+
+\(\newcommand {\mN }{\milli \newton }\)
+
+\(\newcommand {\N }{\newton }\)
+
+\(\newcommand {\kN }{\kilo \newton }\)
+
+\(\newcommand {\MN }{\mega \newton }\)
+
+\(\newcommand {\Pa }{\pascal }\)
+
+\(\newcommand {\kPa }{\kilo \pascal }\)
+
+\(\newcommand {\MPa }{\mega \pascal }\)
+
+\(\newcommand {\GPa }{\giga \pascal }\)
+
+\(\newcommand {\mohm }{\milli \ohm }\)
+
+\(\newcommand {\kohm }{\kilo \ohm }\)
+
+\(\newcommand {\Mohm }{\mega \ohm }\)
+
+\(\newcommand {\pV }{\pico \volt }\)
+
+\(\newcommand {\nV }{\nano \volt }\)
+
+\(\newcommand {\uV }{\micro \volt }\)
+
+\(\newcommand {\mV }{\milli \volt }\)
+
+\(\newcommand {\V }{\volt }\)
+
+\(\newcommand {\kV }{\kilo \volt }\)
+
+\(\newcommand {\W }{\watt }\)
+
+\(\newcommand {\uW }{\micro \watt }\)
+
+\(\newcommand {\mW }{\milli \watt }\)
+
+\(\newcommand {\kW }{\kilo \watt }\)
+
+\(\newcommand {\MW }{\mega \watt }\)
+
+\(\newcommand {\GW }{\giga \watt }\)
+
+\(\newcommand {\J }{\joule }\)
+
+\(\newcommand {\uJ }{\micro \joule }\)
+
+\(\newcommand {\mJ }{\milli \joule }\)
+
+\(\newcommand {\kJ }{\kilo \joule }\)
+
+\(\newcommand {\eV }{\electronvolt }\)
+
+\(\newcommand {\meV }{\milli \electronvolt }\)
+
+\(\newcommand {\keV }{\kilo \electronvolt }\)
+
+\(\newcommand {\MeV }{\mega \electronvolt }\)
+
+\(\newcommand {\GeV }{\giga \electronvolt }\)
+
+\(\newcommand {\TeV }{\tera \electronvolt }\)
+
+\(\newcommand {\kWh }{\kilo \watt \hour }\)
+
+\(\newcommand {\F }{\farad }\)
+
+\(\newcommand {\fF }{\femto \farad }\)
+
+\(\newcommand {\pF }{\pico \farad }\)
+
+\(\newcommand {\K }{\mathrm {K}}\)
+
+\(\newcommand {\dB }{\mathrm {dB}}\)
+
+\(\newcommand {\kibi }{\mathrm {Ki}}\)
+
+\(\newcommand {\mebi }{\mathrm {Mi}}\)
+
+\(\newcommand {\gibi }{\mathrm {Gi}}\)
+
+\(\newcommand {\tebi }{\mathrm {Ti}}\)
+
+\(\newcommand {\pebi }{\mathrm {Pi}}\)
+
+\(\newcommand {\exbi }{\mathrm {Ei}}\)
+
+\(\newcommand {\zebi }{\mathrm {Zi}}\)
+
+\(\newcommand {\yobi }{\mathrm {Yi}}\)
+
+\(\let \unit \si \)
+
+\(\let \qty \SI \)
+
+\(\let \qtylist \SIlist \)
+
+\(\let \qtyrange \SIrange \)
+
+\(\let \numproduct \num \)
+
+\(\let \qtyproduct \SI \)
+
+\(\let \complexnum \num \)
+
+\(\newcommand {\complexqty }[3][]{(\complexnum {#2})\si {#3}}\)
+
+\(\newcommand {\toprule }[1][]{\hline }\)
+
+\(\let \midrule \toprule \)
+
+\(\let \bottomrule \toprule \)
+
+\(\def \LWRbooktabscmidruleparen (#1)#2{}\)
+
+\(\newcommand {\LWRbooktabscmidrulenoparen }[1]{}\)
+
+\(\newcommand {\cmidrule }[1][]{\ifnextchar (\LWRbooktabscmidruleparen \LWRbooktabscmidrulenoparen }\)
+
+\(\newcommand {\morecmidrules }{}\)
+
+\(\newcommand {\specialrule }[3]{\hline }\)
+
+\(\newcommand {\addlinespace }[1][]{}\)
+\(\require {upgreek}\)
+
+\(\def \LWRsiunitxrangephrase {\TextOrMath   { }{\ }\protect \mbox {to}\TextOrMath   { }{\ }}\)
+
+\(\def \LWRsiunitxdecimal {.}\)
+
+</div>
+
+<!--
+...... section Introduction ......
+-->
+<h4 id="autosec-10"><span class="sectionnumber">1&#x2003;</span>Introduction</h4>
+<a id="circuitikzmanual-autopage-10"></a>
+<a id="circuitikzmanual-autofile-1"></a>
+
+<a id="sec:introduction"></a>
+
+<p>
+&#x2003;&#x2003;
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:242pt ; ">
+
+<a id="circuitikzmanual-autopage-11"></a>
+
+<p>
+Lorenzo and Mirella, 57 years ago, started a trip that eventually lead to a lot of things — among them, CircuiTi<em>k</em>Z <kbd>v1.0</kbd>.
+</p>
+
+<p>
+In loving memory — R.&#x202f;G., 2020-02-04
+</p>
+
+
+</div>
+<!--
+...... subsection About ......
+-->
+<h5 id="autosec-12"><span class="sectionnumber">1.1&#x2003;</span>About</h5>
+<a id="circuitikzmanual-autopage-12"></a>
+
+
+<a id="sec:about"></a>
+
+<p>
+CircuiTi<em>k</em>Z was initiated by Massimo Redaelli in 2007, who was working as a research assistant at the Polytechnic University of Milan, Italy, and needed a tool for creating exercises and exams. After he left University in 2010 the development of
+CircuiTi<em>k</em>Z slowed down, since <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span> is mainly established in the academic world. In 2015 Stefan Lindner
+and Stefan Erhardt, both working as research assistants at the University of Erlangen-Nu&#x0308;rnberg, Germany, joined the team and now maintain the project together with the initial author. In 2018 Romano Giannetti, full professor of Electronics at Comillas
+Pontifical University of Madrid, joined the team.
+</p>
+
+<p>
+The use of CircuiTi<em>k</em>Z is, of course, not limited to academic teaching. The package gets widely used by engineers for typesetting electronic circuits for articles and publications all over the world.
+</p>
+<!--
+...... subsection License ......
+-->
+<h5 id="autosec-13"><span class="sectionnumber">1.2&#x2003;</span>License</h5>
+<a id="circuitikzmanual-autopage-13"></a>
+
+
+<a id="sec:license"></a>
+
+<p>
+Copyright © 2007–2026 by Massimo Redaelli, 2013–2026 by Stefan Erhardt, 2015–2026 by Stefan Lindner, and 2018–2026 by Romano Giannetti. This package is author-maintained. Permission is granted to copy, distribute and/or modify this software under the terms of
+the <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span> Project Public License, version 1.3.1, or the GNU Public License. This software is provided “as is”,
+without warranty of any kind, either expressed or implied, including, but not limited to, the implied warranties of merchantability and fitness for a particular purpose.
+</p>
+<!--
+...... subsection Loading the package ......
+-->
+<h5 id="autosec-14"><span class="sectionnumber">1.3&#x2003;</span>Loading the package</h5>
+<a id="circuitikzmanual-autopage-14"></a>
+
+
+<a id="sec:loading-the-package"></a>
+
+<figure id="autoid-1" class="table ">
+<div class="center">
+<table>
+
+<tr style="display:none"><th>.</th></tr>
+
+<tr class="tbrule">
+<td class="tdl"><span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span></td>
+<td class="tdl">Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t<sup>1</sup></td>
+</tr>
+
+<tr class="hline">
+<td class="tdl"><span class="verb">\usepackage{circuitikz}</span></td>
+<td class="tdl"><span class="verb">\usemodule[circuitikz]</span></td>
+</tr>
+
+<tr class="tbrule" aria-hidden="true">
+<td class="tdl"></td>
+<td class="tdl"></td>
+</tr>
+</table>
+
+</div>
+
+</figure>
+
+<a id="circuitikzmanual-autopage-16"></a>
+
+<p>
+
+</p>
+
+<p>
+Ti<em>k</em>Z will be automatically loaded; additionally, the Ti<em>k</em>Z libraries <kbd>calc</kbd>, <kbd>arrows.meta</kbd>, <kbd>bending</kbd>, and <kbd>fpu</kbd> are loaded (the last one is used only on demand).
+</p>
+
+<p>
+CircuiTi<em>k</em>Z commands are just Ti<em>k</em>Z commands, so a minimum usage example would be:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-17"></a>
+<pre class="programlisting">
+\tikz \draw (0,0) to[R=$R_1$] (2,0);
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-19"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-2"
+    class="lateximagesource"
+><!--
+R1
+--><img
+    src="circuitikzmanual-images/image-2.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+There is really no support for Plain TeX — the maintainers are willing to consider patches if somebody is interested.
+</p>
+<div role="note" class="footnotes">
+
+<a id="circuitikzmanual-autopage-22"></a>
+<p>
+<sup>1</sup>&nbsp;Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t support was added mostly thanks to Mojca Miklavec and Aditya Mahajan. <b>Please notice</b> that since Con<span
+class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t switched to the new <kbd>lmtx</kbd> engine (March 2023), there can be problems to compile Ti<em>k</em>Z with some version; in May 2023 the problem has
+been fixed. Please check <a href="https://github.com/circuitikz/circuitikz/issues/706" target="_blank" >this issue</a> for details.
+</p>
+
+
+</div>
+<!--
+...... subsection Installing a new version of the package. ......
+-->
+<h5 id="autosec-23"><span class="sectionnumber">1.4&#x2003;</span>Installing a new version of the package.</h5>
+<a id="circuitikzmanual-autopage-23"></a>
+
+
+<a id="sec:installing-a-new"></a>
+
+<p>
+The stable version of the package should come with your <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span> distribution. Downloading the files from CTAN and
+installing them locally is, unfortunately, a distribution-dependent task and sometimes not so trivial. If you search for <kbd>local texmf tree</kbd> and the name of your distribution on <a href="https://tex.stackexchange.com/" target="_blank"
+>https://tex.stackexchange.com/</a> you will find a lot of hints.
+</p>
+
+<p>
+Anyway, the easiest way of using whichever version of CircuiTi<em>k</em>Z is to point to the GitHub page <a href="https://circuitikz.github.io/circuitikz/" target="_blank" >https://circuitikz.github.io/circuitikz/</a> of the project, and download the version
+you want. You will download a simple (biggish) file, called <kbd>circuitikzgit.sty</kbd>.
+</p>
+
+<p>
+Now you can just put this file in your local <kbd>texmf</kbd> tree, if you have one, or simply adding it into the same directory where your main file resides, and then use
+</p>
+<pre class="programlisting">
+   \usepackage[...options...]{circuitikzgit}
+ </pre>
+
+<p>
+instead of <kbd>circuitikz</kbd>. This is also advantageous for “future resilience”; the authors try hard not to break backward compatibility with new versions, but sometimes, things happen.
+</p>
+<!--
+...... subsection Requirements ......
+-->
+<h5 id="autosec-25"><span class="sectionnumber">1.5&#x2003;</span>Requirements</h5>
+<a id="circuitikzmanual-autopage-25"></a>
+
+
+<a id="sec:requirements"></a>
+
+<ul class="itemize" style="list-style-type:none">
+
+<li>
+<p>
+<span class="listmarker">•</span> <kbd>latex</kbd> (if using it), version from <kbd>2019-10-01</kbd> (better from <kbd>2020-10-01</kbd>);
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <kbd>tikz</kbd>, version \({}\ge {}\)<kbd>3.1.5b</kbd> (it <em>should</em> work with any version from 3.1.4b and up, but better use a newer one);
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <kbd>xstring</kbd>, not older than 2009/03/13;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <kbd>siunitx</kbd>, if using <kbd>siunitx</kbd> option (better <kbd>v2</kbd> or newer).
+</p>
+</li>
+</ul>
+
+<p>
+A similar approach for Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t is available, with the file <kbd>t-circuitikzgit.tex</kbd>; the compatibility in this case is not guaranteed, but provided
+on a <em>best effort</em> base.
+</p>
+
+<p>
+This manual has been typeset with CircuiTi<em>k</em>Z 1.8.6-unreleased (2026/02/10) on Ti<em>k</em>Z 3.1.11a (2025-08-29).
+</p>
+<!--
+...... subsection Incompatible packages ......
+-->
+<h5 id="autosec-26"><span class="sectionnumber">1.6&#x2003;</span>Incompatible packages</h5>
+<a id="circuitikzmanual-autopage-26"></a>
+
+
+<a id="sec:incompatible-packages"></a>
+
+<p>
+Ti<em>k</em>Z’s own <kbd>circuit</kbd> library, which was based on CircuiTi<em>k</em>Z, (re?)defines several styles used by this library. In order to have them work together you can use the <kbd>compatibility</kbd> package option, which basically prefixes the
+names of all CircuiTi<em>k</em>Z <kbd>to[]</kbd> styles with an asterisk.
+</p>
+
+<p>
+So, if loaded with said option, one must write <span class="verb">(0,0) to[*R] (2,0)</span> and, for transistors on a path, <span class="verb">(0,0) to[*Tnmos] (2,0)</span>, and so on (but <span class="verb">(0,0) node[nmos] {}</span>). See example at
+page&nbsp;(page&nbsp;for section&nbsp;<a href="node-Examples.html#ex:compatibility">10.8</a>).
+</p>
+
+<p>
+Anyway, the compatibility code is a <em>best effort</em> task and only very lightly tested — the authors advice is to choose one or the other, without mixing them.
+</p>
+
+<p>
+Another thing to take into account is that any Ti<em>k</em>Z figure (and CircuiTi<em>k</em>Z ones qualify) <b>will</b> have problems if you use the <kbd>babel</kbd> package with a language that changes active characters (most of them). The solution is normally to
+add the line <span class="verb">\usetikzlibrary{babel}</span> in your preamble, after loading Ti<em>k</em>Z or CircuiTi<em>k</em>Z. This will normally solve the problem; some languages also require using <span class="verb">\deactivatequoting</span> or the
+option <kbd>shorthands=off</kbd> for <kbd>babel</kbd>. Please check the documentation of Ti<em>k</em>Z or this question <a href="https://tex.stackexchange.com/questions/166772/problem-with-babel-and-tikz-using-draw" target="_blank" >on <span
+class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span> stackexchange site</a>.
+</p>
+
+<p>
+Finally, the Ti<em>k</em>Z library <kbd>bending</kbd> is loaded by the package, and its effects (the bending of the arrows on curved paths) will also affect the rest of your drawings.
+</p>
+<!--
+...... subsection Related and extension packages ......
+-->
+<h5 id="autosec-27"><span class="sectionnumber">1.7&#x2003;</span>Related and extension packages</h5>
+<a id="circuitikzmanual-autopage-27"></a>
+
+
+<a id="sec:related-and-extension"></a>
+<!--
+...... subsubsection Related packages ......
+-->
+<h6 id="autosec-28"><span class="sectionnumber">1.7.1&#x2003;</span>Related packages</h6>
+<a id="circuitikzmanual-autopage-28"></a>
+
+
+<a id="sec:related-packages"></a>
+
+<p>
+At the Friedrich-Alexander-Universita&#x0308;t, a group of developers are implementing a graphical user interface to draw circuits with CircuiTi<em>k</em>Z. You can find more information <a href="https://github.com/circuitikz/circuitikz/issues/782"
+target="_blank" >in this GitHub issue</a> or, better, on their <a href="https://circuit2tikz.tf.fau.de/" target="_blank" >main site</a>. You can try out the GUI <a href="https://circuit2tikz.tf.fau.de/designer/" target="_blank" >here</a>.
+</p>
+<!--
+...... subsubsection Extension packages ......
+-->
+<h6 id="autosec-29"><span class="sectionnumber">1.7.2&#x2003;</span>Extension packages</h6>
+<a id="circuitikzmanual-autopage-29"></a>
+
+
+<a id="sec:extension-packages"></a>
+
+<p>
+CircuiTi<em>k</em>Z is meant to be, as much as possible, format-agnostic (which means that it can be used from <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span
+class="latexlogosub">e</span>X</span></span>, plain <span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span> and&nbsp;Con<span class="latexlogofont"><span class="latexlogo">T<span
+class="latexlogosub">e</span>X</span></span>t). It is growing in functionality and components, but not everything can be added to the package. In this section, there is a list of packages, available at CTAN, that extend or enhance CircuiTi<em>k</em>Z but are
+distributed separately.<sup>2</sup>
+</p>
+
+<dl class="description" >
+
+<dt><span class="listmarker"><a href="https://ctan.org/pkg/tikzquads" target="_blank" >tikzquads</a></span></dt>
+<dd>
+<p>
+is a package for easily drawing the equivalent electrical circuits for quadrupoles and similar blocks. <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span> only.
+</p>
+
+</dd>
+<dt><span class="listmarker"><a href="https://ctan.org/pkg/tikzdotncross" target="_blank" >tikzdotncross</a></span></dt>
+<dd>
+<p>
+offers a few alternative ways for declaring and marking coordinates and drawing a line with "jumps" over an already existent path<sup>3</sup>. <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span
+class="latexlogosub">e</span>X</span></span> only.
+</p>
+</dd>
+</dl>
+<div role="note" class="footnotes">
+
+<a id="circuitikzmanual-autopage-30"></a>
+<p>
+<sup>2</sup>&nbsp;If you have a package or know a package that should be listed here, please contact the CircuiTi<em>k</em>Z authors, or, better, send a pull request to the project and it will be added.
+</p>
+<p>
+<sup>3</sup>&nbsp;&#x2026;read the introduction: try not to overuse the jumping symbol; it’s not a standard for the last 25 years. Nevertheless, sometimes is very useful, especially for didactic reasons (Romano’s personal opinion in this comment).
+</p>
+
+
+</div>
+<!--
+...... subsection Known bugs and limitation ......
+-->
+<h5 id="autosec-31"><span class="sectionnumber">1.8&#x2003;</span>Known bugs and limitation</h5>
+<a id="circuitikzmanual-autopage-31"></a>
+
+
+<a id="sec:bugs"></a>
+
+<p>
+CircuiTi<em>k</em>Z will <b>not work</b> correctly with global (in the main <kbd>circuitikz</kbd> environment, or in <kbd>scope</kbd> environments) <em>negative</em> scale parameters (<kbd>scale</kbd>, <kbd>xscale</kbd> or <kbd>yscale</kbd>), unless
+<kbd>transform shape</kbd> is also used, and even in this cases the behavior is not guaranteed. Neither will it work with angle-changing scaling (when <kbd>xscale</kbd> is different form <kbd>yscale</kbd>) and with the global <kbd>rotate</kbd> parameter.
+</p>
+
+<p>
+Correcting this will need a big rewrite of the path routines, and although the authors are thinking about solving it, don’t hold your breath; it will need changing a lot of interwoven code (labels, voltages, currents and so on). Contributions and help would be highly
+appreciated.
+</p>
+
+<p>
+Hopefully most of the issues with compatibility between CircuiTi<em>k</em>Z and the <kbd>pic</kbd> Ti<em>k</em>Z feature should have been solved in <kbd>v1.8.0</kbd>, but the feature is only lightly tested (see example&nbsp;<a
+href="node-Examples.html#sec:example-pics">10.10</a>).
+</p>
+
+<p>
+Also, notice that several components will interact in a funny way with global path options. Depending on the specific component, some parameters are inherited by the internal shape, and some others are reset. This is not easy to fix in general. We want some options to
+go through — fill color, dashed pattern for example — and some others to stay only in the outer path; and if the background shape needs some option for drawing the internal shape, like for example a rounded corner, it <em>must</em> reset the external option. So there is
+no perfect solution, although since <kbd>v1.5.0</kbd> the shapes have been “robustified”, so that by default arced corners and arrows parameters will <em>not</em> be propagated into the shape. Arrows with <kbd>to[]</kbd> components don’t work, anyway, so basically
+avoid this situation. In some cases, also the engine you are using (as <kbd>pdflatex</kbd>, <kbd>xelatex</kbd>, and so on) can impact coloring in corner cases (or even not so in the corner, like in <a href="https://tex.stackexchange.com/q/709273/38080"
+target="_blank" >american-style voltage source signs</a>).
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-32"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[]
+     \draw (0,3) to[R] ++(3,0) node[npn, anchor=B]{};
+     &percnt; arrows will not work and give strange
+      results
+     &percnt; so basically do not use them!
+     \draw[&lt;-&gt;] (0,1.5) to[R] ++(3,0) node[npn,
+      anchor=B]{};
+     \draw[shorten &lt;=10pt] (0,0) to[R] ++(3,0)
+          node[npn, anchor=B]{};
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-34"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-3"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-3.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+Lastly, voltage styles interacts in strange ways with general (such as <a id="LWRindex-1"></a><kbd>american</kbd>, <a id="LWRindex-2"></a><kbd>european</kbd> style), in the sense that sometimes the order in which you enact them is important. That should be
+arguably fixed, but it will change (read break) a lot of existing code, so it’ll stay; more information and workarounds in section&nbsp;<a href="node-Labels-voltages-currents.html#sec:mixing-voltage-styles">5.5.7</a>.
+</p>
+
+<p>
+As a final notice, if you want to use the <kbd>externalize</kbd> library, do not use the <kbd>circuitikz</kbd> environment: use <kbd>tikzpicture</kbd> (which is really the same thing, see the FAQ&nbsp;<a
+href="node-FAQ-Frequently-asked-questions.html#faqs:externalize">8.3</a>).
+</p>
+<!--
+...... subsection Scale factor inaccuracies ......
+-->
+<h5 id="autosec-37"><span class="sectionnumber">1.9&#x2003;</span>Scale factor inaccuracies</h5>
+<a id="circuitikzmanual-autopage-37"></a>
+
+
+<a id="sec:usefpu"></a>
+
+<p>
+Sometimes, when using fractional scaling factors and big values for the coordinates, the basic layer inaccuracies from <span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span> can bite you, producing results like
+the following one:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-38"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1.2, transform shape,
+     ]
+     \draw (60,1) to [battery2, v_=$V_{cc}$, name=B]
+       ++(0,2);
+     \node[draw,red,circle,inner sep=4pt] at(B.left) {};
+     \node[draw,red,circle,inner sep=4pt] at(B.right)
+       {};
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-40"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-4"
+    class="lateximagesource"
+><!--
+Vcc
+--><img
+    src="circuitikzmanual-images/image-4.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+A general solution for this problem is difficult to find; probably the best approach is to use a <span class="verb">scalebox</span> command to scale the circuit instead of relying on internal scaling.
+</p>
+
+<p>
+Nevertheless, <a href="https://tex.stackexchange.com/a/529159/38080" target="_blank" >Schro&#x0308;dinger’s cat</a> found a solution which has been ported to CircuiTi<em>k</em>Z: you can use the key <a id="LWRindex-3"></a><kbd>use fpu
+reciprocal</kbd> which will patch a standard low-level math routine with a more precise one.
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-43"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1.2, transform shape,
+     use fpu reciprocal,
+     ]
+ \draw (60,1) to [battery2, v_=$V_{cc}$] ++(0,2);
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-45"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-5"
+    class="lateximagesource"
+><!--
+Vcc
+--><img
+    src="circuitikzmanual-images/image-5.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+The <kbd>use fpu reciprocal</kbd> key seems to have no side effects, but given that it is patching an internal interface of Ti<em>k</em>Z it can break any time, so it is advisable to use it only if and when needed.
+</p>
+<!--
+...... subsection Incompatibilities between versions ......
+-->
+<h5 id="autosec-48"><span class="sectionnumber">1.10&#x2003;</span>Incompatibilities between versions</h5>
+<a id="circuitikzmanual-autopage-48"></a>
+
+
+<a id="sec:incompatible-changes"></a>
+
+<p>
+Here, we will provide a list of incompatibilities between different versions of CircuiTi<em>k</em>Z. We will try to hold this list short, but sometimes it is easier to break with old syntax than include a lot of switches and compatibility layers. In general, changes that would
+invalidate a circuit (changes of polarity of components and so on) are almost always protected by a flag; the same is not true for purely aesthetic changes. If unsure, you can check the version in your local installation by using the macro <span
+class="verb">\pgfcircversion{}</span>.
+</p>
+<ul class="itemize" style="list-style-type:none">
+
+<li>
+<p>
+<span class="listmarker">•</span> In version <kbd>1.8.2</kbd>, all the text anchors of the components have been made stable, meaning they are meaningful after the component has been drawn.<sup>4</sup> That was the case only for part of the components. It
+<em>shouldn’t</em> affect anything for standard usage, but according to the Ti<em>k</em>Z manual, <a href="https://github.com/circuitikz/circuitikz/pull/876#issuecomment-3005428742" target="_blank" >“this is the way”</a>. Almost no text<a
+id="LWRindex-4"></a><kbd></kbd> (see below) should change position (see also section&nbsp;<a href="node-The-components-usage.html#sec:node-text-anchors">3.2.2.1</a>).
+</p>
+<p>
+Two minor changes are that the previously <em>incorrectly</em> described <kbd>text</kbd> anchor for <kbd>flowarrow</kbd> is not where it used to be shown (use anchor <kbd>center</kbd> instead); and that the anchors for <kbd>oscillator</kbd> and
+<kbd>gridnode</kbd>, which were completely bogus, have been fixed.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> In version <kbd>1.8.0</kbd>, the path routines changed to allow using path-style components in Ti<em>k</em>Z’s <kbd>pic</kbd>. The change is a big one, so a rollback point (see below) for <kbd>v1.7.2</kbd> has been added.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> In version <kbd>1.7.2</kbd>, the drawing of the “double-zero” source components <a id="LWRindex-5"></a><kbd>voosource</kbd>, <a id="LWRindex-6"></a><kbd>ioosource</kbd>, and <a
+id="LWRindex-7"></a><kbd>oosourcetran</kbd> changed so that now the circle radius depend on the height and not on the width. If you didn’t play with internal parameters, that should be invisible.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> In version <kbd>1.7.1</kbd>, the default widths of <a id="LWRindex-8"></a><kbd>barrier</kbd> and <a id="LWRindex-9"></a><kbd>openbarrier</kbd> were reduced so that no wire is drawn as part of the symbols by default.
+This is accompanied by a change to the meanings of the configuration keys <kbd>bipoles/barrier/width</kbd>, <kbd>bipoles/barrier/height</kbd> and <kbd>bipoles/openbarrier/gap</kbd> (as well as the new key <kbd>bipoles/openbarrier/width</kbd>). The
+change avoids problems when using barriers on short pieces of path or as nodes, cf.&nbsp;the details in <a href="https://github.com/circuitikz/circuitikz/pull/835" target="_blank" >the relevant pull request on GitHub</a>. The new default values are chosen
+such that the components are identical to the default appearance before the change.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since version <kbd>1.6.3</kbd> the default symbol for the minus sign changed from the simple <span class="verb">$-$</span> to <span class="verb">$\vphantom{+}-$</span>. The reason is that in some (most?) font, the minus
+sign is enclosed in a smaller bounding box than the plus sign and that leads to poorly aligned minus symbols in <kbd>american</kbd> and <kbd>raised</kbd> voltages. This was not noticed before because the two symbols share the same bounding box in the default
+Computer Modern font. You can look at <a href="https://github.com/circuitikz/circuitikz/issues/721" target="_blank" >this issue on GitHub</a> for more details; if you want to go back to the previous definitions you can write
+</p>
+<pre class="programlisting">
+            \ctikzset{amplifiers/minus=$-$}
+            \ctikzset{bipoles/cvsourceam/inner minus=$-$}
+            \ctikzset{bipoles/vsourceam/inner minus=$-$}
+           \ctikzset{voltage/american minus
+ </pre>
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since version <kbd>1.6.3</kbd> the size of the solder dot and the connection dot of the body diodes for transistors has changed (now they are the same and are configurable). The new default scale of&nbsp;<kbd>0.7</kbd> makes the
+dots <em>area</em> more or less one half the one of the external connections. You can go back to the previous values with
+</p>
+<pre class="programlisting">
+            \ctikzset{transistor bodydiode/dot scale=0.5,
+               transistor solderdot scale
+ </pre>
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since version <kbd>1.6.2</kbd> <kbd>siunitx</kbd> will <b>not</b> work anymore with Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t (it was a very
+poor simulation layer, anyway); it has been disabled in upstream Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t, in favor of <a
+href="https://www.pragma-ade.nl/general/manuals/units-mkiv.pdf" target="_blank" >its own <kbd>units</kbd> module</a>.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Version <kbd>1.6.0</kbd> has a big rewrite of the block’s code. In principle the changes are backward-compatible, but there were several bugs (wrong anchors, errors with rotations, and so on) that have been fixed in the process.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since <kbd>v1.5.1</kbd><sup>5</sup><a id="circuitikzmanual-autopage-50"></a> color management (see section&nbsp;<a href="node-Colors.html#sec:colors">7</a>) and the details of how the shapes are drawn and protected
+by the external drawing options has changed. There should be no substantial changes to the circuits, though.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> The Ti<em>k</em>Z fix for <kbd>to[...] +(x,y)</kbd> behavior (see&nbsp;<a href="node-The-components-usage.html#sec:path-relative-coordinates">3.1.3</a>) uncovered a bug in the positioning of the labels in
+CircuiTi<em>k</em>Z that had been present since <kbd>v0.8</kbd>. So you <b>must</b> upgrade to <kbd>v1.4.1</kbd> or better if you have Ti<em>k</em>Z newer than <kbd>3.1.8</kbd> (and you want/need to use the <kbd>+(x,y)</kbd> syntax).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> There have been changes in (internal) parameters for capacitors in <kbd>v1.4.1</kbd>; now to change them you should use the style interface (see&nbsp;<a
+href="node-The-components-list.html#sec:capacitors-styling">4.3.3</a>).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> CircuiTi<em>k</em>Z <kbd>v1.4.0</kbd> introduced the rollback system for the package when using LaTeX; that (at least in principle) should be completely backward-compatible.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> The path construction in <kbd>v1.4.0</kbd> has been changed a bit (again). The change shouldn’t break any circuit and will correct a behavior that should have been fixed with the <kbd>v1.2.1</kbd> change (see below).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Version 1.3.6 fixes several problems with the stacked labels; the most important change is that now the bracing of arguments is respected as in version 1.3.0 for the other labels. The special treatment in stacked labels (and only in
+stacked labels!) for the (still experimental<sup>6</sup>) <kbd>siunitx</kbd> compact syntax <kbd><...></kbd> has been removed: it was completely buggy before, and silently ignored, now will throw an error.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Version 1.3.3 fixes the direction of the arrows in tunable elements; before this version, they were more or less random, now the arrow goes from bottom left to top right. You have the option to go back to the old behavior with <a
+id="LWRindex-10"></a><kbd>\ctikzset{bipoles/fix tunable direction=false}</kbd>. As a compensation for the fuss, now the arrows are configurable. To learn more, see the FAQ:&nbsp;<a
+href="node-FAQ-Frequently-asked-questions.html#faq:tunable-arrow">8.6</a>.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Version 1.3.1 removes the warning if you do not specify a voltage direction.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Version 1.3.0 fixes the buggy stripping of braces from labels and annotations (see&nbsp;<a href="node-Labels-voltages-currents.html#sec:bracing-of-labels">5.1.2</a>).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After 1.2.7 a big code reorganization (which had the collateral effect of fixing some bugs) has been made; no changes should be visible, but a fallback point at 1.2.7 has been added.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> You <b>must</b> upgrade to v1.2.7 or newer if you use a Ti<em>k</em>Z 3.1.8 or 3.1.8a (but better upgrade both packages to the current version). You can check the Ti<em>k</em>Z version installed using the macro <span
+class="verb">\pgfversion</span>.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v1.2.1: <b>Important:</b> the routine that implements the <kbd>to[...]</kbd> component positioning has been rewritten. That should enhance the line joins in paths, and it’s safer, but it can potentially change some old
+behavior.
+</p>
+<p>
+One of the changes is that the previous routine did the wrong thing if you used <kbd>(node) to[...]</kbd> (you should use an anchor or a coordinate, not a node there — like <kbd>(node.anchor) to[...]</kbd>).
+</p>
+<p>
+The other one was that in the structure <kbd>... to[...] node[pos=<em>something</em>] (coord)</kbd> the value of <kbd>pos</kbd> was completely wrong (even if you don’t use <kbd>pos</kbd> explicitly, remember it’s <kbd>pos=0.5</kbd> by default).
+</p>
+<p>
+Additionally, the old code disrupted the Ti<em>k</em>Z path-fill mechanism, so that you could get away with using the <kbd>fill</kbd> option on paths and having just the components filled, not the path. That was incorrect, although sometime it was handy (sorry).
+</p>
+<p>
+See the FAQ at section&nbsp;<a href="node-FAQ-Frequently-asked-questions.html#faqs:nodes">8.1</a> for more information.
+</p>
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v1.2.0: voltage arrows, symbols and label positions are calculated with a rewritten routine. There should be little change, <em>unless</em> you touched internal values&#x2026;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v1.1.3: from version 1.1.0 to version 1.1.2, the inverted Schmitt buffer in IEEE style ports was called <kbd>inv schmitt</kbd> (with an additional space). The correct name is <kbd>invschmitt port</kbd> (the same as the
+legacy american port).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v1.1.2: the position of <kbd>american</kbd> voltages for the <a id="LWRindex-11"></a><kbd>open</kbd> bipoles changed (you can revert to the old behavior, see section&nbsp;<a
+href="node-Labels-voltages-currents.html#sec:sub-voltage-position">5.5.5</a>).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v0.9.7: the position of the text of transistor nodes has changed; see section&nbsp;<a href="node-The-components-list.html#sec:transistors-labels">4.15.4</a>.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v0.9.4: added the concept of styling of circuits. It should be backward compatible, but it’s a big change, so be ready to use the <kbd>0.9.3</kbd> snapshot (see below for details).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v0.9.0: the parameters <kbd>tripoles/american or port/aaa</kbd>, <kbd>...bbb</kbd>, <kbd>...ccc</kbd> and <kbd>...ddd</kbd> are no longer used and are silently ignored; the same stands for the similarly named
+parameters in <kbd>nor</kbd>, <kbd>xor</kbd>, and <kbd>xnor</kbd> ports.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> After v0.9.0: voltage and current directions/signs (plus and minus signs in case of <kbd>american voltages</kbd> and arrows in case of <kbd>european voltages</kbd>) have been rationalized with a couple of new options (see
+details in section&nbsp;<a href="node-Labels-voltages-currents.html#curr-and-volt">5.2</a>). The default case is still the same as v0.8.3, to avoid potentially wrong circuits, but you would be better off with one of the new voltage directions (<kbd>EFvoltages</kbd>
+or <kbd>RPvoltages</kbd>) for newer circuits.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since v0.8.2: voltage and current label directions (<kbd>v<=</kbd> / <kbd>i<=</kbd>) do NOT change the orientation of the drawn source shape anymore. Use the <kbd>invert</kbd> option to rotate the shape of the source.
+Furthermore, from this version on, the current label (<kbd>i=</kbd>) at current sources can be used independent of the regular label (<kbd>l=</kbd>).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since v0.7: The label behavior at mirrored bipoles has changed, this fixes the voltage drawing, but perhaps you will have to adjust your label positions.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since v0.5.1: The parts <a id="LWRindex-12"></a><kbd>pfet</kbd>, <a id="LWRindex-13"></a><kbd>pigfete</kbd>, <a id="LWRindex-14"></a><kbd>pigfetebulk</kbd>, and <a id="LWRindex-15"></a><kbd>pigfetd</kbd> are
+now mirrored by default. Please adjust your yscale-option to correct this.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Since v0.5: New voltage counting direction, there exists an option to use the old behavior.
+</p>
+</li>
+</ul>
+
+<p>
+If you have older projects that show compatibility problems, you have two options:
+</p>
+<ul class="itemize" style="list-style-type:none">
+
+<li>
+<p>
+<span class="listmarker">•</span> you can use an older version locally using the git-version and picking the correct commit from the repository (branch gh-pages) or the main GitHub site directly;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> if you are using <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span>, the distribution has embedded several important old
+versions: <kbd>0.4</kbd>, <kbd>0.6</kbd>, <kbd>0.7</kbd>, <kbd>0.8.3</kbd>, <kbd>0.9.3</kbd>, <kbd>0.9.6</kbd>, <kbd>1.0</kbd>, <kbd>1.1.2</kbd>, <kbd>1.2.7</kbd>, <kbd>1.4.6</kbd>, and <kbd>1.7.2</kbd>. To switch to use them, since <kbd>v1.4.0</kbd>
+you simply use the <a href="https://www.latex-project.org/publications/2018-FMi-TUB-tb122mitt-version-rollback.pdf" target="_blank" >new LaTeX kernel rollback system</a>, changing your <span class="verb">\usepackage</span> invocation to something
+like:
+</p>
+<pre class="programlisting">
+             &percnt; or v0.4, v0.6, ...
+            \usepackage[]{circuitikz}[=v
+ </pre>
+<p>
+You can also specify a date instead of a version number: if you write
+</p>
+<pre class="programlisting">
+           \usepackage[]{circuitikz
+ </pre>
+<p>
+the rollback system will load the version that was current on February 5th,&nbsp;2020 (in this case it will be <kbd>v1.0</kbd> which was released the day before).
+</p>
+<p>
+If for whatever reasons your kernel is older, you can still use the old method of loading the <em>package-version</em> package; for example:
+</p>
+<pre class="programlisting">
+            &percnt; or circuitikz-0.4, 0.6...
+           \usepackage[]{circuitikz
+ </pre>
+<p>
+which is an inferior solution because it can fool any package you use that depend on <kbd>circuitikz</kbd>.
+</p>
+<p>
+Either way, you have to take care of the options that may have changed between versions (and sometime styles, if you use them).
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> if you are using Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t, only versions <kbd>0.8.3</kbd>, <kbd>0.9.3</kbd>, <kbd>0.9.6</kbd>, <kbd>1.0</kbd>,
+<kbd>1.1.2</kbd>, <kbd>1.2.7</kbd>, <kbd>1.4.6</kbd>, and <kbd>1.7.2</kbd> are packaged; you can use it with
+</p>
+<pre class="programlisting">
+          \usemodule[circuitikz
+ </pre>
+</li>
+</ul>
+<div role="note" class="footnotes">
+
+<a id="circuitikzmanual-autopage-55"></a>
+<p>
+<sup>4</sup>&nbsp;The problem has been noticed by <a href="https://github.com/circuitikz/circuitikz/pull/876" target="_blank" >user <kbd>@JPWiedemann</kbd> on GitHub</a>.
+</p>
+<p>
+<sup>5</sup>&nbsp;Do not use <kbd>v1.5.0</kbd>, it’s buggy.
+</p>
+<p>
+<sup>6</sup>&nbsp;and, really, not advised&#x2026;
+</p>
+
+
+</div>
+<!--
+...... subsection Feedback ......
+-->
+<h5 id="autosec-56"><span class="sectionnumber">1.11&#x2003;</span>Feedback</h5>
+<a id="circuitikzmanual-autopage-56"></a>
+
+
+<a id="sec:feedback"></a>
+
+<p>
+The easiest way to contact the authors is via the official GitHub repository: <a href="https://github.com/circuitikz/circuitikz/issues" target="_blank" >https://github.com/circuitikz/circuitikz/issues</a>. For general help question, a lot of nice people are quite
+active on <a href="https://tex.stackexchange.com/questions/tagged/circuitikz" target="_blank" >https://tex.stackexchange.com/questions/tagged/circuitikz</a> — be sure to read the help pages for the site and ask!
+</p>
+<!--
+...... subsection Package options ......
+-->
+<h5 id="autosec-57"><span class="sectionnumber">1.12&#x2003;</span>Package options</h5>
+<a id="circuitikzmanual-autopage-57"></a>
+
+
+<a id="sec:package-options"></a>
+
+<p>
+Circuit people are very opinionated about their symbols. In order to satisfy the individual taste you can set a bunch of package options.
+</p>
+
+<p>
+There are arguably way too many options in CircuiTi<em>k</em>Z, as you can see in the following list. Since version <kbd>1.0</kbd>, it is recommended to just use the basic ones — voltage directions (you <b>should</b> specify one of them), <kbd>siunitx</kbd> (only
+for <span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span>), the global style (<kbd>american</kbd> or <kbd>european</kbd>) and use styles (see&nbsp;<a
+href="node-The-components-usage.html#sec:styling">3.3</a>) for the remaining options.
+</p>
+
+<p>
+The standard options are set by historical reason, and reflect the preferences of the author that introduced them. For example you get this:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-58"></a>
+<pre class="programlisting">
+ \begin{circuitikz}
+     \draw (0,0) to[R=2&lt;\ohm&gt;, i=?, v=84&lt;\volt
+      &gt;] (2,0) --
+     (2,2) to[V&lt;=84&lt;\volt&gt;] (0,2)
+     -- (0,0);
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-60"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-6"
+    class="lateximagesource"
+><!--
+84 V
+2Ω
+       ?
+
+84 V
+--><img
+    src="circuitikzmanual-images/image-6.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+Feel free to load the package with your own cultural options:
+</p>
+<div class="center">
+<table>
+
+<tr style="display:none"><th>.</th></tr>
+
+<tr class="tbrule">
+<td class="tdl"><span class="latexlogofont"><span class="latexlogo">L<span class="latexlogosup">a</span>T<span class="latexlogosub">e</span>X</span></span></td>
+<td class="tdl">Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t</td>
+</tr>
+
+<tr class="hline">
+<td class="tdl"><span class="verb">\usepackage[american]{circuitikz}</span></td>
+<td class="tdl"><span class="verb">\usemodule[circuitikz][american]</span></td>
+</tr>
+
+<tr class="tbrule" aria-hidden="true">
+<td class="tdl"></td>
+<td class="tdl"></td>
+</tr>
+</table>
+
+</div>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-65"></a>
+<pre class="programlisting">
+ \begin{circuitikz}
+     [circuitikz/voltage=american, circuitikz/resistor=
+      american] &percnt; line not printed
+     \draw (0,0) to[R=2&lt;\ohm&gt;, i=?, v=84&lt;\volt
+      &gt;] (2,0) --
+     (2,2) to[V&lt;=84&lt;\volt&gt;] (0,2)
+     -- (0,0);
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-67"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-7"
+    class="lateximagesource"
+><!--
+    −
+    +
+
+    84 V
+
+    2Ω
+           ?
++          −
+    84 V
+--><img
+    src="circuitikzmanual-images/image-7.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+<b>However</b>, most of the global package options are not available in Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t; in that case you can always use the appropriate <span
+class="verb">\tikzset{}</span> or <span class="verb">\IndexKey{}</span> command after loading the package.
+</p>
+
+<p>
+Here is the list of all the options:
+</p>
+<ul class="itemize" style="list-style-type:none">
+
+<li>
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-16"></a><kbd>europeanvoltages</kbd>: uses arrows to define voltages, and uses european-style voltage sources;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-17"></a><kbd>straightvoltages</kbd>: uses arrows to define voltages, and and uses straight voltage arrows;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-18"></a><kbd>americanvoltages</kbd>: uses \(-\) and \(+\) to define voltages, and uses american-style voltage sources;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-19"></a><kbd>europeancurrents</kbd>: uses european-style current sources;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-20"></a><kbd>americancurrents</kbd>: uses american-style current sources;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-21"></a><kbd>europeanresistors</kbd>: uses rectangular empty shape for resistors, as per european standards;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-22"></a><kbd>americanresistors</kbd>: uses zig-zag shape for resistors, as per american standards;
+</p>
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-23"></a><kbd>europeaninductors</kbd>: uses rectangular filled shape for inductors, as per european standards;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-24"></a><kbd>americaninductors</kbd>: uses “4-bumps” shape for inductors, as per american standards;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-25"></a><kbd>cuteinductors</kbd>: uses my personal favorite, “pig-tailed” shape for inductors;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-26"></a><kbd>americanports</kbd>: uses triangular logic ports, as per american standards;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-27"></a><kbd>europeanports</kbd>: uses rectangular logic ports, as per european standards;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-28"></a><kbd>americangfsurgearrester</kbd>: uses round gas filled surge arresters, as per american standards;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-29"></a><kbd>europeangfsurgearrester</kbd>: uses rectangular gas filled surge arresters, as per european standards;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-30"></a><kbd>european</kbd>: equivalent to <kbd>europeancurrents</kbd>, <kbd>europeanvoltages</kbd>, <kbd>europeanresistors</kbd>, <kbd>europeaninductors</kbd>, <kbd>europeanports</kbd>,
+<kbd>europeangfsurgearrester</kbd>;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-31"></a><kbd>american</kbd>: equivalent to <kbd>americancurrents</kbd>, <kbd>americanvoltages</kbd>, <kbd>americanresistors</kbd>, <kbd>americaninductors</kbd>, <kbd>americanports</kbd>,
+<kbd>americangfsurgearrester</kbd>;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-32"></a><kbd>siunitx</kbd>: integrates with <kbd>SIunitx</kbd> package. If labels, currents or voltages are of the form <span class="verb">#1<#2></span> then what is shown is actually <span
+class="verb">\SI{#1}{#2}</span> (not supported in Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t; it has been disabled in upstream Con<span class="latexlogofont"><span
+class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t, in favor of <a href="https://www.pragma-ade.nl/general/manuals/units-mkiv.pdf" target="_blank" >its own <kbd>units</kbd> module</a>);
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-33"></a><kbd>nosiunitx</kbd>: labels are not interpreted as above;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-34"></a><kbd>fulldiode</kbd>: the various diodes are drawn <em>and</em> filled by default, i.e. when using styles such as <kbd>diode</kbd>, <kbd>D</kbd>, <kbd>sD</kbd>, &#x2026;Other diode styles can always
+be forced with e.g. <kbd>Do</kbd>, <kbd>D-</kbd>, &#x2026;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-35"></a><kbd>strokediode</kbd>: the various diodes are drawn <em>and</em> stroke by default, i.e. when using styles such as <kbd>diode</kbd>, <kbd>D</kbd>, <kbd>sD</kbd>, &#x2026;Other diode styles can
+always be forced with e.g. <kbd>Do</kbd>, <kbd>D*</kbd>, &#x2026;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-36"></a><kbd>emptydiode</kbd>: the various diodes are drawn <em>but not</em> filled by default, i.e. when using styles such as <kbd>D</kbd>, <kbd>sD</kbd>, &#x2026;Other diode styles can always be forced with
+e.g. <kbd>Do</kbd>, <kbd>D-</kbd>, &#x2026;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-37"></a><kbd>arrowmos</kbd>: pmos and nmos have arrows analogous to those of pnp and npn transistors;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-38"></a><kbd>noarrowmos</kbd>: pmos and nmos do not have arrows analogous to those of pnp and npn transistors;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-39"></a><kbd>fetbodydiode</kbd>: draw the body diode of a FET;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-40"></a><kbd>nofetbodydiode</kbd>: do not draw the body diode of a FET;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-41"></a><kbd>fetsolderdot</kbd>: draw solderdot at bulk-source junction of some transistors;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-42"></a><kbd>nofetsolderdot</kbd>: do not draw solderdot at bulk-source junction of some transistors;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-43"></a><kbd>emptypmoscircle</kbd>: the circle at the gate of a pmos transistor does not get filled;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-44"></a><kbd>lazymos</kbd>: draws lazy nmos and pmos transistors. Chip designers with huge circuits prefer this notation;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-45"></a><kbd>legacytransistorstext</kbd>: the text of transistor nodes is typeset near the collector;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-46"></a><kbd>nolegacytransistorstext</kbd> or <kbd>centertransistorstext</kbd>: the text of transistor nodes is typeset near the center of the component;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-47"></a><kbd>straightlabels</kbd>: labels on bipoles are always printed straight up, i.e.&nbsp;with horizontal baseline;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-48"></a><kbd>rotatelabels</kbd>: labels on bipoles are always printed aligned along the bipole;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-49"></a><kbd>smartlabels</kbd>: labels on bipoles are rotated along the bipoles, unless the rotation is very close to multiples of 90&deg;;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <a id="LWRindex-50"></a><kbd>compatibility</kbd>: makes it possibile to load CircuiTi<em>k</em>Z and Ti<em>k</em>Z circuit library together.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> Voltage directions: until v0.8.3, there was an error in the coherence between american and european voltages styles (see section&nbsp;<a href="node-Labels-voltages-currents.html#curr-and-volt">5.2</a>) for the batteries. This
+has been fixed, but to guarantee backward compatibility and to avoid nasty surprises, the fix is available with new options:
+</p>
+<ul class="itemize" style="list-style-type:none">
+
+<li>
+<p>
+<span class="listmarker">–</span> <a id="LWRindex-51"></a><kbd>oldvoltagedirection</kbd>: Use old way of voltage direction having a difference between european and american direction, with wrong default labeling for batteries;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">–</span> <a id="LWRindex-52"></a><kbd>nooldvoltagedirection</kbd>: The standard from 0.5 onward, utilizes the (German?) standard of voltage arrows in the direction of electric fields (without fixing batteries);
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">–</span> <a id="LWRindex-53"></a><kbd>RPvoltages</kbd> (meaning Rising Potential voltages): the arrow is in the direction of rising potential, like in <kbd>oldvoltagedirection</kbd>, but batteries and current sources are fixed to follow
+the passive/active standard;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">–</span> <a id="LWRindex-54"></a><kbd>EFvoltages</kbd> (meaning Electric Field voltages): the arrow is in the direction of the electric field, like in <kbd>nooldvoltagedirection</kbd>, but batteries are fixed;
+</p>
+</li>
+</ul>
+<p>
+If none of these option are given, the package will default to <kbd>nooldvoltagedirection</kbd>. The behavior is also selectable circuit by circuit with the <kbd>voltage dir</kbd> style.
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">•</span> <kbd>betterproportions</kbd><sup>7</sup><a id="circuitikzmanual-autopage-70"></a>: nicer proportions of transistors in comparision to resistors; notice that this option is superseded by styles and it’s kept just for
+compatibility, do not use it in new projects;
+</p>
+</li>
+</ul>
+
+<p>
+The old options in the singular (like <kbd>american voltage</kbd>) are still available for compatibility, but are discouraged.
+</p>
+
+<p>
+Loading the package with no options is equivalent to the following options: <kbd>[nofetsolderdot, europeancurrents, europeanvoltages, americanports, americanresistors, cuteinductors, europeangfsurgearrester, nosiunitx, noarrowmos, smartlabels,
+nocompatibility, centertransistorstext]</kbd>.
+</p>
+
+<p>
+In Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t the options are similarly specified: <kbd>current= european|american</kbd>, <kbd>voltage= european|american</kbd>, <kbd>resistor=
+american|european</kbd>, <kbd>inductor= cute|american|european</kbd>, <kbd>logic= american|european</kbd>, <kbd>arrowmos= false|true</kbd>.
+</p>
+<div role="note" class="footnotes">
+
+<a id="circuitikzmanual-autopage-71"></a>
+<p>
+<sup>7</sup>&nbsp;May change in the future!
+</p>
+
+
+</div>
+
+</section>
+
+</main>
+
+
+<nav class="botnavigation"><a href="index.html" class="linkhome" >
+Home</a></nav>
+
+</div><!-- grid -->
+</body>
+</html>

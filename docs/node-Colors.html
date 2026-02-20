@@ -1,0 +1,2494 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="author" content="Massimo A. Redaelli (<a href=mailto:m.redaelli@gmail.com target=-blank >m.redaelli@gmail.com</a>)- Stefan Lindner (<a href=mailto:stefan.lindner@fau.de target=-blank >stefan.lindner@fau.de</a>)- Stefan Erhardt
+(<a href=mailto:stefan.erhardt@fau.de target=-blank >stefan.erhardt@fau.de</a>)- Romano Giannetti (<a href=mailto:romano.giannetti@gmail.com target=-blank >romano.giannetti@gmail.com</a>)" />
+<meta name="generator" content="LaTeX Lwarp package" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CircuiTikZ-version 1.8.6-unreleased (2026/02/10) — Colors</title>
+<link rel="stylesheet" type="text/css" href="ctikzcss.css" />
+
+<script>
+// Lwarp MathJax emulation code
+//
+// Based on code by Davide P. Cervone.
+// Equation numbering: https://github.com/mathjax/MathJax/issues/2427
+// Starred and ifnextchar macros: https://github.com/mathjax/MathJax/issues/2428
+// \left, \right delimiters: https://github.com/mathjax/MathJax/issues/2535
+//
+// Modified by Brian Dunn to adjust equation numbering and add subequations.
+//
+// LaTeX can use \seteqnumber{subequations?}{section}{number} before each equation.
+// subequations? is 0 usually, 1 if inside subequations.
+// section is a string printed as-is, or empty.
+// number is auto-incremented by MathJax between equations.
+//
+MathJax = {
+  subequations: "0",
+  section: "",
+  loader: {
+    load: ['[tex]/tagformat', '[tex]/textmacros'],
+  },
+  startup: {
+    ready() {
+      // These would be replaced by import commands if you wanted to make
+      // a proper extension.
+      const Configuration = MathJax._.input.tex.Configuration.Configuration;
+      const CommandMap = MathJax._.input.tex.SymbolMap.CommandMap;
+      const Macro = MathJax._.input.tex.Symbol.Macro;
+      const TexError = MathJax._.input.tex.TexError.default;
+      const ParseUtil = MathJax._.input.tex.ParseUtil.default;
+      const expandable = MathJax._.util.Options.expandable;
+
+        // Insert the replacement string into the TeX string, and check
+        // that there haven't been too many maxro substitutions (prevents
+        // infinite loops).
+        const useArgument = (parser, text) => {
+          parser.string = ParseUtil.addArgs(parser, text, parser.string.slice(parser.i));
+          parser.i = 0;
+          if (++parser.macroCount > parser.configuration.options.maxMacros) {
+            throw new TexError('MaxMacroSub1',
+            'MathJax maximum macro substitution count exceeded; ' +
+            'is there a recursive macro call?');
+          }
+        }
+
+        // Create the command map for:
+        //     \ifstar, \ifnextchar, \ifblank, \ifstrequal, \gsub, \seteqnumber
+        new CommandMap('Lwarp-macros', {
+          ifstar: 'IfstarFunction',
+          ifnextchar: 'IfnextcharFunction',
+          ifblank: 'IfblankFunction',
+          ifstrequal: 'IfstrequalFunction',
+          gsubstitute: 'GsubstituteFunction',
+          seteqnumber: 'SeteqnumberFunction'
+        }, {
+          // This function implements an ifstar macro.
+          IfstarFunction(parser, name) {
+             const resultstar = parser.GetArgument(name);
+             const resultnostar = parser.GetArgument(name);
+             const star = parser.GetStar();                 // true if there is a *
+             useArgument(parser, star ? resultstar : resultnostar);
+          },
+
+          // This function implements an ifnextchar macro.
+          IfnextcharFunction(parser, name) {
+            let whichchar = parser.GetArgument(name);
+            if (whichchar.match(/^(?:0x[0-9A-F]+|[0-9]+)$/i)) {
+              // $ syntax highlighting
+              whichchar = String.fromCodePoint(parseInt(whichchar));
+            }
+            const resultnextchar = parser.GetArgument(name);
+            const resultnotnextchar = parser.GetArgument(name);
+            const gotchar = (parser.GetNext() === whichchar);
+            useArgument(parser, gotchar ? resultnextchar : resultnotnextchar);
+          },
+
+          // This function implements an ifblank macro.
+          IfblankFunction(parser, name) {
+            const blankarg = parser.GetArgument(name);
+            const resultblank = parser.GetArgument(name);
+            const resultnotblank = parser.GetArgument(name);
+            const isblank = (blankarg.trim() == "");
+            useArgument(parser, isblank ? resultblank : resultnotblank);
+          },
+
+          // This function implements an ifstrequal macro.
+          IfstrequalFunction(parser, name) {
+            const strequalfirst = parser.GetArgument(name);
+            const strequalsecond = parser.GetArgument(name);
+            const resultequal = parser.GetArgument(name);
+            const resultnotequal = parser.GetArgument(name);
+            const isequal = (strequalfirst == strequalsecond);
+            useArgument(parser, isequal ? resultequal : resultnotequal);
+          },
+
+          // This function implements a gsub macro.
+          GsubstituteFunction(parser, name) {
+            const gsubfirst = parser.GetArgument(name);
+            const gsubsecond = parser.GetArgument(name);
+            const gsubthird = parser.GetArgument(name);
+            let gsubresult=gsubfirst.replace(gsubsecond, gsubthird);
+            useArgument(parser, gsubresult);
+          },
+
+          // This function modifies the equation numbers.
+          SeteqnumberFunction(parser, name) {
+              // Get the macro parameters
+              const star = parser.GetStar();                  // true if there is a *
+              const optBrackets = parser.GetBrackets(name);   // contents of optional brackets
+              const newsubequations = parser.GetArgument(name); // the subequations argument
+              const neweqsection = parser.GetArgument(name); // the eq section argument
+              const neweqnumber = parser.GetArgument(name);   // the eq number argument
+              MathJax.config.subequations=newsubequations ;   // a string with boolean meaning
+              MathJax.config.section=neweqsection ;           // a string with numeric meaning
+              parser.tags.counter = parser.tags.allCounter = neweqnumber ;
+          }
+
+        });
+
+        // Create the Lwarp-macros package
+        Configuration.create('Lwarp-macros', {
+          handler: {macro: ['Lwarp-macros']}
+        });
+
+        MathJax.startup.defaultReady();
+
+        // For forward references:
+        MathJax.startup.input[0].preFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              MathJax.config.subequations = math.inputData.recompile.subequations;
+              MathJax.config.section = math.inputData.recompile.section;
+          }
+        });
+        MathJax.startup.input[0].postFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              math.inputData.recompile.subequations = MathJax.config.subequations;
+              math.inputData.recompile.section = MathJax.config.section;
+          }
+        });
+
+          // For \left, \right with unicode-math:
+          const {DelimiterMap} = MathJax._.input.tex.SymbolMap;
+          const {Symbol} = MathJax._.input.tex.Symbol;
+          const {MapHandler} = MathJax._.input.tex.MapHandler;
+          const delimiter = MapHandler.getMap('delimiter');
+          delimiter.add('\\lBrack', new Symbol('\\lBrack', '\u27E6'));
+          delimiter.add('\\rBrack', new Symbol('\\rBrack', '\u27E7'));
+          delimiter.add('\\lAngle', new Symbol('\\lAngle', '\u27EA'));
+          delimiter.add('\\rAngle', new Symbol('\\rAngle', '\u27EB'));
+          delimiter.add('\\lbrbrak', new Symbol('\\lbrbrak', '\u2772'));
+          delimiter.add('\\rbrbrak', new Symbol('\\rbrbrak', '\u2773'));
+          delimiter.add('\\lbag', new Symbol('\\lbag', '\u27C5'));
+          delimiter.add('\\rbag', new Symbol('\\rbag', '\u27C6'));
+          delimiter.add('\\llparenthesis', new Symbol('\\llparenthesis', '\u2987'));
+          delimiter.add('\\rrparenthesis', new Symbol('\\rrparenthesis', '\u2988'));
+          delimiter.add('\\llangle', new Symbol('\\llangle', '\u2989'));
+          delimiter.add('\\rrangle', new Symbol('\\rrangle', '\u298A'));
+          delimiter.add('\\Lbrbrak', new Symbol('\\Lbrbrak', '\u27EC'));
+          delimiter.add('\\Rbrbrak', new Symbol('\\Rbrbrak', '\u27ED'));
+          delimiter.add('\\lBrace', new Symbol('\\lBrace', '\u2983'));
+          delimiter.add('\\rBrace', new Symbol('\\rBrace', '\u2984'));
+          delimiter.add('\\lParen', new Symbol('\\lParen', '\u2985'));
+          delimiter.add('\\rParen', new Symbol('\\rParen', '\u2986'));
+          delimiter.add('\\lbrackubar', new Symbol('\\lbrackubar', '\u298B'));
+          delimiter.add('\\rbrackubar', new Symbol('\\rbrackubar', '\u298C'));
+          delimiter.add('\\lbrackultick', new Symbol('\\lbrackultick', '\u298D'));
+          delimiter.add('\\rbracklrtick', new Symbol('\\rbracklrtick', '\u298E'));
+          delimiter.add('\\lbracklltick', new Symbol('\\lbracklltick', '\u298F'));
+          delimiter.add('\\rbrackurtick', new Symbol('\\rbrackurtick', '\u2990'));
+          delimiter.add('\\langledot', new Symbol('\\langledot', '\u2991'));
+          delimiter.add('\\rangledot', new Symbol('\\rangledot', '\u2992'));
+          delimiter.add('\\lparenless', new Symbol('\\lparenless', '\u2993'));
+          delimiter.add('\\rparengtr', new Symbol('\\rparengtr', '\u2994'));
+          delimiter.add('\\Lparengtr', new Symbol('\\Lparengtr', '\u2995'));
+          delimiter.add('\\Rparenless', new Symbol('\\Rparenless', '\u2996'));
+          delimiter.add('\\lblkbrbrak', new Symbol('\\lblkbrbrak', '\u2997'));
+          delimiter.add('\\rblkbrbrak', new Symbol('\\rblkbrbrak', '\u2998'));
+          delimiter.add('\\lvzigzag', new Symbol('\\lvzigzag', '\u29D8'));
+          delimiter.add('\\rvzigzag', new Symbol('\\rvzigzag', '\u29D9'));
+          delimiter.add('\\Lvzigzag', new Symbol('\\Lvzigzag', '\u29DA'));
+          delimiter.add('\\Rvzigzag', new Symbol('\\Rvzigzag', '\u29DB'));
+          delimiter.add('\\lcurvyangle', new Symbol('\\lcurvyangle', '\u29FC'));
+          delimiter.add('\\rcurvyangle', new Symbol('\\rcurvyangle', '\u29FD'));
+          delimiter.add('\\Vvert', new Symbol('\\Vvert', '\u2980'));
+    }     // ready
+  },      // startup
+
+  tex: {
+    packages: {'[+]': ['tagformat', 'Lwarp-macros', 'textmacros']},
+    tags: "ams",
+         tagformat: {
+             number: function (n) {
+                 if(MathJax.config.subequations==0)
+                     return(MathJax.config.section + n);
+                 else
+                     return(MathJax.config.section + String.fromCharCode(96+n));
+             },
+         },
+  }
+}
+</script>
+
+<script
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+></script>
+
+<script src="permalinks.js" defer></script>
+
+
+</head>
+<body>
+
+
+<a id="circuitikzmanual-autopage-4391"></a>
+<div class="pagegrid">
+
+
+<nav class="topnavigation"><a href="index.html" class="linkhome" >
+Home</a></nav>
+<div class="sidetoccontainer">
+
+
+<nav class="sidetoc">
+
+
+<div class="sidetoctitle">
+
+<p>
+<span class="sidetocthetitle">CircuiTi<em>k</em>Z<br />
+version 1.8.6-unreleased (2026/02/10)</span>
+</p>
+
+<p>
+Contents
+</p>
+</div>
+
+
+<div class="sidetoccontents">
+
+<p>
+<a href="index.html" class="linkhome" >
+Home</a>
+</p>
+
+<p>
+<a href="node-Introduction.html#autosec-10" class="tocsection" >
+<span class="sectionnumber">1</span>&#x2003;Introduction</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-12" class="tocsubsection" >
+<span class="sectionnumber">1.1</span>&#x2003;About</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-13" class="tocsubsection" >
+<span class="sectionnumber">1.2</span>&#x2003;License</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-14" class="tocsubsection" >
+<span class="sectionnumber">1.3</span>&#x2003;Loading the package</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-23" class="tocsubsection" >
+<span class="sectionnumber">1.4</span>&#x2003;Installing a new version of the package.</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-25" class="tocsubsection" >
+<span class="sectionnumber">1.5</span>&#x2003;Requirements</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-26" class="tocsubsection" >
+<span class="sectionnumber">1.6</span>&#x2003;Incompatible packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-27" class="tocsubsection" >
+<span class="sectionnumber">1.7</span>&#x2003;Related and extension packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-31" class="tocsubsection" >
+<span class="sectionnumber">1.8</span>&#x2003;Known bugs and limitation</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-37" class="tocsubsection" >
+<span class="sectionnumber">1.9</span>&#x2003;Scale factor inaccuracies</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-48" class="tocsubsection" >
+<span class="sectionnumber">1.10</span>&#x2003;Incompatibilities between versions</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-56" class="tocsubsection" >
+<span class="sectionnumber">1.11</span>&#x2003;Feedback</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-57" class="tocsubsection" >
+<span class="sectionnumber">1.12</span>&#x2003;Package options</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-74" class="tocsection" >
+<span class="sectionnumber">2</span>&#x2003;Tutorials</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-76" class="tocsubsection" >
+<span class="sectionnumber">2.1</span>&#x2003;Getting started with CircuiTi<em>k</em>Z: a current shunt</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-112" class="tocsubsection" >
+<span class="sectionnumber">2.2</span>&#x2003;A non-inverting op-amp amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-148" class="tocsubsection" >
+<span class="sectionnumber">2.3</span>&#x2003;A transistor-based amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-182" class="tocsubsection" >
+<span class="sectionnumber">2.4</span>&#x2003;A logic circuit</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-222" class="tocsection" >
+<span class="sectionnumber">3</span>&#x2003;The components: usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-223" class="tocsubsection" >
+<span class="sectionnumber">3.1</span>&#x2003;Path-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-336" class="tocsubsection" >
+<span class="sectionnumber">3.2</span>&#x2003;Node-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-363" class="tocsubsection" >
+<span class="sectionnumber">3.3</span>&#x2003;Styling circuits and components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-404" class="tocsubsection" >
+<span class="sectionnumber">3.4</span>&#x2003;Subcircuits</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-456" class="tocsection" >
+<span class="sectionnumber">4</span>&#x2003;The components: list</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-457" class="tocsubsection" >
+<span class="sectionnumber">4.1</span>&#x2003;Grounds and supply voltages</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-510" class="tocsubsection" >
+<span class="sectionnumber">4.2</span>&#x2003;Resistive bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-673" class="tocsubsection" >
+<span class="sectionnumber">4.3</span>&#x2003;Capacitors and inductors: dynamical bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-767" class="tocsubsection" >
+<span class="sectionnumber">4.4</span>&#x2003;Diodes and such</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-949" class="tocsubsection" >
+<span class="sectionnumber">4.5</span>&#x2003;Sources and generators</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1157" class="tocsubsection" >
+<span class="sectionnumber">4.6</span>&#x2003;Instruments</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1290" class="tocsubsection" >
+<span class="sectionnumber">4.7</span>&#x2003;Mechanical Analogy</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1303" class="tocsubsection" >
+<span class="sectionnumber">4.8</span>&#x2003;Miscellaneous bipoles and symbols</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1398" class="tocsubsection" >
+<span class="sectionnumber">4.9</span>&#x2003;Multiple wires (buses)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1411" class="tocsubsection" >
+<span class="sectionnumber">4.10</span>&#x2003;Crossings</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1442" class="tocsubsection" >
+<span class="sectionnumber">4.11</span>&#x2003;Arrows (fake and real)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1477" class="tocsubsection" >
+<span class="sectionnumber">4.12</span>&#x2003;Terminal shapes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1497" class="tocsubsection" >
+<span class="sectionnumber">4.13</span>&#x2003;Connectors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1558" class="tocsubsection" >
+<span class="sectionnumber">4.14</span>&#x2003;Block diagram components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1852" class="tocsubsection" >
+<span class="sectionnumber">4.15</span>&#x2003;Transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2264" class="tocsubsection" >
+<span class="sectionnumber">4.16</span>&#x2003;Electronic Tubes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2355" class="tocsubsection" >
+<span class="sectionnumber">4.17</span>&#x2003;RF components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2409" class="tocsubsection" >
+<span class="sectionnumber">4.18</span>&#x2003;Electro-Mechanical Devices</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2433" class="tocsubsection" >
+<span class="sectionnumber">4.19</span>&#x2003;Double bipoles (transformers)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2534" class="tocsubsection" >
+<span class="sectionnumber">4.20</span>&#x2003;Amplifiers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2669" class="tocsubsection" >
+<span class="sectionnumber">4.21</span>&#x2003;Switches, buttons and jumpers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2878" class="tocsubsection" >
+<span class="sectionnumber">4.22</span>&#x2003;Logic gates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3148" class="tocsubsection" >
+<span class="sectionnumber">4.23</span>&#x2003;Flip-flops</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3204" class="tocsubsection" >
+<span class="sectionnumber">4.24</span>&#x2003;Multiplexer and de-multiplexer</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3312" class="tocsubsection" >
+<span class="sectionnumber">4.25</span>&#x2003;Chips (integrated circuits)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3355" class="tocsubsection" >
+<span class="sectionnumber">4.26</span>&#x2003;Seven segment displays</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3380" class="tocsection" >
+<span class="sectionnumber">5</span>&#x2003;Labels, voltages and currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3416" class="tocsubsection" >
+<span class="sectionnumber">5.1</span>&#x2003;Labels and Annotations</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3478" class="tocsubsection" >
+<span class="sectionnumber">5.2</span>&#x2003;Currents and voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3739" class="tocsubsection" >
+<span class="sectionnumber">5.3</span>&#x2003;Currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3816" class="tocsubsection" >
+<span class="sectionnumber">5.4</span>&#x2003;Flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3852" class="tocsubsection" >
+<span class="sectionnumber">5.5</span>&#x2003;Voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4085" class="tocsubsection" >
+<span class="sectionnumber">5.6</span>&#x2003;Changing the style of labels, voltages, and other text ornaments</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4095" class="tocsubsection" >
+<span class="sectionnumber">5.7</span>&#x2003;Accessing labels text nodes</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4107" class="tocsubsection" >
+<span class="sectionnumber">5.8</span>&#x2003;Advanced voltages, currents and flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4200" class="tocsubsection" >
+<span class="sectionnumber">5.9</span>&#x2003;Integration with siunitx</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4234" class="tocsection" >
+<span class="sectionnumber">6</span>&#x2003;Using bipoles in circuits</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4235" class="tocsubsection" >
+<span class="sectionnumber">6.1</span>&#x2003;Nodes (also called poles)</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4333" class="tocsubsection" >
+<span class="sectionnumber">6.2</span>&#x2003;Mirroring and Inverting</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4369" class="tocsubsection" >
+<span class="sectionnumber">6.3</span>&#x2003;Putting them together</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4380" class="tocsubsection" >
+<span class="sectionnumber">6.4</span>&#x2003;Line joins between Path Components</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4393" class="tocsection" >
+<span class="sectionnumber">7</span>&#x2003;Colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4418" class="tocsubsection" >
+<span class="sectionnumber">7.1</span>&#x2003;Shape colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4454" class="tocsubsection" >
+<span class="sectionnumber">7.2</span>&#x2003;Fill colors</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4498" class="tocsection" >
+<span class="sectionnumber">8</span>&#x2003;FAQ: Frequently asked questions</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4499" class="tocsubsection" >
+<span class="sectionnumber">8.1</span>&#x2003;Using named nodes in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4521" class="tocsubsection" >
+<span class="sectionnumber">8.2</span>&#x2003;Using dashed (or colored) wires in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4558" class="tocsubsection" >
+<span class="sectionnumber">8.3</span>&#x2003;Errors when externalizing pictures</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4561" class="tocsubsection" >
+<span class="sectionnumber">8.4</span>&#x2003;Labels, voltages and currents woes</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4567" class="tocsubsection" >
+<span class="sectionnumber">8.5</span>&#x2003;Global scaling and rotating</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4568" class="tocsubsection" >
+<span class="sectionnumber">8.6</span>&#x2003;Tunable components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4576" class="tocsection" >
+<span class="sectionnumber">9</span>&#x2003;Defining new components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4579" class="tocsubsection" >
+<span class="sectionnumber">9.1</span>&#x2003;Suggested setup</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4590" class="tocsubsection" >
+<span class="sectionnumber">9.2</span>&#x2003;Path-style component</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4615" class="tocsubsection" >
+<span class="sectionnumber">9.3</span>&#x2003;Node-style component</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4625" class="tocsection" >
+<span class="sectionnumber">10</span>&#x2003;Examples</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4626" class="tocsubsection" >
+<span class="sectionnumber">10.1</span>&#x2003;A red diode</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4632" class="tocsubsection" >
+<span class="sectionnumber">10.2</span>&#x2003;Using the (experimental) <kbd>siunitx</kbd> syntax</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4643" class="tocsubsection" >
+<span class="sectionnumber">10.3</span>&#x2003;Photodiodes</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4649" class="tocsubsection" >
+<span class="sectionnumber">10.4</span>&#x2003;A Sallen-Key cell</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4655" class="tocsubsection" >
+<span class="sectionnumber">10.5</span>&#x2003;Mixing circuits and graphs</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4661" class="tocsubsection" >
+<span class="sectionnumber">10.6</span>&#x2003;RF circuit</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4667" class="tocsubsection" >
+<span class="sectionnumber">10.7</span>&#x2003;A styled low noise input stage</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4674" class="tocsubsection" >
+<span class="sectionnumber">10.8</span>&#x2003;An example with the <kbd>compatibility</kbd> option</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4676" class="tocsubsection" >
+<span class="sectionnumber">10.9</span>&#x2003;3-phases block schematic</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4682" class="tocsubsection" >
+<span class="sectionnumber">10.10</span>&#x2003;Using components in <kbd>pic</kbd>s (since <kbd>v1.8.0</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4688" class="tocsubsection" >
+<span class="sectionnumber">10.11</span>&#x2003;Automatic user-defined voltages, currents and flows (since <kbd>v1.8.5</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4697" class="tocsection" >
+<span class="sectionnumber">11</span>&#x2003;Changelog and Release Notes</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4701" class="tocsection" >
+Index</a>
+</p>
+
+
+</div>
+
+</nav>
+
+</div>
+
+
+<main class="bodycontainer">
+
+
+<section class="textbody">
+
+<h1>CircuiTi<em>k</em>Z<br />
+version 1.8.6-unreleased (2026/02/10)</h1>
+
+<!--MathJax customizations:-->
+<div data-nosnippet
+    style="display:none"
+>
+
+\(\newcommand{\footnotename}{footnote}\)
+
+\(\def \LWRfootnote {1}\)
+
+\(\newcommand {\footnote }[2][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\newcommand {\footnotemark }[1][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\let \LWRorighspace \hspace \)
+
+\(\renewcommand {\hspace }{\ifstar \LWRorighspace \LWRorighspace }\)
+
+\(\newcommand {\TextOrMath }[2]{#2}\)
+
+\(\newcommand {\mathnormal }[1]{{#1}}\)
+
+\(\newcommand \ensuremath [1]{#1}\)
+
+\(\newcommand {\LWRframebox }[2][]{\fbox {#2}} \newcommand {\framebox }[1][]{\LWRframebox } \)
+
+\(\newcommand {\setlength }[2]{}\)
+
+\(\newcommand {\addtolength }[2]{}\)
+
+\(\newcommand {\setcounter }[2]{}\)
+
+\(\newcommand {\addtocounter }[2]{}\)
+
+\(\newcommand {\arabic }[1]{}\)
+
+\(\newcommand {\number }[1]{}\)
+
+\(\newcommand {\noalign }[1]{\text {#1}\notag \\}\)
+
+\(\newcommand {\cline }[1]{}\)
+
+\(\newcommand {\directlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\luatexdirectlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\protect }{}\)
+
+\(\def \LWRabsorbnumber #1 {}\)
+
+\(\def \LWRabsorbquotenumber &quot;#1 {}\)
+
+\(\newcommand {\LWRabsorboption }[1][]{}\)
+
+\(\newcommand {\LWRabsorbtwooptions }[1][]{\LWRabsorboption }\)
+
+\(\def \mathchar {\ifnextchar &quot;\LWRabsorbquotenumber \LWRabsorbnumber }\)
+
+\(\def \mathcode #1={\mathchar }\)
+
+\(\let \delcode \mathcode \)
+
+\(\let \delimiter \mathchar \)
+
+\(\def \oe {\unicode {x0153}}\)
+
+\(\def \OE {\unicode {x0152}}\)
+
+\(\def \ae {\unicode {x00E6}}\)
+
+\(\def \AE {\unicode {x00C6}}\)
+
+\(\def \aa {\unicode {x00E5}}\)
+
+\(\def \AA {\unicode {x00C5}}\)
+
+\(\def \o {\unicode {x00F8}}\)
+
+\(\def \O {\unicode {x00D8}}\)
+
+\(\def \l {\unicode {x0142}}\)
+
+\(\def \L {\unicode {x0141}}\)
+
+\(\def \ss {\unicode {x00DF}}\)
+
+\(\def \SS {\unicode {x1E9E}}\)
+
+\(\def \dag {\unicode {x2020}}\)
+
+\(\def \ddag {\unicode {x2021}}\)
+
+\(\def \P {\unicode {x00B6}}\)
+
+\(\def \copyright {\unicode {x00A9}}\)
+
+\(\def \pounds {\unicode {x00A3}}\)
+
+\(\let \LWRref \ref \)
+
+\(\renewcommand {\ref }{\ifstar \LWRref \LWRref }\)
+
+\( \newcommand {\multicolumn }[3]{#3}\)
+
+\(\require {textcomp}\)
+
+\(\newcommand {\tothe }[1]{^{#1}}\)
+
+\(\newcommand {\raiseto }[2]{{#2}^{#1}}\)
+
+\(\newcommand {\LWRsiunitxEND }{}\)
+
+\(\def \LWRsiunitxang #1;#2;#3;#4\LWRsiunitxEND {\ifblank {#1}{}{\num {#1}\degree }\ifblank {#2}{}{\num {#2}^{\unicode {x2032}}}\ifblank {#3}{}{\num {#3}^{\unicode {x2033}}}}\)
+
+\(\newcommand {\ang }[2][]{\LWRsiunitxang #2;;;\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxdistribunit {}\)
+
+\(\newcommand {\LWRsiunitxENDTWO }{}\)
+
+\(\def \LWRsiunitxprintdecimalsubtwo #1,#2,#3\LWRsiunitxENDTWO {\ifblank {#1}{0}{\mathrm {#1}}\ifblank {#2}{}{{\LWRsiunitxdecimal }\mathrm {#2}}}\)
+
+\(\def \LWRsiunitxprintdecimalsub #1.#2.#3\LWRsiunitxEND {\LWRsiunitxprintdecimalsubtwo #1,,\LWRsiunitxENDTWO \ifblank {#2}{}{{\LWRsiunitxdecimal }\LWRsiunitxprintdecimalsubtwo #2,,\LWRsiunitxENDTWO }}\)
+
+\(\newcommand {\LWRsiunitxprintdecimal }[1]{\LWRsiunitxprintdecimalsub #1...\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxnumplus #1+#2+#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxprintdecimal {#1}}{\ifblank {#1}{\LWRsiunitxprintdecimal {#2}}{\LWRsiunitxprintdecimal {#1}\unicode {x02B}\LWRsiunitxprintdecimal {#2}}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumminus #1-#2-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumplus #1+++\LWRsiunitxEND }{\ifblank {#1}{}{\LWRsiunitxprintdecimal {#1}}\unicode {x02212}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpmmacro #1\pm #2\pm #3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumminus #1---\LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpm #1+-#2+-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpmmacro #1\pm \pm \pm \LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\newcommand {\LWRsiunitxnumscientific }[2]{\ifblank {#1}{}{\ifstrequal {#1}{-}{-}{\LWRsiunitxprintdecimal {#1}\times }}10^{\LWRsiunitxprintdecimal {#2}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumD #1D#2D#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpm #1+-+-\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumd #1d#2d#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumD #1DDD\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumE #1E#2E#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumd #1ddd\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnume #1e#2e#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumE #1EEE\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumx #1x#2x#3x#4\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnume #1eee\LWRsiunitxEND }{\ifblank {#3}{\LWRsiunitxnume #1eee\LWRsiunitxEND \times \LWRsiunitxnume #2eee\LWRsiunitxEND }{\LWRsiunitxnume #1eee\LWRsiunitxEND
+\times \LWRsiunitxnume #2eee\LWRsiunitxEND \times \LWRsiunitxnume #3eee\LWRsiunitxEND }}}\)
+
+\(\newcommand {\num }[2][]{\LWRsiunitxnumx #2xxxxx\LWRsiunitxEND }\)
+
+\(\newcommand {\si }[2][]{\mathrm {\gsubstitute {#2}{~}{\,}}}\)
+
+\(\def \LWRsiunitxSIopt #1[#2]#3{\def \LWRsiunitxdistribunit {\,\si {#3}}{#2}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\LWRsiunitxSI }[2]{\def \LWRsiunitxdistribunit {\,\si {#2}}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\SI }[2][]{\ifnextchar [{\LWRsiunitxSIopt {#2}}{\LWRsiunitxSI {#2}}}\)
+
+\(\newcommand {\numlist }[2][]{\text {#2}}\)
+
+\(\newcommand {\numrange }[3][]{\num {#2}\ \LWRsiunitxrangephrase \ \num {#3}}\)
+
+\(\newcommand {\SIlist }[3][]{\text {#2}\,\si {#3}}\)
+
+\(\newcommand {\SIrange }[4][]{\num {#2}\,#4\ \LWRsiunitxrangephrase \ \num {#3}\,#4}\)
+
+\(\newcommand {\tablenum }[2][]{\mathrm {#2}}\)
+
+\(\newcommand {\ampere }{\mathrm {A}}\)
+
+\(\newcommand {\candela }{\mathrm {cd}}\)
+
+\(\newcommand {\kelvin }{\mathrm {K}}\)
+
+\(\newcommand {\kilogram }{\mathrm {kg}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\mole }{\mathrm {mol}}\)
+
+\(\newcommand {\second }{\mathrm {s}}\)
+
+\(\newcommand {\becquerel }{\mathrm {Bq}}\)
+
+\(\newcommand {\degreeCelsius }{\unicode {x2103}}\)
+
+\(\newcommand {\coulomb }{\mathrm {C}}\)
+
+\(\newcommand {\farad }{\mathrm {F}}\)
+
+\(\newcommand {\gray }{\mathrm {Gy}}\)
+
+\(\newcommand {\hertz }{\mathrm {Hz}}\)
+
+\(\newcommand {\henry }{\mathrm {H}}\)
+
+\(\newcommand {\joule }{\mathrm {J}}\)
+
+\(\newcommand {\katal }{\mathrm {kat}}\)
+
+\(\newcommand {\lumen }{\mathrm {lm}}\)
+
+\(\newcommand {\lux }{\mathrm {lx}}\)
+
+\(\newcommand {\newton }{\mathrm {N}}\)
+
+\(\newcommand {\ohm }{\mathrm {\Omega }}\)
+
+\(\newcommand {\pascal }{\mathrm {Pa}}\)
+
+\(\newcommand {\radian }{\mathrm {rad}}\)
+
+\(\newcommand {\siemens }{\mathrm {S}}\)
+
+\(\newcommand {\sievert }{\mathrm {Sv}}\)
+
+\(\newcommand {\steradian }{\mathrm {sr}}\)
+
+\(\newcommand {\tesla }{\mathrm {T}}\)
+
+\(\newcommand {\volt }{\mathrm {V}}\)
+
+\(\newcommand {\watt }{\mathrm {W}}\)
+
+\(\newcommand {\weber }{\mathrm {Wb}}\)
+
+\(\newcommand {\day }{\mathrm {d}}\)
+
+\(\newcommand {\degree }{\mathrm {^\circ }}\)
+
+\(\newcommand {\hectare }{\mathrm {ha}}\)
+
+\(\newcommand {\hour }{\mathrm {h}}\)
+
+\(\newcommand {\litre }{\mathrm {l}}\)
+
+\(\newcommand {\liter }{\mathrm {L}}\)
+
+\(\newcommand {\arcminute }{^\prime }\)
+
+\(\newcommand {\minute }{\mathrm {min}}\)
+
+\(\newcommand {\arcsecond }{^{\prime \prime }}\)
+
+\(\newcommand {\tonne }{\mathrm {t}}\)
+
+\(\newcommand {\astronomicalunit }{au}\)
+
+\(\newcommand {\atomicmassunit }{u}\)
+
+\(\newcommand {\bohr }{\mathit {a}_0}\)
+
+\(\newcommand {\clight }{\mathit {c}_0}\)
+
+\(\newcommand {\dalton }{\mathrm {D}_\mathrm {a}}\)
+
+\(\newcommand {\electronmass }{\mathit {m}_{\mathrm {e}}}\)
+
+\(\newcommand {\electronvolt }{\mathrm {eV}}\)
+
+\(\newcommand {\elementarycharge }{\mathit {e}}\)
+
+\(\newcommand {\hartree }{\mathit {E}_{\mathrm {h}}}\)
+
+\(\newcommand {\planckbar }{\mathit {\unicode {x210F}}}\)
+
+\(\newcommand {\angstrom }{\mathrm {\unicode {x212B}}}\)
+
+\(\let \LWRorigbar \bar \)
+
+\(\newcommand {\bar }{\mathrm {bar}}\)
+
+\(\newcommand {\barn }{\mathrm {b}}\)
+
+\(\newcommand {\bel }{\mathrm {B}}\)
+
+\(\newcommand {\decibel }{\mathrm {dB}}\)
+
+\(\newcommand {\knot }{\mathrm {kn}}\)
+
+\(\newcommand {\mmHg }{\mathrm {mmHg}}\)
+
+\(\newcommand {\nauticalmile }{\mathrm {M}}\)
+
+\(\newcommand {\neper }{\mathrm {Np}}\)
+
+\(\newcommand {\yocto }{\mathrm {y}}\)
+
+\(\newcommand {\zepto }{\mathrm {z}}\)
+
+\(\newcommand {\atto }{\mathrm {a}}\)
+
+\(\newcommand {\femto }{\mathrm {f}}\)
+
+\(\newcommand {\pico }{\mathrm {p}}\)
+
+\(\newcommand {\nano }{\mathrm {n}}\)
+
+\(\newcommand {\micro }{\mathrm {\unicode {x00B5}}}\)
+
+\(\newcommand {\milli }{\mathrm {m}}\)
+
+\(\newcommand {\centi }{\mathrm {c}}\)
+
+\(\newcommand {\deci }{\mathrm {d}}\)
+
+\(\newcommand {\deca }{\mathrm {da}}\)
+
+\(\newcommand {\hecto }{\mathrm {h}}\)
+
+\(\newcommand {\kilo }{\mathrm {k}}\)
+
+\(\newcommand {\mega }{\mathrm {M}}\)
+
+\(\newcommand {\giga }{\mathrm {G}}\)
+
+\(\newcommand {\tera }{\mathrm {T}}\)
+
+\(\newcommand {\peta }{\mathrm {P}}\)
+
+\(\newcommand {\exa }{\mathrm {E}}\)
+
+\(\newcommand {\zetta }{\mathrm {Z}}\)
+
+\(\newcommand {\yotta }{\mathrm {Y}}\)
+
+\(\newcommand {\percent }{\mathrm {\%}}\)
+
+\(\newcommand {\meter }{\mathrm {m}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\gram }{\mathrm {g}}\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\of }[1]{_{\mathrm {#1}}}\)
+
+\(\newcommand {\squared }{^2}\)
+
+\(\newcommand {\square }[1]{\mathrm {#1}^2}\)
+
+\(\newcommand {\cubed }{^3}\)
+
+\(\newcommand {\cubic }[1]{\mathrm {#1}^3}\)
+
+\(\newcommand {\per }{\,\mathrm {/}}\)
+
+\(\newcommand {\celsius }{\unicode {x2103}}\)
+
+\(\newcommand {\fg }{\femto \gram }\)
+
+\(\newcommand {\pg }{\pico \gram }\)
+
+\(\newcommand {\ng }{\nano \gram }\)
+
+\(\newcommand {\ug }{\micro \gram }\)
+
+\(\newcommand {\mg }{\milli \gram }\)
+
+\(\newcommand {\g }{\gram }\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\amu }{\mathrm {u}}\)
+
+\(\newcommand {\pm }{\pico \metre }\)
+
+\(\newcommand {\nm }{\nano \metre }\)
+
+\(\newcommand {\um }{\micro \metre }\)
+
+\(\newcommand {\mm }{\milli \metre }\)
+
+\(\newcommand {\cm }{\centi \metre }\)
+
+\(\newcommand {\dm }{\deci \metre }\)
+
+\(\newcommand {\m }{\metre }\)
+
+\(\newcommand {\km }{\kilo \metre }\)
+
+\(\newcommand {\as }{\atto \second }\)
+
+\(\newcommand {\fs }{\femto \second }\)
+
+\(\newcommand {\ps }{\pico \second }\)
+
+\(\newcommand {\ns }{\nano \second }\)
+
+\(\newcommand {\us }{\micro \second }\)
+
+\(\newcommand {\ms }{\milli \second }\)
+
+\(\newcommand {\s }{\second }\)
+
+\(\newcommand {\fmol }{\femto \mol }\)
+
+\(\newcommand {\pmol }{\pico \mol }\)
+
+\(\newcommand {\nmol }{\nano \mol }\)
+
+\(\newcommand {\umol }{\micro \mol }\)
+
+\(\newcommand {\mmol }{\milli \mol }\)
+
+\(\newcommand {\mol }{\mol }\)
+
+\(\newcommand {\kmol }{\kilo \mol }\)
+
+\(\newcommand {\pA }{\pico \ampere }\)
+
+\(\newcommand {\nA }{\nano \ampere }\)
+
+\(\newcommand {\uA }{\micro \ampere }\)
+
+\(\newcommand {\mA }{\milli \ampere }\)
+
+\(\newcommand {\A }{\ampere }\)
+
+\(\newcommand {\kA }{\kilo \ampere }\)
+
+\(\newcommand {\ul }{\micro \litre }\)
+
+\(\newcommand {\ml }{\milli \litre }\)
+
+\(\newcommand {\l }{\litre }\)
+
+\(\newcommand {\hl }{\hecto \litre }\)
+
+\(\newcommand {\uL }{\micro \liter }\)
+
+\(\newcommand {\mL }{\milli \liter }\)
+
+\(\newcommand {\L }{\liter }\)
+
+\(\newcommand {\hL }{\hecto \liter }\)
+
+\(\newcommand {\mHz }{\milli \hertz }\)
+
+\(\newcommand {\Hz }{\hertz }\)
+
+\(\newcommand {\kHz }{\kilo \hertz }\)
+
+\(\newcommand {\MHz }{\mega \hertz }\)
+
+\(\newcommand {\GHz }{\giga \hertz }\)
+
+\(\newcommand {\THz }{\tera \hertz }\)
+
+\(\newcommand {\mN }{\milli \newton }\)
+
+\(\newcommand {\N }{\newton }\)
+
+\(\newcommand {\kN }{\kilo \newton }\)
+
+\(\newcommand {\MN }{\mega \newton }\)
+
+\(\newcommand {\Pa }{\pascal }\)
+
+\(\newcommand {\kPa }{\kilo \pascal }\)
+
+\(\newcommand {\MPa }{\mega \pascal }\)
+
+\(\newcommand {\GPa }{\giga \pascal }\)
+
+\(\newcommand {\mohm }{\milli \ohm }\)
+
+\(\newcommand {\kohm }{\kilo \ohm }\)
+
+\(\newcommand {\Mohm }{\mega \ohm }\)
+
+\(\newcommand {\pV }{\pico \volt }\)
+
+\(\newcommand {\nV }{\nano \volt }\)
+
+\(\newcommand {\uV }{\micro \volt }\)
+
+\(\newcommand {\mV }{\milli \volt }\)
+
+\(\newcommand {\V }{\volt }\)
+
+\(\newcommand {\kV }{\kilo \volt }\)
+
+\(\newcommand {\W }{\watt }\)
+
+\(\newcommand {\uW }{\micro \watt }\)
+
+\(\newcommand {\mW }{\milli \watt }\)
+
+\(\newcommand {\kW }{\kilo \watt }\)
+
+\(\newcommand {\MW }{\mega \watt }\)
+
+\(\newcommand {\GW }{\giga \watt }\)
+
+\(\newcommand {\J }{\joule }\)
+
+\(\newcommand {\uJ }{\micro \joule }\)
+
+\(\newcommand {\mJ }{\milli \joule }\)
+
+\(\newcommand {\kJ }{\kilo \joule }\)
+
+\(\newcommand {\eV }{\electronvolt }\)
+
+\(\newcommand {\meV }{\milli \electronvolt }\)
+
+\(\newcommand {\keV }{\kilo \electronvolt }\)
+
+\(\newcommand {\MeV }{\mega \electronvolt }\)
+
+\(\newcommand {\GeV }{\giga \electronvolt }\)
+
+\(\newcommand {\TeV }{\tera \electronvolt }\)
+
+\(\newcommand {\kWh }{\kilo \watt \hour }\)
+
+\(\newcommand {\F }{\farad }\)
+
+\(\newcommand {\fF }{\femto \farad }\)
+
+\(\newcommand {\pF }{\pico \farad }\)
+
+\(\newcommand {\K }{\mathrm {K}}\)
+
+\(\newcommand {\dB }{\mathrm {dB}}\)
+
+\(\newcommand {\kibi }{\mathrm {Ki}}\)
+
+\(\newcommand {\mebi }{\mathrm {Mi}}\)
+
+\(\newcommand {\gibi }{\mathrm {Gi}}\)
+
+\(\newcommand {\tebi }{\mathrm {Ti}}\)
+
+\(\newcommand {\pebi }{\mathrm {Pi}}\)
+
+\(\newcommand {\exbi }{\mathrm {Ei}}\)
+
+\(\newcommand {\zebi }{\mathrm {Zi}}\)
+
+\(\newcommand {\yobi }{\mathrm {Yi}}\)
+
+\(\let \unit \si \)
+
+\(\let \qty \SI \)
+
+\(\let \qtylist \SIlist \)
+
+\(\let \qtyrange \SIrange \)
+
+\(\let \numproduct \num \)
+
+\(\let \qtyproduct \SI \)
+
+\(\let \complexnum \num \)
+
+\(\newcommand {\complexqty }[3][]{(\complexnum {#2})\si {#3}}\)
+
+\(\newcommand {\toprule }[1][]{\hline }\)
+
+\(\let \midrule \toprule \)
+
+\(\let \bottomrule \toprule \)
+
+\(\def \LWRbooktabscmidruleparen (#1)#2{}\)
+
+\(\newcommand {\LWRbooktabscmidrulenoparen }[1]{}\)
+
+\(\newcommand {\cmidrule }[1][]{\ifnextchar (\LWRbooktabscmidruleparen \LWRbooktabscmidrulenoparen }\)
+
+\(\newcommand {\morecmidrules }{}\)
+
+\(\newcommand {\specialrule }[3]{\hline }\)
+
+\(\newcommand {\addlinespace }[1][]{}\)
+\(\require {upgreek}\)
+
+\(\def \LWRsiunitxrangephrase {\TextOrMath       { }{\ }\protect \mbox {to}\TextOrMath      { }{\ }}\)
+
+\(\def \LWRsiunitxdecimal {.}\)
+
+</div>
+
+<!--
+...... section Colors ......
+-->
+<h4 id="autosec-4393"><span class="sectionnumber">7&#x2003;</span>Colors</h4>
+<a id="circuitikzmanual-autopage-4393"></a>
+<a id="circuitikzmanual-autofile-7"></a>
+
+<a id="sec:colors"></a>
+
+<p>
+Color support in CircuiTi<em>k</em>Z has been quite limited up to version 1.5.1; from that one onward there has been an effort to make components’ behavior more intuitive.
+</p>
+
+<p>
+Part of the problem is how colors in paths are treated by Ti<em>k</em>Z itself; you can see part of the discussion on <a href="https://github.com/circuitikz/circuitikz/issues/605" target="_blank" >this issue</a> and in <a
+href="https://tex.stackexchange.com/questions/634987/pgf-basic-layer-struggling-again-with-colors" target="_blank" >this question on TeX.SX</a> — many thanks to <kbd>@muzimuzhi</kbd> for helping there. Basically, nodes are drawn <em>after</em> the
+path is completed, and color is applied to the path at the end. Look at this code (pure Ti<em>k</em>Z, no CircuiTi<em>k</em>Z here):
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4394"></a>
+<pre class="programlisting">
+ \tikz \draw[thick] (0,0) -- (1,0) {[color=red] -- (2,0)
+       node[draw]{}} --(3,0); \par
+\tikz \draw[thick] (0,0) -- (1,0) [color=red] -- (2,0) node[draw]{} --(3,0);
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4396"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1206"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1206.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span><br />
+
+<span
+    id="lateximage-circuitikzmanual-1207"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1207.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+So the path is drawn with the last “effective” (in current group) color. The deferred behavior of the color properties is very difficult to track for CircuiTi<em>k</em>Z, especially when the shorthand <a id="LWRindex-1315"></a><kbd>color-name</kbd> (e.g.,
+<kbd>red</kbd> instead of <kbd>color=red</kbd>) is used. CircuiTi<em>k</em>Z will try to keep track of the colors specified by <kbd>color=...</kbd> and <kbd>fill=...</kbd>, but if you use the implicit way (<kbd>\draw[red]...</kbd>) it often fails.
+</p>
+
+<p>
+If you’re adventurous, you can try to add
+</p>
+<pre class="programlisting">
+      \usepackage{regexpatch}\ctikzPatchImplicitColor
+ </pre>
+
+<p>
+after loading CircuiTi<em>k</em>Z, and it will try to patch the default commands to keep track of the “current color”; if it fails will give a warning like <kbd>patch failed, use only explicit color=...</kbd>. This is, unfortunately, not compatible with package
+<kbd>xpatch</kbd> (and much others, which load <kbd>xpatch</kbd>).<sup>147</sup><a id="circuitikzmanual-autopage-4401"></a>.
+</p>
+
+<p>
+Before 1.5.0, CircuiTi<em>k</em>Z used black as the default color. Now it tries to follow the current color, as Ti<em>k</em>Z does normally; but notice that there is a difference with the fill strategy:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4402"></a>
+<pre class="programlisting">
+ \color{red}
+ Red text
+ \tikz \draw (0,0) -- node[draw] {x} (1,0) -- node[draw=
+      cyan] {y} (2,0);
+ \tikz \draw (0,0) to[R] (2,0) to[R,color=cyan] (4,0) to
+       [generic] (6,0) to [fullgeneric] (8,0);
+
+ \color{blue}
+ Blue text
+ \tikz \draw (0,0) -- node[draw] {x} (1,0) -- node[draw=
+      cyan] {y} (2,0);
+ \tikz \draw (0,0) to[R] (2,0) to[R,color=cyan] (4,0) to
+       [generic] (6,0) to [fullgeneric] (8,0);
+
+ \color{black}
+ Black text
+ \tikz \draw[fill=yellow] (0,0) -- node[draw, fill] {x}
+      (1,0) -- node[draw=cyan] {y} (2,0);
+\tikz \draw[fill=yellow] (0,0) to[R] (2,0) to[R,color=cyan] (4,0) to [generic] (6,0) to [fullgeneric] (8,0);
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4404"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+> Red text <span
+    id="lateximage-circuitikzmanual-1208"
+    class="lateximagesource"
+><!--
+x   y
+--><img
+    src="circuitikzmanual-images/image-1208.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> <span
+    id="lateximage-circuitikzmanual-1209"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1209.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span><br />
+
+Blue text <span
+    id="lateximage-circuitikzmanual-1210"
+    class="lateximagesource"
+><!--
+x   y
+--><img
+    src="circuitikzmanual-images/image-1210.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> <span
+    id="lateximage-circuitikzmanual-1211"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1211.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span><br />
+
+Black text <span
+    id="lateximage-circuitikzmanual-1212"
+    class="lateximagesource"
+><!--
+x   y
+--><img
+    src="circuitikzmanual-images/image-1212.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> <span
+    id="lateximage-circuitikzmanual-1213"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1213.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+CircuiTi<em>k</em>Z components that are fillable will inherit the <a id="LWRindex-1316"></a><kbd>fill</kbd> property of the path (it is almost impossible to do otherwise) as if the <kbd>fill</kbd> flag was present. “Full”-type elements (for example, full diodes or
+similar) are filled with the draw color; elements with intrinsic labels (i.e., labels that are part of the shape, like signs on amplifiers and pin numbers in chips) are drawn with the “draw” colors.
+</p>
+
+<p>
+Basically, you should have no problem if:
+</p>
+<ul class="enumerate" style="list-style-type:none">
+
+<li>
+<p>
+<span class="listmarker">1.</span> You stick to use styles (see&nbsp;<a href="node-The-components-usage.html#sec:styling-fillcolor">3.3.2</a>) for filling your components, or using a direct <kbd>fill=...</kbd> option in the component node or <kbd>to</kbd>
+option;
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">2.</span> do not try to change the color mid-path; sometimes it works (see the examples below), but it’s better to avoid it (using different paths is better);
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">3.</span> when coloring whole circuits, it’s better to use the option <kbd>color=...</kbd> in your global picture options or in the <span class="verb">\draw</span> command (not just the color name as a shorthand);
+</p>
+
+</li>
+<li>
+
+<p>
+<span class="listmarker">4.</span> forget about transparency.
+</p>
+</li>
+</ul>
+
+<p>
+Nevertheless, if you really need to do strange things with colors you can read on; you can do almost everything but there are several glitches to take into account.
+</p>
+
+<p>
+Moreover, in some cases, also the engine you are using (as <kbd>pdflatex</kbd>, <kbd>xelatex</kbd>, and so on) can impact corner cases (or even not so corner, like in <a href="https://tex.stackexchange.com/q/709273/38080" target="_blank" >american-style
+voltage source signs</a>).
+</p>
+<div role="note" class="footnotes">
+
+<a id="circuitikzmanual-autopage-4417"></a>
+<p>
+<sup>147</sup>&nbsp;version <kbd>1.5.0</kbd> loaded it unconditionally for LaTeX; please do not use it
+</p>
+
+
+</div>
+<!--
+...... subsection Shape colors ......
+-->
+<h5 id="autosec-4418"><span class="sectionnumber">7.1&#x2003;</span>Shape colors</h5>
+<a id="circuitikzmanual-autopage-4418"></a>
+
+
+<a id="sec:shape-colors"></a>
+
+<p>
+The color of the components is stored in the key <span class="verb">\circuitikzbasekey/color</span>. CircuiTi<em>k</em>Z tries to follow the color set in Ti<em>k</em>Z, although sometimes it fails. The following circuit will fail to draw the circuit in red if the
+patching of the inner commands of Ti<em>k</em>Z fails, like for example in Con<span class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</span>X</span></span>t.
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4419"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw[red]
+   (0,2) node[and port](myand1){1}
+   (0,0) node[and port](myand2){2}
+   (2,1) node[xnor port](myxnor){3}
+   (myand1.out) -| (myxnor.in 1)
+   (myand2.out) -| (myxnor.in 2)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4421"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1214"
+    class="lateximagesource"
+><!--
+1
+
+    3
+
+2
+--><img
+    src="circuitikzmanual-images/image-1214.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+If you see this problem, please do not use just the color name as a style, like <span class="verb">[red]</span>, but rather assign the style <span class="verb">[color=red]</span>.
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4424"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw[color=red]
+   (0,2) node[and port](myand1){1}
+   (0,0) node[and port](myand2){2}
+   (2,1) node[xnor port](myxnor){3}
+   (myand1.out) -| (myxnor.in 1)
+   (myand2.out) -| (myxnor.in 2)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4426"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1215"
+    class="lateximagesource"
+><!--
+1
+
+    3
+
+2
+--><img
+    src="circuitikzmanual-images/image-1215.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+One can, of course, change the color directly in the component:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4429"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw
+   (0,0) node[pnp, color=blue](pnp2){q1}
+   (pnp2.B) node[pnp, xscale=-1, anchor=B, color=brown](
+      pnp1){\ctikzflipx{q2}}
+   (pnp1.C) node[npn, anchor=C, color=green](npn1){q3}
+   (pnp2.C) node[npn, xscale=-1, anchor=C, color=magenta
+      ](npn2){\ctikzflipx{q4}}
+   (pnp1.E) -- (pnp2.E) (npn1.E) -- (npn2.E)
+   (pnp1.B) node[circ]{} |- (pnp2.C) node[circ]{}
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4431"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1216"
+    class="lateximagesource"
+><!--
+q2             q1
+
+
+
+     q3   q4
+--><img
+    src="circuitikzmanual-images/image-1216.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+The all-in-one stream of bipoles poses some challenges, as only the actual body of the bipole, and not the connecting lines, will be rendered in the specified color (Notice that the following example uses the special <kbd>siunitx</kbd> shorthand; you can use it only in
+simple cases like here, in general using the full <span class="verb">\SI{}</span> or <span class="verb">\qty{}</span> commands).
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4434"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw
+   (0,0) to[V=1&lt;\volt&gt;] (0,2)
+         to[R=1&lt;\ohm&gt;, color=red] (2,2)
+         to[C=1&lt;\farad&gt;] (2,0) -- (0,0)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4436"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1217"
+    class="lateximagesource"
+><!--
+     1Ω
+
+
+
+1V        1F
+--><img
+    src="circuitikzmanual-images/image-1217.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+The postponed application of colors creates a problem if you want to use arrows for voltages, because the “arrows” are partially part of the path, partially nodes:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4439"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw
+   (0,0){[red] to[V=1&lt;\volt&gt;] (0,2) }
+         to[R=1&lt;\ohm&gt;] (2,2)
+         to[C=1&lt;\farad&gt;] (2,0) -- (0,0)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4441"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1218"
+    class="lateximagesource"
+><!--
+     1Ω
+
+
+
+1V        1F
+--><img
+    src="circuitikzmanual-images/image-1218.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+...and that can become quite frustrating:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4444"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw
+   (0,0) to[V=1&lt;\volt&gt;, color=red] (0,2)
+         to[R=1&lt;\ohm&gt;] (2,2)
+         to[C=1&lt;\farad&gt;] (2,0) -- (0,0)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4446"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1219"
+    class="lateximagesource"
+><!--
+     1Ω
+
+
+
+1V        1F
+--><img
+    src="circuitikzmanual-images/image-1219.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+In those cases, the only way out is to specify different paths (and/or using advanced voltages, see&nbsp;<a href="node-Labels-voltages-currents.html#sec:vif-anchors">5.8</a>)
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4449"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw[color=red]
+   (0,0) to[V=1&lt;\volt&gt;, color=red] (0,2);
+   \draw (0,2) to[R=1&lt;\ohm&gt;] (2,2)
+         to[C=1&lt;\farad&gt;] (2,0) -- (0,0)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4451"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1220"
+    class="lateximagesource"
+><!--
+     1Ω
+
+
+
+1V        1F
+--><img
+    src="circuitikzmanual-images/image-1220.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection Fill colors ......
+-->
+<h5 id="autosec-4454"><span class="sectionnumber">7.2&#x2003;</span>Fill colors</h5>
+<a id="circuitikzmanual-autopage-4454"></a>
+
+
+<a id="sec:fill-colors"></a>
+
+<p>
+Since version 0.9.0, you can also fill most shapes with a color (the manual specifies which ones are fillable or not). The syntax is quite intuitive:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4455"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw
+     (0,2) node[and port, fill=yellow](myand1){1}
+     (0,0) node[and port, fill=cyan](myand2){2}
+     (2,1) node[xnor port,fill=red!30!white](myxnor){3}
+   (myand1.out) -| (myxnor.in 1)
+   (myand2.out) -| (myxnor.in 2)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4457"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1221"
+    class="lateximagesource"
+><!--
+1
+
+    3
+
+2
+--><img
+    src="circuitikzmanual-images/image-1221.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+This fill color will override any color defined by the style (see section&nbsp;<a href="node-The-components-usage.html#sec:styling-fillcolor">3.3.2</a>). If you want to override a style fill color with no-fill for a specific component, you need to override the style — it’s
+a bit unfortunate, but should be an exceptional thing anyway. Notice that in simple case <a id="LWRindex-1317"></a><kbd>fill opacity</kbd> works, but don’t count too much on it.
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4460"></a>
+<pre class="programlisting">
+ \begin{circuitikz}
+     \ctikzset{logic ports/fill=cyan!30!white}
+     \draw[red] (-0.5,3) -- (-0.5, -1);
+     \draw[red] (1.5,3) -- (1.5, -1);
+     \draw
+     (0,2) node[and port](myand1){1}
+     (0,0) node[and port, fill=cyan, fill opacity=0.7](
+      myand2){2}
+     (2,1) node[xnor port, circuitikz/logic ports/fill=
+      none
+               ](myxnor){3}
+   (myand1.out) -| (myxnor.in 1)
+   (myand2.out) -| (myxnor.in 2)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4462"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1222"
+    class="lateximagesource"
+><!--
+1
+
+    3
+
+2
+--><img
+    src="circuitikzmanual-images/image-1222.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+You can combine shape colors with fill colors, too, but you should use the explicit <kbd>color</kbd> option style for this:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4465"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw[color=red]
+     (0,2) node[and port, fill=yellow](myand1) {1}
+     (0,0) node[and port, fill=cyan] (myand2){2}
+     (2,1) node[xnor port,fill=red!30!white](myxnor){3}
+   (myand1.out) -| (myxnor.in 1)
+   (myand2.out) -| (myxnor.in 2)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4467"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1223"
+    class="lateximagesource"
+><!--
+1
+
+    3
+
+2
+--><img
+    src="circuitikzmanual-images/image-1223.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4470"></a>
+<pre class="programlisting">
+ \begin{circuitikz} \draw
+   (0,2) node[and port, color=black](myand1){1}
+   (0,0) node[and port, color=blue, fill=cyan](myand2)
+      {2}
+   (2,1) node[xnor port, color=red, fill=cyan](myxnor)
+      {3}
+   (myand1.out) -| (myxnor.in 1)
+   (myand2.out) -| (myxnor.in 2)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4472"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1224"
+    class="lateximagesource"
+><!--
+1
+
+    3
+
+2
+--><img
+    src="circuitikzmanual-images/image-1224.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsubsection Background colors different from white ......
+-->
+<h6 id="autosec-4475"><span class="sectionnumber">7.2.1&#x2003;</span>Background colors different from white</h6>
+<a id="circuitikzmanual-autopage-4475"></a>
+
+
+<a id="sec:background-colors-different"></a>
+
+<p>
+Notice also that the connection point is always filled, and the color <em>tries</em> to follow the color of the filling of the component (but look at section&nbsp;<a href="node-Using-bipoles-in-circuits.html#sec:transparent-poles">6.1.1</a>). Moreover, if you want
+to pass fill transparency down to path-style components, you <em>have</em> to put it into the options of the <span class="verb">\draw</span> command.
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4476"></a>
+<pre class="programlisting">
+ \begin{circuitikz}
+     \fill[cyan] (0,3.0) rectangle (7,7);
+     \draw [fill opacity=0.5] (1,6.5) to[generic, fill=
+      white,o-o] ++(2,0);
+     \draw (1,5.5) to[short, fill=red, o-o] ++(1,0) to[
+      short, -o] ++(1,0);
+     \draw[fill=yellow] (1,5) to[short, o-o] ++(1,0) to[
+      short, -o] ++(1,0);
+     \draw (1,4.5) to[short, o-o] ++(1,0) to[short, -o]
+      ++(1,0);
+     \draw (1,4) node[ocirc]{} -- ++(1,0) node[ocirc]{};
+     \draw [thick, color=green!50!black] (4,4) to [D,o-o
+      ,fill=yellow] ++(0,2) to[D*, fill=yellow]
+         ++(2,0) to[D*,fill=yellow] ++(0,-2) to[D, fill
+      =red, o-o] ++(-2,0);
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4478"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1225"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1225.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+As you can see, the “black” components (as <kbd>D*</kbd>) follow the color of the line, not the fill.
+</p>
+
+<p>
+Note, however, that if you choose a colored background, for example with the <span class="verb">\pagecolor{}</span> command or with other tricks, the nodes will be by default still filled with white.
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4481"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[european]
+     \fill[color=blue] (-1,-1) rectangle (4,1);
+     \draw[color=white] (0,0) to[R, o-o] ++(3,0);
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4483"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1226"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1226.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+You have two solutions for this. You can redefine the <a id="LWRindex-1318"></a><kbd>o-o</kbd> (and the similar commands <a id="LWRindex-1319"></a><kbd>-o</kbd>, <a id="LWRindex-1320"></a><kbd>o-</kbd>, <a id="LWRindex-1321"></a><kbd>*-o</kbd> and
+so on) with a blue filled “open” pole:
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4486"></a>
+<pre class="programlisting">
+ \tikzset{bcirc/.style={shape=ocirc, fill=blue}}
+ \ctikzset{o-o/.style ={
+     \circuitikzbasekey/bipole/nodes/left=bcirc,
+     \circuitikzbasekey/bipole/nodes/right=bcirc}}
+ \begin{circuitikz}[european]
+     \fill[color=blue] (-1,-1) rectangle (4,1);
+     \draw[color=white] (0,0) to[R, o-o] ++(3,0);
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4488"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+> <span
+    id="lateximage-circuitikzmanual-1227"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1227.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+Also, since <kbd>v1.2.3</kbd>, you can set the key <a id="LWRindex-1322"></a><kbd>open poles fill</kbd> (default: <kbd>white</kbd> which works for <kbd>ocirc</kbd>, <kbd>odiamondpole</kbd> and <kbd>osquarepole</kbd>):
+</p>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4491"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[european]
+     \ctikzset{open poles fill=blue}
+     \fill[color=blue] (-1,-1) rectangle (4,1);
+     \draw[color=white] (0,0) to[R, o-o] ++(3,0);
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4493"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1228"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1228.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+</section>
+
+</main>
+
+
+<nav class="botnavigation"><a href="index.html" class="linkhome" >
+Home</a></nav>
+
+</div><!-- grid -->
+</body>
+</html>

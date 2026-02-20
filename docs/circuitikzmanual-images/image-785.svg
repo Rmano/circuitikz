@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="56.712pt" height="11.908pt" viewBox="0 0 56.712 11.908">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0 8 L 56.566406 8 L 56.566406 9 L 0 9 Z M 0 8 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 9 0 L 46 0 L 46 11.863281 L 9 11.863281 Z M 9 0 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 25 6 L 30 6 L 30 11.863281 L 25 11.863281 Z M 25 6 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -0.00171875 -0.001625 L 21.400625 -0.001625 M 35.29125 -0.001625 L 56.693594 -0.001625 " transform="matrix(1, 0, 0, -1, -0.135, 8.264)"/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 21.400625 -0.001625 L 34.595938 6.943688 " transform="matrix(1, 0, 0, -1, -0.135, 8.264)"/>
+</g>
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 35.29125 -0.001625 L 29.736563 -0.001625 L 29.736563 6.943688 " transform="matrix(1, 0, 0, -1, -0.135, 8.264)"/>
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="bevel" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 21.400625 6.252281 C 24.85375 6.252281 27.650625 3.4515 27.650625 -0.001625 C 27.650625 -0.236 27.638906 -0.470375 27.611563 -0.70475 " transform="matrix(1, 0, 0, -1, -0.135, 8.264)"/>
+<g clip-path="url(#clip-2)">
+<path fill-rule="nonzero" fill="rgb(0%, 0%, 0%)" fill-opacity="1" d="M 26.386719 11.847656 C 26.894531 10.628906 27.863281 8.445312 29.3125 7.152344 C 27.660156 8.140625 26.644531 7.9375 25.5 6.386719 C 26.339844 8.140625 26.386719 10.527344 26.386719 11.847656 Z M 26.386719 11.847656 "/>
+</g>
+</svg>

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="141.964pt" height="29.577pt" viewBox="0 0 141.964 29.577">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0 0 L 29 0 L 29 29.367188 L 0 29.367188 Z M 0 0 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 0 0 L 34 0 L 34 29.367188 L 0 29.367188 Z M 0 0 "/>
+</clipPath>
+<clipPath id="clip-2">
+<path clip-rule="nonzero" d="M 56 0 L 86 0 L 86 29.367188 L 56 29.367188 Z M 56 0 "/>
+</clipPath>
+<clipPath id="clip-3">
+<path clip-rule="nonzero" d="M 51 0 L 91 0 L 91 29.367188 L 51 29.367188 Z M 51 0 "/>
+</clipPath>
+<clipPath id="clip-4">
+<path clip-rule="nonzero" d="M 113 0 L 141.945312 0 L 141.945312 29.367188 L 113 29.367188 Z M 113 0 "/>
+</clipPath>
+<clipPath id="clip-5">
+<path clip-rule="nonzero" d="M 108 0 L 141.945312 0 L 141.945312 29.367188 L 108 29.367188 Z M 108 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -13.891094 13.89 L 13.890156 13.89 L 13.890156 -13.89125 L -13.891094 -13.89125 Z M -13.891094 13.89 " transform="matrix(1, 0, 0, -1, 14.27, 15.0775)"/>
+</g>
+<g clip-path="url(#clip-1)">
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -13.891094 13.89 L 13.890156 -13.89125 M 13.890156 13.89 L -13.891094 -13.89125 M -6.945781 13.89 L 13.890156 -6.945938 M 6.944844 13.89 L -13.891094 -6.945938 M -0.00046875 13.89 L 13.890156 -0.000625 M -0.00046875 13.89 L -13.891094 -0.000625 M 6.944844 13.89 L 13.890156 6.944687 M -6.945781 13.89 L -13.891094 6.944687 M 6.944844 -13.89125 L 13.890156 -6.945938 M -6.945781 -13.89125 L -13.891094 -6.945938 M -0.00046875 -13.89125 L 13.890156 -0.000625 M -0.00046875 -13.89125 L -13.891094 -0.000625 M -6.945781 -13.89125 L 13.890156 6.944687 M 6.944844 -13.89125 L -13.891094 6.944687 " transform="matrix(1, 0, 0, -1, 14.27, 15.0775)"/>
+</g>
+<g clip-path="url(#clip-2)">
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 42.804219 13.89 L 70.581562 13.89 L 70.581562 -13.89125 L 42.804219 -13.89125 Z M 42.804219 13.89 " transform="matrix(1, 0, 0, -1, 14.27, 15.0775)"/>
+</g>
+<g clip-path="url(#clip-3)">
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 42.804219 13.89 L 70.581562 -13.89125 M 70.581562 13.89 L 42.804219 -13.89125 M 56.694844 13.89 L 70.581562 -0.000625 M 56.694844 13.89 L 42.804219 -0.000625 M 56.694844 -13.89125 L 70.581562 -0.000625 M 56.694844 -13.89125 L 42.804219 -0.000625 " transform="matrix(1, 0, 0, -1, 14.27, 15.0775)"/>
+</g>
+<g clip-path="url(#clip-4)">
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 99.495625 13.89 L 127.276875 13.89 L 127.276875 -13.89125 L 99.495625 -13.89125 Z M 99.495625 13.89 " transform="matrix(1, 0, 0, -1, 14.27, 15.0775)"/>
+</g>
+<g clip-path="url(#clip-5)">
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 102.022969 13.89 L 127.276875 -11.363906 M 124.753437 13.89 L 99.495625 -11.363906 M 107.07375 13.89 L 127.276875 -6.313125 M 119.702656 13.89 L 99.495625 -6.313125 M 112.124531 13.89 L 127.276875 -1.262344 M 114.651875 13.89 L 99.495625 -1.262344 M 117.175312 13.89 L 127.276875 3.788437 M 109.601094 13.89 L 99.495625 3.788437 M 122.226094 13.89 L 127.276875 8.839219 M 104.550312 13.89 L 99.495625 8.839219 M 122.226094 -13.89125 L 127.276875 -8.840469 M 104.546406 -13.89125 L 99.495625 -8.840469 M 117.175312 -13.89125 L 127.276875 -3.789688 M 109.597187 -13.89125 L 99.495625 -3.789688 M 112.124531 -13.89125 L 127.276875 1.261094 M 114.647969 -13.89125 L 99.495625 1.261094 M 107.07375 -13.89125 L 127.276875 6.311875 M 119.702656 -13.89125 L 99.495625 6.311875 M 102.022969 -13.89125 L 127.276875 11.362656 M 124.753437 -13.89125 L 99.495625 11.362656 " transform="matrix(1, 0, 0, -1, 14.27, 15.0775)"/>
+</g>
+</svg>

@@ -1,0 +1,2403 @@
+
+<!DOCTYPE html>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8" />
+<meta name="author" content="Massimo A. Redaelli (<a href=mailto:m.redaelli@gmail.com target=-blank >m.redaelli@gmail.com</a>)- Stefan Lindner (<a href=mailto:stefan.lindner@fau.de target=-blank >stefan.lindner@fau.de</a>)- Stefan Erhardt
+(<a href=mailto:stefan.erhardt@fau.de target=-blank >stefan.erhardt@fau.de</a>)- Romano Giannetti (<a href=mailto:romano.giannetti@gmail.com target=-blank >romano.giannetti@gmail.com</a>)" />
+<meta name="generator" content="LaTeX Lwarp package" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CircuiTikZ-version 1.8.6-unreleased (2026/02/10) — Examples</title>
+<link rel="stylesheet" type="text/css" href="ctikzcss.css" />
+
+<script>
+// Lwarp MathJax emulation code
+//
+// Based on code by Davide P. Cervone.
+// Equation numbering: https://github.com/mathjax/MathJax/issues/2427
+// Starred and ifnextchar macros: https://github.com/mathjax/MathJax/issues/2428
+// \left, \right delimiters: https://github.com/mathjax/MathJax/issues/2535
+//
+// Modified by Brian Dunn to adjust equation numbering and add subequations.
+//
+// LaTeX can use \seteqnumber{subequations?}{section}{number} before each equation.
+// subequations? is 0 usually, 1 if inside subequations.
+// section is a string printed as-is, or empty.
+// number is auto-incremented by MathJax between equations.
+//
+MathJax = {
+  subequations: "0",
+  section: "",
+  loader: {
+    load: ['[tex]/tagformat', '[tex]/textmacros'],
+  },
+  startup: {
+    ready() {
+      // These would be replaced by import commands if you wanted to make
+      // a proper extension.
+      const Configuration = MathJax._.input.tex.Configuration.Configuration;
+      const CommandMap = MathJax._.input.tex.SymbolMap.CommandMap;
+      const Macro = MathJax._.input.tex.Symbol.Macro;
+      const TexError = MathJax._.input.tex.TexError.default;
+      const ParseUtil = MathJax._.input.tex.ParseUtil.default;
+      const expandable = MathJax._.util.Options.expandable;
+
+        // Insert the replacement string into the TeX string, and check
+        // that there haven't been too many maxro substitutions (prevents
+        // infinite loops).
+        const useArgument = (parser, text) => {
+          parser.string = ParseUtil.addArgs(parser, text, parser.string.slice(parser.i));
+          parser.i = 0;
+          if (++parser.macroCount > parser.configuration.options.maxMacros) {
+            throw new TexError('MaxMacroSub1',
+            'MathJax maximum macro substitution count exceeded; ' +
+            'is there a recursive macro call?');
+          }
+        }
+
+        // Create the command map for:
+        //     \ifstar, \ifnextchar, \ifblank, \ifstrequal, \gsub, \seteqnumber
+        new CommandMap('Lwarp-macros', {
+          ifstar: 'IfstarFunction',
+          ifnextchar: 'IfnextcharFunction',
+          ifblank: 'IfblankFunction',
+          ifstrequal: 'IfstrequalFunction',
+          gsubstitute: 'GsubstituteFunction',
+          seteqnumber: 'SeteqnumberFunction'
+        }, {
+          // This function implements an ifstar macro.
+          IfstarFunction(parser, name) {
+             const resultstar = parser.GetArgument(name);
+             const resultnostar = parser.GetArgument(name);
+             const star = parser.GetStar();                 // true if there is a *
+             useArgument(parser, star ? resultstar : resultnostar);
+          },
+
+          // This function implements an ifnextchar macro.
+          IfnextcharFunction(parser, name) {
+            let whichchar = parser.GetArgument(name);
+            if (whichchar.match(/^(?:0x[0-9A-F]+|[0-9]+)$/i)) {
+              // $ syntax highlighting
+              whichchar = String.fromCodePoint(parseInt(whichchar));
+            }
+            const resultnextchar = parser.GetArgument(name);
+            const resultnotnextchar = parser.GetArgument(name);
+            const gotchar = (parser.GetNext() === whichchar);
+            useArgument(parser, gotchar ? resultnextchar : resultnotnextchar);
+          },
+
+          // This function implements an ifblank macro.
+          IfblankFunction(parser, name) {
+            const blankarg = parser.GetArgument(name);
+            const resultblank = parser.GetArgument(name);
+            const resultnotblank = parser.GetArgument(name);
+            const isblank = (blankarg.trim() == "");
+            useArgument(parser, isblank ? resultblank : resultnotblank);
+          },
+
+          // This function implements an ifstrequal macro.
+          IfstrequalFunction(parser, name) {
+            const strequalfirst = parser.GetArgument(name);
+            const strequalsecond = parser.GetArgument(name);
+            const resultequal = parser.GetArgument(name);
+            const resultnotequal = parser.GetArgument(name);
+            const isequal = (strequalfirst == strequalsecond);
+            useArgument(parser, isequal ? resultequal : resultnotequal);
+          },
+
+          // This function implements a gsub macro.
+          GsubstituteFunction(parser, name) {
+            const gsubfirst = parser.GetArgument(name);
+            const gsubsecond = parser.GetArgument(name);
+            const gsubthird = parser.GetArgument(name);
+            let gsubresult=gsubfirst.replace(gsubsecond, gsubthird);
+            useArgument(parser, gsubresult);
+          },
+
+          // This function modifies the equation numbers.
+          SeteqnumberFunction(parser, name) {
+              // Get the macro parameters
+              const star = parser.GetStar();                  // true if there is a *
+              const optBrackets = parser.GetBrackets(name);   // contents of optional brackets
+              const newsubequations = parser.GetArgument(name); // the subequations argument
+              const neweqsection = parser.GetArgument(name); // the eq section argument
+              const neweqnumber = parser.GetArgument(name);   // the eq number argument
+              MathJax.config.subequations=newsubequations ;   // a string with boolean meaning
+              MathJax.config.section=neweqsection ;           // a string with numeric meaning
+              parser.tags.counter = parser.tags.allCounter = neweqnumber ;
+          }
+
+        });
+
+        // Create the Lwarp-macros package
+        Configuration.create('Lwarp-macros', {
+          handler: {macro: ['Lwarp-macros']}
+        });
+
+        MathJax.startup.defaultReady();
+
+        // For forward references:
+        MathJax.startup.input[0].preFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              MathJax.config.subequations = math.inputData.recompile.subequations;
+              MathJax.config.section = math.inputData.recompile.section;
+          }
+        });
+        MathJax.startup.input[0].postFilters.add(({math}) => {
+          if (math.inputData.recompile){
+              math.inputData.recompile.subequations = MathJax.config.subequations;
+              math.inputData.recompile.section = MathJax.config.section;
+          }
+        });
+
+          // For \left, \right with unicode-math:
+          const {DelimiterMap} = MathJax._.input.tex.SymbolMap;
+          const {Symbol} = MathJax._.input.tex.Symbol;
+          const {MapHandler} = MathJax._.input.tex.MapHandler;
+          const delimiter = MapHandler.getMap('delimiter');
+          delimiter.add('\\lBrack', new Symbol('\\lBrack', '\u27E6'));
+          delimiter.add('\\rBrack', new Symbol('\\rBrack', '\u27E7'));
+          delimiter.add('\\lAngle', new Symbol('\\lAngle', '\u27EA'));
+          delimiter.add('\\rAngle', new Symbol('\\rAngle', '\u27EB'));
+          delimiter.add('\\lbrbrak', new Symbol('\\lbrbrak', '\u2772'));
+          delimiter.add('\\rbrbrak', new Symbol('\\rbrbrak', '\u2773'));
+          delimiter.add('\\lbag', new Symbol('\\lbag', '\u27C5'));
+          delimiter.add('\\rbag', new Symbol('\\rbag', '\u27C6'));
+          delimiter.add('\\llparenthesis', new Symbol('\\llparenthesis', '\u2987'));
+          delimiter.add('\\rrparenthesis', new Symbol('\\rrparenthesis', '\u2988'));
+          delimiter.add('\\llangle', new Symbol('\\llangle', '\u2989'));
+          delimiter.add('\\rrangle', new Symbol('\\rrangle', '\u298A'));
+          delimiter.add('\\Lbrbrak', new Symbol('\\Lbrbrak', '\u27EC'));
+          delimiter.add('\\Rbrbrak', new Symbol('\\Rbrbrak', '\u27ED'));
+          delimiter.add('\\lBrace', new Symbol('\\lBrace', '\u2983'));
+          delimiter.add('\\rBrace', new Symbol('\\rBrace', '\u2984'));
+          delimiter.add('\\lParen', new Symbol('\\lParen', '\u2985'));
+          delimiter.add('\\rParen', new Symbol('\\rParen', '\u2986'));
+          delimiter.add('\\lbrackubar', new Symbol('\\lbrackubar', '\u298B'));
+          delimiter.add('\\rbrackubar', new Symbol('\\rbrackubar', '\u298C'));
+          delimiter.add('\\lbrackultick', new Symbol('\\lbrackultick', '\u298D'));
+          delimiter.add('\\rbracklrtick', new Symbol('\\rbracklrtick', '\u298E'));
+          delimiter.add('\\lbracklltick', new Symbol('\\lbracklltick', '\u298F'));
+          delimiter.add('\\rbrackurtick', new Symbol('\\rbrackurtick', '\u2990'));
+          delimiter.add('\\langledot', new Symbol('\\langledot', '\u2991'));
+          delimiter.add('\\rangledot', new Symbol('\\rangledot', '\u2992'));
+          delimiter.add('\\lparenless', new Symbol('\\lparenless', '\u2993'));
+          delimiter.add('\\rparengtr', new Symbol('\\rparengtr', '\u2994'));
+          delimiter.add('\\Lparengtr', new Symbol('\\Lparengtr', '\u2995'));
+          delimiter.add('\\Rparenless', new Symbol('\\Rparenless', '\u2996'));
+          delimiter.add('\\lblkbrbrak', new Symbol('\\lblkbrbrak', '\u2997'));
+          delimiter.add('\\rblkbrbrak', new Symbol('\\rblkbrbrak', '\u2998'));
+          delimiter.add('\\lvzigzag', new Symbol('\\lvzigzag', '\u29D8'));
+          delimiter.add('\\rvzigzag', new Symbol('\\rvzigzag', '\u29D9'));
+          delimiter.add('\\Lvzigzag', new Symbol('\\Lvzigzag', '\u29DA'));
+          delimiter.add('\\Rvzigzag', new Symbol('\\Rvzigzag', '\u29DB'));
+          delimiter.add('\\lcurvyangle', new Symbol('\\lcurvyangle', '\u29FC'));
+          delimiter.add('\\rcurvyangle', new Symbol('\\rcurvyangle', '\u29FD'));
+          delimiter.add('\\Vvert', new Symbol('\\Vvert', '\u2980'));
+    }     // ready
+  },      // startup
+
+  tex: {
+    packages: {'[+]': ['tagformat', 'Lwarp-macros', 'textmacros']},
+    tags: "ams",
+         tagformat: {
+             number: function (n) {
+                 if(MathJax.config.subequations==0)
+                     return(MathJax.config.section + n);
+                 else
+                     return(MathJax.config.section + String.fromCharCode(96+n));
+             },
+         },
+  }
+}
+</script>
+
+<script
+    id="MathJax-script"
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"
+></script>
+
+<script src="permalinks.js" defer></script>
+
+
+</head>
+<body>
+
+
+<a id="circuitikzmanual-autopage-4623"></a>
+<div class="pagegrid">
+
+
+<nav class="topnavigation"><a href="index.html" class="linkhome" >
+Home</a></nav>
+<div class="sidetoccontainer">
+
+
+<nav class="sidetoc">
+
+
+<div class="sidetoctitle">
+
+<p>
+<span class="sidetocthetitle">CircuiTi<em>k</em>Z<br />
+version 1.8.6-unreleased (2026/02/10)</span>
+</p>
+
+<p>
+Contents
+</p>
+</div>
+
+
+<div class="sidetoccontents">
+
+<p>
+<a href="index.html" class="linkhome" >
+Home</a>
+</p>
+
+<p>
+<a href="node-Introduction.html#autosec-10" class="tocsection" >
+<span class="sectionnumber">1</span>&#x2003;Introduction</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-12" class="tocsubsection" >
+<span class="sectionnumber">1.1</span>&#x2003;About</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-13" class="tocsubsection" >
+<span class="sectionnumber">1.2</span>&#x2003;License</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-14" class="tocsubsection" >
+<span class="sectionnumber">1.3</span>&#x2003;Loading the package</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-23" class="tocsubsection" >
+<span class="sectionnumber">1.4</span>&#x2003;Installing a new version of the package.</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-25" class="tocsubsection" >
+<span class="sectionnumber">1.5</span>&#x2003;Requirements</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-26" class="tocsubsection" >
+<span class="sectionnumber">1.6</span>&#x2003;Incompatible packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-27" class="tocsubsection" >
+<span class="sectionnumber">1.7</span>&#x2003;Related and extension packages</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-31" class="tocsubsection" >
+<span class="sectionnumber">1.8</span>&#x2003;Known bugs and limitation</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-37" class="tocsubsection" >
+<span class="sectionnumber">1.9</span>&#x2003;Scale factor inaccuracies</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-48" class="tocsubsection" >
+<span class="sectionnumber">1.10</span>&#x2003;Incompatibilities between versions</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-56" class="tocsubsection" >
+<span class="sectionnumber">1.11</span>&#x2003;Feedback</a>
+</p>
+
+
+<p>
+<a href="node-Introduction.html#autosec-57" class="tocsubsection" >
+<span class="sectionnumber">1.12</span>&#x2003;Package options</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-74" class="tocsection" >
+<span class="sectionnumber">2</span>&#x2003;Tutorials</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-76" class="tocsubsection" >
+<span class="sectionnumber">2.1</span>&#x2003;Getting started with CircuiTi<em>k</em>Z: a current shunt</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-112" class="tocsubsection" >
+<span class="sectionnumber">2.2</span>&#x2003;A non-inverting op-amp amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-148" class="tocsubsection" >
+<span class="sectionnumber">2.3</span>&#x2003;A transistor-based amplifier</a>
+</p>
+
+
+<p>
+<a href="node-Tutorials.html#autosec-182" class="tocsubsection" >
+<span class="sectionnumber">2.4</span>&#x2003;A logic circuit</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-222" class="tocsection" >
+<span class="sectionnumber">3</span>&#x2003;The components: usage</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-223" class="tocsubsection" >
+<span class="sectionnumber">3.1</span>&#x2003;Path-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-336" class="tocsubsection" >
+<span class="sectionnumber">3.2</span>&#x2003;Node-style components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-363" class="tocsubsection" >
+<span class="sectionnumber">3.3</span>&#x2003;Styling circuits and components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-usage.html#autosec-404" class="tocsubsection" >
+<span class="sectionnumber">3.4</span>&#x2003;Subcircuits</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-456" class="tocsection" >
+<span class="sectionnumber">4</span>&#x2003;The components: list</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-457" class="tocsubsection" >
+<span class="sectionnumber">4.1</span>&#x2003;Grounds and supply voltages</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-510" class="tocsubsection" >
+<span class="sectionnumber">4.2</span>&#x2003;Resistive bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-673" class="tocsubsection" >
+<span class="sectionnumber">4.3</span>&#x2003;Capacitors and inductors: dynamical bipoles</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-767" class="tocsubsection" >
+<span class="sectionnumber">4.4</span>&#x2003;Diodes and such</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-949" class="tocsubsection" >
+<span class="sectionnumber">4.5</span>&#x2003;Sources and generators</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1157" class="tocsubsection" >
+<span class="sectionnumber">4.6</span>&#x2003;Instruments</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1290" class="tocsubsection" >
+<span class="sectionnumber">4.7</span>&#x2003;Mechanical Analogy</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1303" class="tocsubsection" >
+<span class="sectionnumber">4.8</span>&#x2003;Miscellaneous bipoles and symbols</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1398" class="tocsubsection" >
+<span class="sectionnumber">4.9</span>&#x2003;Multiple wires (buses)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1411" class="tocsubsection" >
+<span class="sectionnumber">4.10</span>&#x2003;Crossings</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1442" class="tocsubsection" >
+<span class="sectionnumber">4.11</span>&#x2003;Arrows (fake and real)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1477" class="tocsubsection" >
+<span class="sectionnumber">4.12</span>&#x2003;Terminal shapes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1497" class="tocsubsection" >
+<span class="sectionnumber">4.13</span>&#x2003;Connectors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1558" class="tocsubsection" >
+<span class="sectionnumber">4.14</span>&#x2003;Block diagram components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-1852" class="tocsubsection" >
+<span class="sectionnumber">4.15</span>&#x2003;Transistors</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2264" class="tocsubsection" >
+<span class="sectionnumber">4.16</span>&#x2003;Electronic Tubes</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2355" class="tocsubsection" >
+<span class="sectionnumber">4.17</span>&#x2003;RF components</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2409" class="tocsubsection" >
+<span class="sectionnumber">4.18</span>&#x2003;Electro-Mechanical Devices</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2433" class="tocsubsection" >
+<span class="sectionnumber">4.19</span>&#x2003;Double bipoles (transformers)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2534" class="tocsubsection" >
+<span class="sectionnumber">4.20</span>&#x2003;Amplifiers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2669" class="tocsubsection" >
+<span class="sectionnumber">4.21</span>&#x2003;Switches, buttons and jumpers</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-2878" class="tocsubsection" >
+<span class="sectionnumber">4.22</span>&#x2003;Logic gates</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3148" class="tocsubsection" >
+<span class="sectionnumber">4.23</span>&#x2003;Flip-flops</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3204" class="tocsubsection" >
+<span class="sectionnumber">4.24</span>&#x2003;Multiplexer and de-multiplexer</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3312" class="tocsubsection" >
+<span class="sectionnumber">4.25</span>&#x2003;Chips (integrated circuits)</a>
+</p>
+
+
+<p>
+<a href="node-The-components-list.html#autosec-3355" class="tocsubsection" >
+<span class="sectionnumber">4.26</span>&#x2003;Seven segment displays</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3380" class="tocsection" >
+<span class="sectionnumber">5</span>&#x2003;Labels, voltages and currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3416" class="tocsubsection" >
+<span class="sectionnumber">5.1</span>&#x2003;Labels and Annotations</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3478" class="tocsubsection" >
+<span class="sectionnumber">5.2</span>&#x2003;Currents and voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3739" class="tocsubsection" >
+<span class="sectionnumber">5.3</span>&#x2003;Currents</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3816" class="tocsubsection" >
+<span class="sectionnumber">5.4</span>&#x2003;Flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-3852" class="tocsubsection" >
+<span class="sectionnumber">5.5</span>&#x2003;Voltages</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4085" class="tocsubsection" >
+<span class="sectionnumber">5.6</span>&#x2003;Changing the style of labels, voltages, and other text ornaments</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4095" class="tocsubsection" >
+<span class="sectionnumber">5.7</span>&#x2003;Accessing labels text nodes</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4107" class="tocsubsection" >
+<span class="sectionnumber">5.8</span>&#x2003;Advanced voltages, currents and flows</a>
+</p>
+
+
+<p>
+<a href="node-Labels-voltages-currents.html#autosec-4200" class="tocsubsection" >
+<span class="sectionnumber">5.9</span>&#x2003;Integration with siunitx</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4234" class="tocsection" >
+<span class="sectionnumber">6</span>&#x2003;Using bipoles in circuits</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4235" class="tocsubsection" >
+<span class="sectionnumber">6.1</span>&#x2003;Nodes (also called poles)</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4333" class="tocsubsection" >
+<span class="sectionnumber">6.2</span>&#x2003;Mirroring and Inverting</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4369" class="tocsubsection" >
+<span class="sectionnumber">6.3</span>&#x2003;Putting them together</a>
+</p>
+
+
+<p>
+<a href="node-Using-bipoles-in-circuits.html#autosec-4380" class="tocsubsection" >
+<span class="sectionnumber">6.4</span>&#x2003;Line joins between Path Components</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4393" class="tocsection" >
+<span class="sectionnumber">7</span>&#x2003;Colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4418" class="tocsubsection" >
+<span class="sectionnumber">7.1</span>&#x2003;Shape colors</a>
+</p>
+
+
+<p>
+<a href="node-Colors.html#autosec-4454" class="tocsubsection" >
+<span class="sectionnumber">7.2</span>&#x2003;Fill colors</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4498" class="tocsection" >
+<span class="sectionnumber">8</span>&#x2003;FAQ: Frequently asked questions</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4499" class="tocsubsection" >
+<span class="sectionnumber">8.1</span>&#x2003;Using named nodes in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4521" class="tocsubsection" >
+<span class="sectionnumber">8.2</span>&#x2003;Using dashed (or colored) wires in circuits</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4558" class="tocsubsection" >
+<span class="sectionnumber">8.3</span>&#x2003;Errors when externalizing pictures</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4561" class="tocsubsection" >
+<span class="sectionnumber">8.4</span>&#x2003;Labels, voltages and currents woes</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4567" class="tocsubsection" >
+<span class="sectionnumber">8.5</span>&#x2003;Global scaling and rotating</a>
+</p>
+
+
+<p>
+<a href="node-FAQ-Frequently-asked-questions.html#autosec-4568" class="tocsubsection" >
+<span class="sectionnumber">8.6</span>&#x2003;Tunable components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4576" class="tocsection" >
+<span class="sectionnumber">9</span>&#x2003;Defining new components</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4579" class="tocsubsection" >
+<span class="sectionnumber">9.1</span>&#x2003;Suggested setup</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4590" class="tocsubsection" >
+<span class="sectionnumber">9.2</span>&#x2003;Path-style component</a>
+</p>
+
+
+<p>
+<a href="node-Defining-new-components.html#autosec-4615" class="tocsubsection" >
+<span class="sectionnumber">9.3</span>&#x2003;Node-style component</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4625" class="tocsection" >
+<span class="sectionnumber">10</span>&#x2003;Examples</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4626" class="tocsubsection" >
+<span class="sectionnumber">10.1</span>&#x2003;A red diode</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4632" class="tocsubsection" >
+<span class="sectionnumber">10.2</span>&#x2003;Using the (experimental) <kbd>siunitx</kbd> syntax</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4643" class="tocsubsection" >
+<span class="sectionnumber">10.3</span>&#x2003;Photodiodes</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4649" class="tocsubsection" >
+<span class="sectionnumber">10.4</span>&#x2003;A Sallen-Key cell</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4655" class="tocsubsection" >
+<span class="sectionnumber">10.5</span>&#x2003;Mixing circuits and graphs</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4661" class="tocsubsection" >
+<span class="sectionnumber">10.6</span>&#x2003;RF circuit</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4667" class="tocsubsection" >
+<span class="sectionnumber">10.7</span>&#x2003;A styled low noise input stage</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4674" class="tocsubsection" >
+<span class="sectionnumber">10.8</span>&#x2003;An example with the <kbd>compatibility</kbd> option</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4676" class="tocsubsection" >
+<span class="sectionnumber">10.9</span>&#x2003;3-phases block schematic</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4682" class="tocsubsection" >
+<span class="sectionnumber">10.10</span>&#x2003;Using components in <kbd>pic</kbd>s (since <kbd>v1.8.0</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Examples.html#autosec-4688" class="tocsubsection" >
+<span class="sectionnumber">10.11</span>&#x2003;Automatic user-defined voltages, currents and flows (since <kbd>v1.8.5</kbd>)</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4697" class="tocsection" >
+<span class="sectionnumber">11</span>&#x2003;Changelog and Release Notes</a>
+</p>
+
+
+<p>
+<a href="node-Changelog-Release-Notes.html#autosec-4701" class="tocsection" >
+Index</a>
+</p>
+
+
+</div>
+
+</nav>
+
+</div>
+
+
+<main class="bodycontainer">
+
+
+<section class="textbody">
+
+<h1>CircuiTi<em>k</em>Z<br />
+version 1.8.6-unreleased (2026/02/10)</h1>
+
+<!--MathJax customizations:-->
+<div data-nosnippet
+    style="display:none"
+>
+
+\(\newcommand{\footnotename}{footnote}\)
+
+\(\def \LWRfootnote {1}\)
+
+\(\newcommand {\footnote }[2][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\newcommand {\footnotemark }[1][\LWRfootnote ]{{}^{\mathrm {#1}}}\)
+
+\(\let \LWRorighspace \hspace \)
+
+\(\renewcommand {\hspace }{\ifstar \LWRorighspace \LWRorighspace }\)
+
+\(\newcommand {\TextOrMath }[2]{#2}\)
+
+\(\newcommand {\mathnormal }[1]{{#1}}\)
+
+\(\newcommand \ensuremath [1]{#1}\)
+
+\(\newcommand {\LWRframebox }[2][]{\fbox {#2}} \newcommand {\framebox }[1][]{\LWRframebox } \)
+
+\(\newcommand {\setlength }[2]{}\)
+
+\(\newcommand {\addtolength }[2]{}\)
+
+\(\newcommand {\setcounter }[2]{}\)
+
+\(\newcommand {\addtocounter }[2]{}\)
+
+\(\newcommand {\arabic }[1]{}\)
+
+\(\newcommand {\number }[1]{}\)
+
+\(\newcommand {\noalign }[1]{\text {#1}\notag \\}\)
+
+\(\newcommand {\cline }[1]{}\)
+
+\(\newcommand {\directlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\luatexdirectlua }[1]{\text {(directlua)}}\)
+
+\(\newcommand {\protect }{}\)
+
+\(\def \LWRabsorbnumber #1 {}\)
+
+\(\def \LWRabsorbquotenumber &quot;#1 {}\)
+
+\(\newcommand {\LWRabsorboption }[1][]{}\)
+
+\(\newcommand {\LWRabsorbtwooptions }[1][]{\LWRabsorboption }\)
+
+\(\def \mathchar {\ifnextchar &quot;\LWRabsorbquotenumber \LWRabsorbnumber }\)
+
+\(\def \mathcode #1={\mathchar }\)
+
+\(\let \delcode \mathcode \)
+
+\(\let \delimiter \mathchar \)
+
+\(\def \oe {\unicode {x0153}}\)
+
+\(\def \OE {\unicode {x0152}}\)
+
+\(\def \ae {\unicode {x00E6}}\)
+
+\(\def \AE {\unicode {x00C6}}\)
+
+\(\def \aa {\unicode {x00E5}}\)
+
+\(\def \AA {\unicode {x00C5}}\)
+
+\(\def \o {\unicode {x00F8}}\)
+
+\(\def \O {\unicode {x00D8}}\)
+
+\(\def \l {\unicode {x0142}}\)
+
+\(\def \L {\unicode {x0141}}\)
+
+\(\def \ss {\unicode {x00DF}}\)
+
+\(\def \SS {\unicode {x1E9E}}\)
+
+\(\def \dag {\unicode {x2020}}\)
+
+\(\def \ddag {\unicode {x2021}}\)
+
+\(\def \P {\unicode {x00B6}}\)
+
+\(\def \copyright {\unicode {x00A9}}\)
+
+\(\def \pounds {\unicode {x00A3}}\)
+
+\(\let \LWRref \ref \)
+
+\(\renewcommand {\ref }{\ifstar \LWRref \LWRref }\)
+
+\( \newcommand {\multicolumn }[3]{#3}\)
+
+\(\require {textcomp}\)
+
+\(\newcommand {\tothe }[1]{^{#1}}\)
+
+\(\newcommand {\raiseto }[2]{{#2}^{#1}}\)
+
+\(\newcommand {\LWRsiunitxEND }{}\)
+
+\(\def \LWRsiunitxang #1;#2;#3;#4\LWRsiunitxEND {\ifblank {#1}{}{\num {#1}\degree }\ifblank {#2}{}{\num {#2}^{\unicode {x2032}}}\ifblank {#3}{}{\num {#3}^{\unicode {x2033}}}}\)
+
+\(\newcommand {\ang }[2][]{\LWRsiunitxang #2;;;\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxdistribunit {}\)
+
+\(\newcommand {\LWRsiunitxENDTWO }{}\)
+
+\(\def \LWRsiunitxprintdecimalsubtwo #1,#2,#3\LWRsiunitxENDTWO {\ifblank {#1}{0}{\mathrm {#1}}\ifblank {#2}{}{{\LWRsiunitxdecimal }\mathrm {#2}}}\)
+
+\(\def \LWRsiunitxprintdecimalsub #1.#2.#3\LWRsiunitxEND {\LWRsiunitxprintdecimalsubtwo #1,,\LWRsiunitxENDTWO \ifblank {#2}{}{{\LWRsiunitxdecimal }\LWRsiunitxprintdecimalsubtwo #2,,\LWRsiunitxENDTWO }}\)
+
+\(\newcommand {\LWRsiunitxprintdecimal }[1]{\LWRsiunitxprintdecimalsub #1...\LWRsiunitxEND }\)
+
+\(\def \LWRsiunitxnumplus #1+#2+#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxprintdecimal {#1}}{\ifblank {#1}{\LWRsiunitxprintdecimal {#2}}{\LWRsiunitxprintdecimal {#1}\unicode {x02B}\LWRsiunitxprintdecimal {#2}}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumminus #1-#2-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumplus #1+++\LWRsiunitxEND }{\ifblank {#1}{}{\LWRsiunitxprintdecimal {#1}}\unicode {x02212}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpmmacro #1\pm #2\pm #3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumminus #1---\LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\def \LWRsiunitxnumpm #1+-#2+-#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpmmacro #1\pm \pm \pm \LWRsiunitxEND }{\LWRsiunitxprintdecimal {#1}\unicode {x0B1}\LWRsiunitxprintdecimal {#2}\LWRsiunitxdistribunit }}\)
+
+\(\newcommand {\LWRsiunitxnumscientific }[2]{\ifblank {#1}{}{\ifstrequal {#1}{-}{-}{\LWRsiunitxprintdecimal {#1}\times }}10^{\LWRsiunitxprintdecimal {#2}}\LWRsiunitxdistribunit }\)
+
+\(\def \LWRsiunitxnumD #1D#2D#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumpm #1+-+-\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumd #1d#2d#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumD #1DDD\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumE #1E#2E#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumd #1ddd\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnume #1e#2e#3\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnumE #1EEE\LWRsiunitxEND }{\mathrm {\LWRsiunitxnumscientific {#1}{#2}}}}\)
+
+\(\def \LWRsiunitxnumx #1x#2x#3x#4\LWRsiunitxEND {\ifblank {#2}{\LWRsiunitxnume #1eee\LWRsiunitxEND }{\ifblank {#3}{\LWRsiunitxnume #1eee\LWRsiunitxEND \times \LWRsiunitxnume #2eee\LWRsiunitxEND }{\LWRsiunitxnume #1eee\LWRsiunitxEND
+\times \LWRsiunitxnume #2eee\LWRsiunitxEND \times \LWRsiunitxnume #3eee\LWRsiunitxEND }}}\)
+
+\(\newcommand {\num }[2][]{\LWRsiunitxnumx #2xxxxx\LWRsiunitxEND }\)
+
+\(\newcommand {\si }[2][]{\mathrm {\gsubstitute {#2}{~}{\,}}}\)
+
+\(\def \LWRsiunitxSIopt #1[#2]#3{\def \LWRsiunitxdistribunit {\,\si {#3}}{#2}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\LWRsiunitxSI }[2]{\def \LWRsiunitxdistribunit {\,\si {#2}}\num {#1}\def \LWRsiunitxdistribunit {}}\)
+
+\(\newcommand {\SI }[2][]{\ifnextchar [{\LWRsiunitxSIopt {#2}}{\LWRsiunitxSI {#2}}}\)
+
+\(\newcommand {\numlist }[2][]{\text {#2}}\)
+
+\(\newcommand {\numrange }[3][]{\num {#2}\ \LWRsiunitxrangephrase \ \num {#3}}\)
+
+\(\newcommand {\SIlist }[3][]{\text {#2}\,\si {#3}}\)
+
+\(\newcommand {\SIrange }[4][]{\num {#2}\,#4\ \LWRsiunitxrangephrase \ \num {#3}\,#4}\)
+
+\(\newcommand {\tablenum }[2][]{\mathrm {#2}}\)
+
+\(\newcommand {\ampere }{\mathrm {A}}\)
+
+\(\newcommand {\candela }{\mathrm {cd}}\)
+
+\(\newcommand {\kelvin }{\mathrm {K}}\)
+
+\(\newcommand {\kilogram }{\mathrm {kg}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\mole }{\mathrm {mol}}\)
+
+\(\newcommand {\second }{\mathrm {s}}\)
+
+\(\newcommand {\becquerel }{\mathrm {Bq}}\)
+
+\(\newcommand {\degreeCelsius }{\unicode {x2103}}\)
+
+\(\newcommand {\coulomb }{\mathrm {C}}\)
+
+\(\newcommand {\farad }{\mathrm {F}}\)
+
+\(\newcommand {\gray }{\mathrm {Gy}}\)
+
+\(\newcommand {\hertz }{\mathrm {Hz}}\)
+
+\(\newcommand {\henry }{\mathrm {H}}\)
+
+\(\newcommand {\joule }{\mathrm {J}}\)
+
+\(\newcommand {\katal }{\mathrm {kat}}\)
+
+\(\newcommand {\lumen }{\mathrm {lm}}\)
+
+\(\newcommand {\lux }{\mathrm {lx}}\)
+
+\(\newcommand {\newton }{\mathrm {N}}\)
+
+\(\newcommand {\ohm }{\mathrm {\Omega }}\)
+
+\(\newcommand {\pascal }{\mathrm {Pa}}\)
+
+\(\newcommand {\radian }{\mathrm {rad}}\)
+
+\(\newcommand {\siemens }{\mathrm {S}}\)
+
+\(\newcommand {\sievert }{\mathrm {Sv}}\)
+
+\(\newcommand {\steradian }{\mathrm {sr}}\)
+
+\(\newcommand {\tesla }{\mathrm {T}}\)
+
+\(\newcommand {\volt }{\mathrm {V}}\)
+
+\(\newcommand {\watt }{\mathrm {W}}\)
+
+\(\newcommand {\weber }{\mathrm {Wb}}\)
+
+\(\newcommand {\day }{\mathrm {d}}\)
+
+\(\newcommand {\degree }{\mathrm {^\circ }}\)
+
+\(\newcommand {\hectare }{\mathrm {ha}}\)
+
+\(\newcommand {\hour }{\mathrm {h}}\)
+
+\(\newcommand {\litre }{\mathrm {l}}\)
+
+\(\newcommand {\liter }{\mathrm {L}}\)
+
+\(\newcommand {\arcminute }{^\prime }\)
+
+\(\newcommand {\minute }{\mathrm {min}}\)
+
+\(\newcommand {\arcsecond }{^{\prime \prime }}\)
+
+\(\newcommand {\tonne }{\mathrm {t}}\)
+
+\(\newcommand {\astronomicalunit }{au}\)
+
+\(\newcommand {\atomicmassunit }{u}\)
+
+\(\newcommand {\bohr }{\mathit {a}_0}\)
+
+\(\newcommand {\clight }{\mathit {c}_0}\)
+
+\(\newcommand {\dalton }{\mathrm {D}_\mathrm {a}}\)
+
+\(\newcommand {\electronmass }{\mathit {m}_{\mathrm {e}}}\)
+
+\(\newcommand {\electronvolt }{\mathrm {eV}}\)
+
+\(\newcommand {\elementarycharge }{\mathit {e}}\)
+
+\(\newcommand {\hartree }{\mathit {E}_{\mathrm {h}}}\)
+
+\(\newcommand {\planckbar }{\mathit {\unicode {x210F}}}\)
+
+\(\newcommand {\angstrom }{\mathrm {\unicode {x212B}}}\)
+
+\(\let \LWRorigbar \bar \)
+
+\(\newcommand {\bar }{\mathrm {bar}}\)
+
+\(\newcommand {\barn }{\mathrm {b}}\)
+
+\(\newcommand {\bel }{\mathrm {B}}\)
+
+\(\newcommand {\decibel }{\mathrm {dB}}\)
+
+\(\newcommand {\knot }{\mathrm {kn}}\)
+
+\(\newcommand {\mmHg }{\mathrm {mmHg}}\)
+
+\(\newcommand {\nauticalmile }{\mathrm {M}}\)
+
+\(\newcommand {\neper }{\mathrm {Np}}\)
+
+\(\newcommand {\yocto }{\mathrm {y}}\)
+
+\(\newcommand {\zepto }{\mathrm {z}}\)
+
+\(\newcommand {\atto }{\mathrm {a}}\)
+
+\(\newcommand {\femto }{\mathrm {f}}\)
+
+\(\newcommand {\pico }{\mathrm {p}}\)
+
+\(\newcommand {\nano }{\mathrm {n}}\)
+
+\(\newcommand {\micro }{\mathrm {\unicode {x00B5}}}\)
+
+\(\newcommand {\milli }{\mathrm {m}}\)
+
+\(\newcommand {\centi }{\mathrm {c}}\)
+
+\(\newcommand {\deci }{\mathrm {d}}\)
+
+\(\newcommand {\deca }{\mathrm {da}}\)
+
+\(\newcommand {\hecto }{\mathrm {h}}\)
+
+\(\newcommand {\kilo }{\mathrm {k}}\)
+
+\(\newcommand {\mega }{\mathrm {M}}\)
+
+\(\newcommand {\giga }{\mathrm {G}}\)
+
+\(\newcommand {\tera }{\mathrm {T}}\)
+
+\(\newcommand {\peta }{\mathrm {P}}\)
+
+\(\newcommand {\exa }{\mathrm {E}}\)
+
+\(\newcommand {\zetta }{\mathrm {Z}}\)
+
+\(\newcommand {\yotta }{\mathrm {Y}}\)
+
+\(\newcommand {\percent }{\mathrm {\%}}\)
+
+\(\newcommand {\meter }{\mathrm {m}}\)
+
+\(\newcommand {\metre }{\mathrm {m}}\)
+
+\(\newcommand {\gram }{\mathrm {g}}\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\of }[1]{_{\mathrm {#1}}}\)
+
+\(\newcommand {\squared }{^2}\)
+
+\(\newcommand {\square }[1]{\mathrm {#1}^2}\)
+
+\(\newcommand {\cubed }{^3}\)
+
+\(\newcommand {\cubic }[1]{\mathrm {#1}^3}\)
+
+\(\newcommand {\per }{\,\mathrm {/}}\)
+
+\(\newcommand {\celsius }{\unicode {x2103}}\)
+
+\(\newcommand {\fg }{\femto \gram }\)
+
+\(\newcommand {\pg }{\pico \gram }\)
+
+\(\newcommand {\ng }{\nano \gram }\)
+
+\(\newcommand {\ug }{\micro \gram }\)
+
+\(\newcommand {\mg }{\milli \gram }\)
+
+\(\newcommand {\g }{\gram }\)
+
+\(\newcommand {\kg }{\kilo \gram }\)
+
+\(\newcommand {\amu }{\mathrm {u}}\)
+
+\(\newcommand {\pm }{\pico \metre }\)
+
+\(\newcommand {\nm }{\nano \metre }\)
+
+\(\newcommand {\um }{\micro \metre }\)
+
+\(\newcommand {\mm }{\milli \metre }\)
+
+\(\newcommand {\cm }{\centi \metre }\)
+
+\(\newcommand {\dm }{\deci \metre }\)
+
+\(\newcommand {\m }{\metre }\)
+
+\(\newcommand {\km }{\kilo \metre }\)
+
+\(\newcommand {\as }{\atto \second }\)
+
+\(\newcommand {\fs }{\femto \second }\)
+
+\(\newcommand {\ps }{\pico \second }\)
+
+\(\newcommand {\ns }{\nano \second }\)
+
+\(\newcommand {\us }{\micro \second }\)
+
+\(\newcommand {\ms }{\milli \second }\)
+
+\(\newcommand {\s }{\second }\)
+
+\(\newcommand {\fmol }{\femto \mol }\)
+
+\(\newcommand {\pmol }{\pico \mol }\)
+
+\(\newcommand {\nmol }{\nano \mol }\)
+
+\(\newcommand {\umol }{\micro \mol }\)
+
+\(\newcommand {\mmol }{\milli \mol }\)
+
+\(\newcommand {\mol }{\mol }\)
+
+\(\newcommand {\kmol }{\kilo \mol }\)
+
+\(\newcommand {\pA }{\pico \ampere }\)
+
+\(\newcommand {\nA }{\nano \ampere }\)
+
+\(\newcommand {\uA }{\micro \ampere }\)
+
+\(\newcommand {\mA }{\milli \ampere }\)
+
+\(\newcommand {\A }{\ampere }\)
+
+\(\newcommand {\kA }{\kilo \ampere }\)
+
+\(\newcommand {\ul }{\micro \litre }\)
+
+\(\newcommand {\ml }{\milli \litre }\)
+
+\(\newcommand {\l }{\litre }\)
+
+\(\newcommand {\hl }{\hecto \litre }\)
+
+\(\newcommand {\uL }{\micro \liter }\)
+
+\(\newcommand {\mL }{\milli \liter }\)
+
+\(\newcommand {\L }{\liter }\)
+
+\(\newcommand {\hL }{\hecto \liter }\)
+
+\(\newcommand {\mHz }{\milli \hertz }\)
+
+\(\newcommand {\Hz }{\hertz }\)
+
+\(\newcommand {\kHz }{\kilo \hertz }\)
+
+\(\newcommand {\MHz }{\mega \hertz }\)
+
+\(\newcommand {\GHz }{\giga \hertz }\)
+
+\(\newcommand {\THz }{\tera \hertz }\)
+
+\(\newcommand {\mN }{\milli \newton }\)
+
+\(\newcommand {\N }{\newton }\)
+
+\(\newcommand {\kN }{\kilo \newton }\)
+
+\(\newcommand {\MN }{\mega \newton }\)
+
+\(\newcommand {\Pa }{\pascal }\)
+
+\(\newcommand {\kPa }{\kilo \pascal }\)
+
+\(\newcommand {\MPa }{\mega \pascal }\)
+
+\(\newcommand {\GPa }{\giga \pascal }\)
+
+\(\newcommand {\mohm }{\milli \ohm }\)
+
+\(\newcommand {\kohm }{\kilo \ohm }\)
+
+\(\newcommand {\Mohm }{\mega \ohm }\)
+
+\(\newcommand {\pV }{\pico \volt }\)
+
+\(\newcommand {\nV }{\nano \volt }\)
+
+\(\newcommand {\uV }{\micro \volt }\)
+
+\(\newcommand {\mV }{\milli \volt }\)
+
+\(\newcommand {\V }{\volt }\)
+
+\(\newcommand {\kV }{\kilo \volt }\)
+
+\(\newcommand {\W }{\watt }\)
+
+\(\newcommand {\uW }{\micro \watt }\)
+
+\(\newcommand {\mW }{\milli \watt }\)
+
+\(\newcommand {\kW }{\kilo \watt }\)
+
+\(\newcommand {\MW }{\mega \watt }\)
+
+\(\newcommand {\GW }{\giga \watt }\)
+
+\(\newcommand {\J }{\joule }\)
+
+\(\newcommand {\uJ }{\micro \joule }\)
+
+\(\newcommand {\mJ }{\milli \joule }\)
+
+\(\newcommand {\kJ }{\kilo \joule }\)
+
+\(\newcommand {\eV }{\electronvolt }\)
+
+\(\newcommand {\meV }{\milli \electronvolt }\)
+
+\(\newcommand {\keV }{\kilo \electronvolt }\)
+
+\(\newcommand {\MeV }{\mega \electronvolt }\)
+
+\(\newcommand {\GeV }{\giga \electronvolt }\)
+
+\(\newcommand {\TeV }{\tera \electronvolt }\)
+
+\(\newcommand {\kWh }{\kilo \watt \hour }\)
+
+\(\newcommand {\F }{\farad }\)
+
+\(\newcommand {\fF }{\femto \farad }\)
+
+\(\newcommand {\pF }{\pico \farad }\)
+
+\(\newcommand {\K }{\mathrm {K}}\)
+
+\(\newcommand {\dB }{\mathrm {dB}}\)
+
+\(\newcommand {\kibi }{\mathrm {Ki}}\)
+
+\(\newcommand {\mebi }{\mathrm {Mi}}\)
+
+\(\newcommand {\gibi }{\mathrm {Gi}}\)
+
+\(\newcommand {\tebi }{\mathrm {Ti}}\)
+
+\(\newcommand {\pebi }{\mathrm {Pi}}\)
+
+\(\newcommand {\exbi }{\mathrm {Ei}}\)
+
+\(\newcommand {\zebi }{\mathrm {Zi}}\)
+
+\(\newcommand {\yobi }{\mathrm {Yi}}\)
+
+\(\let \unit \si \)
+
+\(\let \qty \SI \)
+
+\(\let \qtylist \SIlist \)
+
+\(\let \qtyrange \SIrange \)
+
+\(\let \numproduct \num \)
+
+\(\let \qtyproduct \SI \)
+
+\(\let \complexnum \num \)
+
+\(\newcommand {\complexqty }[3][]{(\complexnum {#2})\si {#3}}\)
+
+\(\newcommand {\toprule }[1][]{\hline }\)
+
+\(\let \midrule \toprule \)
+
+\(\let \bottomrule \toprule \)
+
+\(\def \LWRbooktabscmidruleparen (#1)#2{}\)
+
+\(\newcommand {\LWRbooktabscmidrulenoparen }[1]{}\)
+
+\(\newcommand {\cmidrule }[1][]{\ifnextchar (\LWRbooktabscmidruleparen \LWRbooktabscmidrulenoparen }\)
+
+\(\newcommand {\morecmidrules }{}\)
+
+\(\newcommand {\specialrule }[3]{\hline }\)
+
+\(\newcommand {\addlinespace }[1][]{}\)
+\(\require {upgreek}\)
+
+\(\def \LWRsiunitxrangephrase {\TextOrMath        { }{\ }\protect \mbox {to}\TextOrMath   { }{\ }}\)
+
+\(\def \LWRsiunitxdecimal {.}\)
+
+</div>
+
+<!--
+...... section Examples ......
+-->
+<h4 id="autosec-4625"><span class="sectionnumber">10&#x2003;</span>Examples</h4>
+<a id="circuitikzmanual-autopage-4625"></a>
+<a id="circuitikzmanual-autofile-10"></a>
+
+<a id="sec:examples"></a>
+
+<p>
+Here a series of examples, contributed by several people, is shown with their code.
+</p>
+<!--
+...... subsection A red diode ......
+-->
+<h5 id="autosec-4626"><span class="sectionnumber">10.1&#x2003;</span>A red diode</h5>
+<a id="circuitikzmanual-autopage-4626"></a>
+
+
+<a id="sec:a-red-diode"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4627"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1.4]\draw
+   (0,0) to[C, l=10&lt;\micro\farad&gt;] (0,2) -- (0,3)
+         to[R, l=2.2&lt;\kilo\ohm&gt;] (4,3) -- (4,2)
+         to[L, l=12&lt;\milli\henry&gt;, i=$i_1$,v=b]
+      (4,0) -- (0,0)
+   (4,2) to[D*, color=red] (2,0)
+   (0,2) to[R, l=1&lt;\kilo\ohm&gt;, *-] (2,2)
+         to[cV, i=1, -*, v=$\SI{.3}{\kilo\ohm}\, i_1$]
+      (4,2)
+   (2,0) to[I, i=1&lt;\milli\ampere&gt;, *-*] (2,2)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4629"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1250"
+    class="lateximagesource"
+><!--
+                 2.2 kΩ
+
+                          0.3 kΩ i1
+        1 kΩ
+                                      1
+
+               1 mA
+
+10 µF                                 b    12 mH
+
+                                          i1
+--><img
+    src="circuitikzmanual-images/image-1250.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection Using the (experimental) siunitx syntax ......
+-->
+<h5 id="autosec-4632"><span class="sectionnumber">10.2&#x2003;</span>Using the (experimental) <kbd>siunitx</kbd> syntax</h5>
+<a id="circuitikzmanual-autopage-4632"></a>
+
+
+<a id="sec:using-the-experimental"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4633"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1.2]\draw
+   (0,0) node[ground] {}
+         to[V=$e(t)$, *-*] (0,2) to[C=4&lt;\nano\farad
+      &gt;] (2,2)
+         to[R, l_=.25&lt;\kilo\ohm&gt;, *-*] (2,0)
+   (2,2) to[R=1&lt;\kilo\ohm&gt;] (4,2)
+         to[C, l_=2&lt;\nano\farad&gt;, *-*] (4,0)
+   (5,0) to[I, i_=$a(t)$, -*] (5,2) -- (4,2)
+   (0,0) -- (5,0)
+   (0,2) -- (0,3) to[L, l=2&lt;\milli\henry&gt;] (5,3)
+      -- (5,2)
+
+  {[anchor=south east] (0,2) node {1} (2,2) node {2}
+      (4,2) node {3}}
+ ;
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4635"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1251"
+    class="lateximagesource"
+><!--
+                      2 mH
+
+           4 nF
+                         1 kΩ
+       1          2                 3
+                                        a(t)
+
+e(t)       0.25 kΩ           2 nF
+--><img
+    src="circuitikzmanual-images/image-1251.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4638"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1.2]\draw
+   (0,0) node[anchor=east] {B}
+         to[short, o-*] (1,0)
+         to[R=20&lt;\ohm&gt;, *-*] (1,2)
+         to[R=10&lt;\ohm&gt;, v=$v_x$] (3,2) -- (4,2)
+         to[cI=$\frac{\si{\siemens}}{5} v_x$, *-*] (4,0)
+      -- (3,0)
+         to[R=5&lt;\ohm&gt;, *-*] (3,2)
+   (3,0) -- (1,0)
+   (1,2) to[short, -o] (0,2) node[anchor=east]{A}
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4640"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1252"
+    class="lateximagesource"
+><!--
+           10 Ω
+A
+           vx
+    20 Ω          5Ω
+
+                       S
+                       5 vx
+B
+--><img
+    src="circuitikzmanual-images/image-1252.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection Photodiodes ......
+-->
+<h5 id="autosec-4643"><span class="sectionnumber">10.3&#x2003;</span>Photodiodes</h5>
+<a id="circuitikzmanual-autopage-4643"></a>
+
+
+<a id="sec:photodiodes"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4644"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1]\draw
+    (0,0) node[transformer] (T) {}
+    (T.B2) to[pD] ($(T.B2)+(2,0)$) -| (3.5, -1)
+    (T.B1) to[pD] ($(T.B1)+(2,0)$) -| (3.5, -1)
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4646"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1253"
+    class="lateximagesource"
+><!--
+--><img
+    src="circuitikzmanual-images/image-1253.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection A Sallen-Key cell ......
+-->
+<h5 id="autosec-4649"><span class="sectionnumber">10.4&#x2003;</span>A Sallen-Key cell</h5>
+<a id="circuitikzmanual-autopage-4649"></a>
+
+
+<a id="sec:a-sallen-key"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4650"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1]\draw
+     (5,.5) node [op amp] (opamp) {}
+     (0,0) node [left] {$U_{we}$} to [R, l=$R_d$, o-*]
+      (2,0)
+     to [R, l=$R_d$, *-*] (opamp.+)
+     to [C, l_=$C_{d2}$, *-] ($(opamp.+)+(0,-2)$) node [
+      ground] {}
+     (opamp.out) |- (3.5,2) to [C, l_=$C_{d1}$, *-]
+      (2,2) to [short] (2,0)
+     (opamp.-) -| (3.5,2)
+     (opamp.out) to [short, *-o] (7,.5) node [right] {$U
+      _{wy}$}
+;\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4652"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1254"
+    class="lateximagesource"
+><!--
+           Cd1
+
+
+
+                  −
+      Rd    Rd        Uwy
+Uwe               +
+
+            Cd2
+--><img
+    src="circuitikzmanual-images/image-1254.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection Mixing circuits and graphs ......
+-->
+<h5 id="autosec-4655"><span class="sectionnumber">10.5&#x2003;</span>Mixing circuits and graphs</h5>
+<a id="circuitikzmanual-autopage-4655"></a>
+
+
+<a id="sec:mixing-circuits-and"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4656"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[scale=1.2, american]\draw
+   (0,2) to[I=1&lt;\milli\ampere&gt;] (2,2)
+         to[R, l_=2&lt;\kilo\ohm&gt;, *-*] (0,0)
+         to[R, l_=2&lt;\kilo\ohm&gt;] (2,0)
+         to[V, v_=2&lt;\volt&gt;] (2,2)
+         to[cspst, l=$t_0$] (4,2) -- (4,1.5)
+         to [generic, i=$i_1$, v=$v_1$] (4,-.5) --
+      (4,-1.5)
+   (0,2) -- (0,-1.5) to[V, v_=4&lt;\volt&gt;] (2,-1.5)
+         to [R, l=1&lt;\kilo\ohm&gt;] (4,-1.5);
+
+    \begin{scope}[xshift=6.5cm, yshift=.5cm]
+        \draw [-&gt;] (-2,0) -- (2.5,0) node[anchor=west
+      ] {$v_1/\si{\volt}$};
+     \draw [-&gt;] (0,-2) -- (0,2) node[anchor=west] {$i
+      _1/\si{\milli\ampere}$} ;
+     \draw (-1,0) node[anchor=north] {-2} (1,0) node[
+      anchor=south] {2}
+           (0,1) node[anchor=west] {4} (0,-1) node[
+      anchor=east] {-4}
+           (2,0) node[anchor=north west] {4}
+           (-1.5,0) node[anchor=south east] {-3};
+     \draw [thick] (-2,-1) -- (-1,1) -- (1,-1) -- (2,0)
+      -- (2.5,.5);
+     \draw [dotted] (-1,1) -- (-1,0) (1,-1) -- (1,0)
+           (-1,1) -- (0,1) (1,-1) -- (0,-1);
+    \end{scope}
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4658"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1255"
+    class="lateximagesource"
+><!--
+                 t0                               i1 /mA
+         1 mA
+
+2k                                                4
+  Ω         −               +
+            +   2V
+                       v1          -3                  2
+                                                               v1 /V
+                                        -2                 4
+                            − i1
+  2 kΩ                                       -4
+
+                1 kΩ
+  −
+  +
+
+  4V
+--><img
+    src="circuitikzmanual-images/image-1255.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection RF circuit ......
+-->
+<h5 id="autosec-4661"><span class="sectionnumber">10.6&#x2003;</span>RF circuit</h5>
+<a id="circuitikzmanual-autopage-4661"></a>
+
+
+<a id="sec:rf-circuit"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4662"></a>
+<pre class="programlisting">
+    \begin{circuitikz}[scale=1]
+        \ctikzset{bipoles/detector/width=.35}
+        \ctikzset{quadpoles/coupler/width=1}
+        \ctikzset{quadpoles/coupler/height=1}
+        \ctikzset{tripoles/wilkinson/width=1}
+        \ctikzset{tripoles/wilkinson/height=1}
+        &percnt;\draw[help lines,red,thin,dotted] (0,-5)
+      grid (5,5);
+        \draw
+        (-2,0) node[wilkinson](w1){}
+        (2,0) node[coupler] (c1) {}
+        (0,2) node[coupler,rotate=90] (c2) {}
+        (0,-2) node[coupler,rotate=90] (c3) {}
+        (w1.out1) .. controls ++(0.8,0) and ++(0,0.8)
+     .. (c3.port3)
+        (w1.out2) .. controls ++(0.8,0) and ++(0,-0.8)
+     .. (c2.port4)
+        (c1.port1) .. controls ++(-0.8,0) and ++(0,0.8)
+      .. (c3.port2)
+        (c1.port4) .. controls ++(-0.8,0) and
+     ++(0,-0.8) .. (c2.port1)
+        (w1.in) to[short,-o] ++(-1,0)
+        (w1.in) node[left=30] {LO}
+        (c1.port2) node[match,yscale=1] {}
+        (c1.port3) to[short,-o] ++(1,0)
+        (c1.port3) node[right=30] {RF}
+        (c2.port3) to[detector,-o] ++(0,1.5)
+        (c2.port2) to[detector,-o] ++(0,1.5)
+        (c3.port1) to[detector,-o] ++(0,-1.5)
+        (c3.port4) to[detector,-o] ++(0,-1.5)
+        ;
+   \end{circuitikz}
+</pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4664"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1256"
+    class="lateximagesource"
+><!--
+     RF
+LO
+--><img
+    src="circuitikzmanual-images/image-1256.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection A styled low noise input stage ......
+-->
+<h5 id="autosec-4667"><span class="sectionnumber">10.7&#x2003;</span>A styled low noise input stage</h5>
+<a id="circuitikzmanual-autopage-4667"></a>
+
+
+<a id="sec:a-styled-low"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4668"></a>
+<pre class="programlisting">
+\ctikzloadstyle{romano}
+\scalebox{0.707}{&percnt;
+\begin{circuitikz}[american, romano circuit style]
+    \ctikzset{bipoles/cuteswitch/thickness=0.5}
+    \draw (0,0) node[ground](GND0){} to[sV, l=$v_{cm}$]
+      ++(0,1)
+    to [R, l=$R_c$, -*] ++(0,1.5) coordinate(vcm)
+     --++(0,0.5) coordinate(diffc);
+    \draw (diffc) -| ++(-0.5, 0.5) to[sV,l=$v_+$, name=
+     vplus] ++(0,1) --++(0,2)
+    -- ++(2.5,0) coordinate(skin+ a) to[battery2, l=$E
+     _+$, name=eplus] ++(1,0)
+    to[R=$R_+$, name=rplus] ++(2,0) coordinate(skin+ b)
+      -- ++(0.5,0)
+    -- ++(4,0) coordinate(hpin+) to[highpass] ++(2,0)
+    node[inst amp, anchor=+, noinv input up,
+    circuitikz/amplifiers/scale=1.6,
+    circuitikz/tripoles/inst amp/width=1](LNA){LNA}
+    (LNA.out);
+    \coordinate (skin- a) at (LNA.- -| skin+ a);
+    \draw (diffc) -| ++(0.5,0.5) to[sV,l_=$v_-$, name=
+     vminus] ++(0, 1) |- (skin- a);
+    \draw (skin- a) to[battery2, l_=$E_-$, name=eminus]
+      ++(1,0)
+    to[R, l_=$R_-$, name=rminus] ++(2,0) coordinate(
+     skin- b) -- ++(2.5,0)
+    -- (skin- b -| hpin+) to[highpass] (LNA.-);
+    \coordinate (gnd a) at (vcm -| skin+ a);
+    \draw (vcm) -- (gnd a) to[battery2, l_=$E_\mathrm{
+     gnd}$, name=egnd] ++(1,0)
+    to[R, l_=$R_\mathrm{gnd}$, name=rgnd] ++(2,0)
+     coordinate(gnd b);
+    &percnt; switch set
+    \def\swdown{-3.2}
+    \draw (skin- b) ++(1,0) coordinate(sw1) to[cosw,
+     invert, mirror, l=1, *-, name=s1] ++(0,\swdown) to
+     [short, -*] ++(0, -1.5);
+    \draw (sw1) ++(1,0) coordinate(sw2) to[cosw, invert
+     , mirror, l=2, *-] ++(0,\swdown) to[R=$R$, -*]
+     ++(0, -1.5);
+    \draw (sw2|-skin+ b) ++(1,0) coordinate(sw3) to[
+     short, *-] (sw3|-sw2) to[cosw, invert, mirror, l
+     =3,] ++(0,\swdown) to[R=$R$, -*] ++(0, -1.5);
+    \draw (sw3) ++(1,0) coordinate(sw4) to[short, *-] (
+     sw4|-sw2) to[cosw, invert, mirror, l=4, name=s4]
+     ++(0,\swdown) to[short] ++(0, -1.5) coordinate(
+     endsw);
+    \draw (gnd b) |- (endsw) node[rectjoinfill]{};
+    &percnt; boxes
+    \node [rectangle, draw, dashed, fit=(GND0) (vplus)
+     (vpluslabel) (vminuslabel)](body){};
+    \node [anchor=south east, align=center] at (body.
+     south east) {Body} ;
+    \node [rectangle, draw, dashed, fit=(rplus) (eplus)
+      (epluslabel) (rpluslabel)](top){};
+    \node [rectangle, draw, dashed, fit=(eminus) (
+     rminus) (eminuslabel) (rminuslabel)](bot){};
+    \node [anchor=center, align=center] at ($(top.south
+     )!0.5!(bot.north)$) {electrodes} ;
+    \node [rectangle, draw, dashed, fit=(egnd) (rgnd) (
+     egndlabel) (rgndlabel)](gnd){};
+     \node [below, align=center] at (gnd.south) {ground
+      \\ electrode} ;
+     \node [rectangle, draw, dashed, fit=(s1) (s4label),
+       inner ysep=8pt](switches){};
+     &percnt; ADC and micro
+     \draw (LNA.out) -- ++(0.5,0) node[msport,circuitikz
+      /RF/scale=2](ADC){ADC};
+     \draw (ADC.right) -- ++(0.5,0) node[twoportshape,
+      anchor=left, t=$\upmu$C](uC){};
+     \draw (uC.south) -- (uC.south |- switches.east) --
+      ++(-4,0)
+     node[align=left, anchor=east](DCS){\small digitally
+      \\ controlled\\ switches};
+     \draw[-Stealth] (DCS.west) -- (switches.east);
+     &percnt; components
+     \node [anchor=north west] at ([xshift=-10pt, yshift
+      =-5pt]switches.south east) {ADG1414};
+     \node [anchor=north west] at ([yshift=-5pt]LNA.refv
+       down) {AD8429};
+ \end{circuitikz}
+} &percnt; scalebox
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4671"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+> <span
+    style="
+    display: inline-block;
+    -ms-transform:scale(0.707,0.707);
+    -webkit-transform:scale(0.707,0.707);
+    transform:scale(0.707,0.707); "
+>
+<span
+    id="lateximage-circuitikzmanual-1257"
+    class="lateximagesource"
+><!--
+                 E+
+                          R+
+                                                              +
+
+                   electrodes                                      LNA            ADC   µC
+
+                                                              −
+                          R−
+v+         v−
+                 E−                                                      AD8429
+                                                       digitally
+                                 1   2   3   4         controlled
+                                                       switches
+                                             ADG1414
+                          Rgnd
+     Rc          Egnd
+                    ground           R   R
+ vcm               electrode
+
+
+          Body
+--><img
+    src="circuitikzmanual-images/image-1257.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection An example with the compatibility option ......
+-->
+<h5 id="autosec-4674"><span class="sectionnumber">10.8&#x2003;</span>An example with the <kbd>compatibility</kbd> option</h5>
+<a id="circuitikzmanual-autopage-4674"></a>
+
+
+<a id="ex:compatibility"></a>
+
+<p>
+<span
+    class="fbox"
+    style="display:inline-block ; border:1pt solid #000000; padding:3pt ; color:#000000"
+>
+<a href="compatibility.svg" target="_blank" ><img
+    src="compatibility.svg"
+    class="inlineimage"
+    alt="(image)"
+></a></span>
+</p>
+<pre class="programlisting">
+ \documentclass{standalone}
+
+ \usepackage{tikz}
+ \usetikzlibrary{circuits.ee.IEC}
+ \usetikzlibrary{positioning}
+
+ \usepackage[compatibility]{circuitikzgit}
+ \ctikzset{bipoles/length=.9cm}
+
+ \begin{document}
+  \begin{tikzpicture}[circuit ee IEC]
+   \draw (0,0) to [resistor={name=R}] (0,2)
+    to[diode={name=D}] (3,2);
+   \draw (0,0) to[*R=$R_1$] (1.5,0) to[*Tnpn] (3,0)
+     to[*D](3,2);
+  \end{tikzpicture}
+\end{document}
+ </pre>
+<!--
+...... subsection 3-phases block schematic ......
+-->
+<h5 id="autosec-4676"><span class="sectionnumber">10.9&#x2003;</span>3-phases block schematic</h5>
+<a id="circuitikzmanual-autopage-4676"></a>
+
+
+<a id="sec:3-phases-block"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4677"></a>
+<pre class="programlisting">
+ \begin{circuitikz}[smallR/.style={european resistor,
+      resistors/scale=0.5}]
+     \draw (0,0) node[tacdcshape, anchor=ac mid in](acdc
+      ){} to[smallR] ++(-2,0)
+         -- coordinate(point) node[circ](){} ++(-.5,0);
+     \draw (acdc.ac up in)
+         to[nos, invert, mirror, name=switch,color=red]
+      ++(-2,0)
+         -- (point);
+     \draw (acdc.ac down in) to[smallR] ++(-2,0)
+         -- (point)
+         to[oosourcetrans,prim=wye,sec=delta,l=
+      transformer] ++(-1.5,0)
+         to[tmultiwire] ++(-.5,0)
+         node[gridnode, anchor=right]{};
+     \node[above=.3cm,color=red] at (switch) {fault};
+     \draw (acdc.dc up out) to[smallR,l=HVDC line]
+      ++(2,0 )
+         node[tdcacshape, anchor=dc up in](dcac){};
+     \draw (acdc.dc down out) -- (dcac.dc down in);
+     \draw (dcac.right)
+         to[ooosource,prim=delta,sec=delta,tert=wye,
+      invert] ++(1.5,0)
+         to[tmultiwire] ++(.5,0) node[gridnode,anchor=
+      left]{};
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4679"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+><span
+    id="lateximage-circuitikzmanual-1258"
+    class="lateximagesource"
+><!--
+              fault
+                      HVDC line
+
+transformer
+--><img
+    src="circuitikzmanual-images/image-1258.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection Using components in pics (since v1.8.0) ......
+-->
+<h5 id="autosec-4682"><span class="sectionnumber">10.10&#x2003;</span>Using components in <kbd>pic</kbd>s (since <kbd>v1.8.0</kbd>)</h5>
+<a id="circuitikzmanual-autopage-4682"></a>
+
+
+<a id="sec:example-pics"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4683"></a>
+<pre class="programlisting">
+ \tikzset{mypic/.pic = {
+     \draw (0,0) coordinate(-in)
+     &percnt; unnamed component
+     to[R=#1] ++(2,1)
+     &percnt; named component
+     to[leD*, diodes/scale=0.6, led arrows from cathode,
+          name=-led, l=label, v]
+     ++(2,-1) coordinate(-out);
+     }
+ }
+ \begin{tikzpicture}
+     \ctikzset{voltage=raised}
+     \draw (0,0) to[R] ++(2,1);
+     \begin{scope}[xshift=2cm,
+          name prefix=inner-
+          ]
+          \draw (0,0) to[R, name=r, i&lt;] ++(2,1);
+     \end{scope}
+     \draw (4,0) pic(P){mypic=PR};
+     \node[circ] at (inner-r) {};
+     \node[circ, cyan] at (inner-r-Ipos) {};
+     \node[circ, red] at (P-led) {};
+     \node[circ, blue] at (P-ledlabel) {};
+     \node[circ, green] at (P-led-Vto) {};
+     \node[circ, purple] at (P-led-Vfrom) {};
+     \draw (4,0) pic[rotate=-60, scale=0.7, transform
+       shape](P2){mypic=P2R};
+     \node[circ, red] at (P2-led) {};
+     \node[circ, blue] at (P2-ledlabel) {};
+     \node[circ, green] at (P2-led-Vto) {};
+     \node[circ, purple] at (P2-led-Vfrom) {};
+     &percnt;&percnt; extra data
+     \node[right] at (0, -1) {DIR: \ctikzgetdirection{
+       inner-r}};
+     \node[right] at (0, -1.5) {ANC: \ctikzgetanchor{P-
+       led}{Vlab}};
+     \node[right] at (0, -2) {Iarr: \ctikzgetdirection{
+       inner-r-Iarrow}};
+     \node[right] at (0, -2.5) {LAB: \ctikzgetdirection{
+       P2-ledlabel}};
+\end{tikzpicture}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4685"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+> <span
+    id="lateximage-circuitikzmanual-1259"
+    class="lateximagesource"
+><!--
+                                lab
+                                    e   l
+                  PR
+
+                  P2
+                    R
+
+
+DIR: 26.56505
+ANC: north east         label
+Iarr: -153
+LAB: 333
+--><img
+    src="circuitikzmanual-images/image-1259.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+<!--
+...... subsection Automatic user-defined voltages, currents and flows (since v1.8.5) ......
+-->
+<h5 id="autosec-4688"><span class="sectionnumber">10.11&#x2003;</span>Automatic user-defined voltages, currents and flows (since <kbd>v1.8.5</kbd>)</h5>
+<a id="circuitikzmanual-autopage-4688"></a>
+
+
+<a id="sec:example-auto-vif"></a>
+
+<p>
+
+</p>
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4689"></a>
+<pre class="programlisting">
+&percnt;&percnt; This can go to your preamble and/or a
+     style file!
+&percnt;&percnt; setup voltage drawing macro: european
+     style, but adding "+" and "-"
+\newcommand\eurVPMstyled[4]{&percnt; node, label, style,
+      one ignored arguments
+    \draw [thin, -{Stealth[width=4pt]}, shorten &gt;=5
+     pt, shorten &lt;=5pt, #3]
+        &percnt; NOTICE that boldmath requires double
+     braces to work in nodes
+        &percnt; see https://tex.stackexchange.com/q
+     /487777/38080
+        (#1-Vfrom) node[font=\tiny]{{\boldmath$\vphantom
+     {+}-$}}
+        .. controls (#1-Vcont1) and (#1-Vcont2)..
+        (#1-Vto) node[font=\tiny]{{\boldmath$+$}}
+        node[pos=0.5,anchor=\ctikzgetanchor{#1}{Vlab
+     }]{#2};
+}
+&percnt; voltage shift must go after the "european
+     voltage, v" pair
+\ctikzset{vpms/.style 2 args={european voltages, v,
+     voltage shift=2,
+    vif queue add={eurVPMstyled}{#1}{#2}{}}}
+\ctikzactivatevoltagedirections{vpms}
+&percnt; setup flow drawing macro: squiggle for power
+     flux
+&percnt;&percnt; requires \usetikzlibrary{decorations,
+     decorations.pathmorphing}
+\tikzset{ lray/.style={decorate, decoration={
+    snake, amplitude=2pt,pre length=1pt,post length=2pt
+     , segment length=5pt,},
+    -Triangle}}
+\newcommand\flowpow[4]{&percnt; node, label, color
+    \draw [lray, #3 ] (#1-Ffrom) -- (#1-Fto)
+    node [anchor=\ctikzgetanchor{#1}{Flab}, inner sep=4
+     pt]
+    at (#1-Fpos) {#2};}
+\ctikzset{fpow/.style 2 args={f, vif queue add={flowpow
+     }{#1}{#2}{}}}
+\ctikzactivateflowdirections{fpow}
+&percnt; setup current drawing macros: 6 mm with Stealth
+      arrow on the line, dark green
+\newcommand{\inlinecurrent}[4]{&percnt; node, label
+    \draw [-{Stealth[scale=1.5]}, thick, color=green
+     !50!black]
+    ($(#1-Ipos)!3mm!(#1-Ifrom)$) -- ($(#1-Ipos)!3mm
+     !(#1-Ito)$)
+    node [midway, inner sep=6pt, anchor=\ctikzgetanchor
+     {#1}{Ilab}] {#2};
+}
+\ctikzset{iline/.style ={i, vif queue add={
+     inlinecurrent}{#1}{}{}}}
+\ctikzactivatecurrentdirections{iline}
+&percnt;&percnt; setup end
+&percnt;
+&percnt; Let&apos;s draw our circuit!
+&percnt;
+&percnt; &percnt; "use auto vif" only needed if using
+     old (before 2020) LaTeX or Plain or ConTeXt
+\begin{circuitikz}[use auto vif]
+     \draw (0,0) to[R=$R_1$, iline={$i$}, vpms={$v_1$}{
+      dashed}] ++(4,0)
+     to[R, l_=$R_2$, vpms^&gt;={$v_2$}{blue}, fpow_={$P
+      $}{red}] ++(4,0)
+     to[L=$L$, i=$i$, v=$v_L$, f&gt;^=$P_L$] ++(4,0);
+      &percnt; traditional still working!
+\end{circuitikz}
+ </pre>
+
+</div>
+
+&#x2003;
+
+&#x2003;
+<div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:238pt ; ">
+
+<a id="circuitikzmanual-autopage-4692"></a>
+
+<p>
+<span
+    class="fcolorbox"
+    style="border:1pt solid #00FFFF ; padding:6pt ; background:#FFFFFF"
+>                            <span
+    id="lateximage-circuitikzmanual-1260"
+    class="lateximagesource"
+><!--
+                 v2
+    R1                    PL   L
+         i   −        +
+                                    i
++        −
+                 R2   P        vL
+    v1
+--><img
+    src="circuitikzmanual-images/image-1260.svg"
+    alt="(-tikz-&nbsp;diagram)"
+    style=""
+    class="lateximage"
+></span> </span>
+</p>
+
+
+</div>
+
+</section>
+
+</main>
+
+
+<nav class="botnavigation"><a href="index.html" class="linkhome" >
+Home</a></nav>
+
+</div><!-- grid -->
+</body>
+</html>

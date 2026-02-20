@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="56.92pt" height="29.566pt" viewBox="0 0 56.92 29.566">
+<defs>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0 0 L 56.878906 0 L 56.878906 29.347656 L 0 29.347656 Z M 0 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(75%, 0%, 25%)" stroke-opacity="1" stroke-miterlimit="10" d="M -0.00121875 0 L 56.694094 0 M -0.00121875 0 L -0.00121875 -28.347656 " transform="matrix(1, 0, 0, -1, 0.177, 1)"/>
+</g>
+</svg>

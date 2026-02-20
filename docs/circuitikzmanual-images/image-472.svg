@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="56.712pt" height="29.577pt" viewBox="0 0 56.712 29.577">
+<defs>
+<g>
+<g id="glyph-0-0">
+<path d="M 5.25 -6.234375 L 5.25 -6.890625 L 0.9375 -6.890625 L 0.9375 0 L 1.828125 0 L 1.828125 -3.140625 L 4.828125 -3.140625 L 4.828125 -3.75 L 1.828125 -3.75 L 1.828125 -6.25 L 3.125 -6.25 C 3.25 -6.25 3.375 -6.234375 3.484375 -6.234375 Z M 5.25 -6.234375 "/>
+</g>
+<g id="glyph-0-1">
+<path d="M 6.421875 -6.203125 L 6.421875 -6.859375 L 0.359375 -6.859375 L 0.359375 -6.203125 L 1.6875 -6.203125 C 1.8125 -6.203125 1.9375 -6.21875 2.046875 -6.21875 L 2.953125 -6.21875 L 2.953125 0 L 3.84375 0 L 3.84375 -6.21875 L 4.71875 -6.21875 C 4.84375 -6.21875 4.96875 -6.203125 5.078125 -6.203125 Z M 6.421875 -6.203125 "/>
+</g>
+</g>
+<clipPath id="clip-0">
+<path clip-rule="nonzero" d="M 0 14 L 56.566406 14 L 56.566406 16 L 0 16 Z M 0 14 "/>
+</clipPath>
+<clipPath id="clip-1">
+<path clip-rule="nonzero" d="M 13 0 L 43 0 L 43 29.367188 L 13 29.367188 Z M 13 0 "/>
+</clipPath>
+</defs>
+<g clip-path="url(#clip-0)">
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -0.00171875 -0.000625 L 14.455313 -0.000625 M 42.236563 -0.000625 L 56.693594 -0.000625 " transform="matrix(1, 0, 0, -1, -0.135, 15.0775)"/>
+</g>
+<path fill-rule="nonzero" fill="rgb(70.001221%, 90.351868%, 98.118591%)" fill-opacity="1" d="M 14.320312 1.1875 L 42.101562 1.1875 L 42.101562 28.96875 L 14.320312 28.96875 Z M 14.320312 1.1875 "/>
+<g clip-path="url(#clip-1)">
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 14.455313 13.89 L 42.236563 13.89 L 42.236563 -13.89125 L 14.455313 -13.89125 Z M 14.455313 13.89 " transform="matrix(1, 0, 0, -1, -0.135, 15.0775)"/>
+</g>
+<g fill="rgb(0%, 0%, 0%)" fill-opacity="1">
+<use xlink:href="#glyph-0-0" x="19.148" y="18.5365"/>
+<use xlink:href="#glyph-0-0" x="24.821701" y="18.5365"/>
+<use xlink:href="#glyph-0-1" x="30.495401" y="18.5365"/>
+</g>
+</svg>
