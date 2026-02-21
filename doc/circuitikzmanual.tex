@@ -304,11 +304,13 @@ If unsure, you can check the version in your local installation by using the mac
             \ctikzset{amplifiers/minus=$-$}
             \ctikzset{bipoles/cvsourceam/inner minus=$-$}
             \ctikzset{bipoles/vsourceam/inner minus=$-$}
-            \ctikzset{voltage/american minus=$-$}\end{lstlisting}
+            \ctikzset{voltage/american minus=$-$}
+        \end{lstlisting}
     \item Since version \texttt{1.6.3} the size of the solder dot and the connection dot of the body diodes for transistors has changed (now they are the same and are configurable). The new default scale of~\texttt{0.7} makes the dots \emph{area} more or less one half the one of the external connections. You can go back to the previous values with
         \begin{lstlisting}
             \ctikzset{transistor bodydiode/dot scale=0.5,
-                transistor solderdot scale=1.0}\end{lstlisting}
+                transistor solderdot scale=1.0}
+            \end{lstlisting}
     \item Since version \texttt{1.6.2} \texttt{siunitx}  will \textbf{not}  work anymore with \ConTeXt{} (it was a very poor simulation layer, anyway); it has been disabled in upstream \ConTeXt, in favor of \href{https://www.pragma-ade.nl/general/manuals/units-mkiv.pdf}{its own \texttt{units} module}.
     \item Version \texttt{1.6.0} has a big rewrite of the block's code. In principle the changes are backward-compatible, but there were several bugs (wrong anchors, errors with rotations, and so on) that have been fixed in the process.
     \item Since \texttt{v1.5.1}\footnote{Do not use \texttt{v1.5.0}, it's buggy.} color management (see section~\ref{sec:colors}) and the details of how the shapes are drawn and protected by the external drawing options has changed. There should be no substantial changes to the circuits, though.
@@ -361,7 +363,8 @@ If you have older projects that show compatibility problems, you have two option
         If for whatever reasons your kernel is older, you can still use the old method of loading the \emph{package-version} package; for example:
         \begin{lstlisting}[numbers=none]
             % or circuitikz-0.4, 0.6...
-            \usepackage[]{circuitikz-0.8.3}\end{lstlisting}
+            \usepackage[]{circuitikz-0.8.3}
+        \end{lstlisting}
         which is an inferior solution because it can fool any package you use that depend on \texttt{circuitikz}.
 
         Either way, you have to take care of the options that may have changed between versions (and sometime styles, if you use them).
@@ -1072,7 +1075,8 @@ I want a reusable block, so I will start from a coordinate and then use only rel
 \tikzset{sr-ff/.style={flipflop, flipflop def={
     t1=S, t2=CP, t3=R, t4={\ctikztextnot{Q}},
     t6=Q, nd=1}},
-}\end{lstlisting}
+}
+\end{lstlisting}
 \end{minipage}\hfill
 \begin{minipage}{0.2\linewidth}
     \begin{circuitikz}[scale=0.8, transform shape]
