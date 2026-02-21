@@ -3000,10 +3000,11 @@ I want a reusable block, so I will start from a coordinate and then use only rel
 The first thing is to define a suitable flip-flop. The standard SR&nbsp;(see <a href="node-The-components-list.html#sec:flipflops">4.23</a>) is <em>almost</em> what we need, but not exactly the same. So let’s define a new one:
 </p>
 <pre class="programlisting">
-\tikzset{sr-ff/.style={flipflop, flipflop def={
-    t1=S, t2=CP, t3=R, t4={\ctikztextnot{Q}},
-   t6=Q, nd=1}},
-</pre>
+    \tikzset{sr-ff/.style={flipflop, flipflop def={
+        t1=S, t2=CP, t3=R, t4={\ctikztextnot{Q}},
+        t6=Q, nd=1}},
+}
+    </pre>
 
 </div>
 

@@ -2016,7 +2016,9 @@ Computer Modern font. You can look at <a href="https://github.com/circuitikz/cir
             \ctikzset{amplifiers/minus=$-$}
             \ctikzset{bipoles/cvsourceam/inner minus=$-$}
             \ctikzset{bipoles/vsourceam/inner minus=$-$}
-           \ctikzset{voltage/american minus
+            \ctikzset{voltage/american minus=$-$}
+
+
  </pre>
 </li>
 <li>
@@ -2027,7 +2029,9 @@ dots <em>area</em> more or less one half the one of the external connections. Yo
 </p>
 <pre class="programlisting">
             \ctikzset{transistor bodydiode/dot scale=0.5,
-               transistor solderdot scale
+                transistor solderdot scale=1.0}
+
+
  </pre>
 </li>
 <li>
@@ -2271,7 +2275,9 @@ If for whatever reasons your kernel is older, you can still use the old method o
 </p>
 <pre class="programlisting">
             &percnt; or circuitikz-0.4, 0.6...
-           \usepackage[]{circuitikz
+            \usepackage[]{circuitikz-0.8.3}
+
+
  </pre>
 <p>
 which is an inferior solution because it can fool any package you use that depend on <kbd>circuitikz</kbd>.
