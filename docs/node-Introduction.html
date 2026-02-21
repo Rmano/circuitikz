@@ -2259,13 +2259,17 @@ like:
 </p>
 <pre class="programlisting">
              &percnt; or v0.4, v0.6, ...
-            \usepackage[]{circuitikz}[=v
+             \usepackage[]{circuitikz}[=v0.8.3]
+
+
  </pre>
 <p>
 You can also specify a date instead of a version number: if you write
 </p>
 <pre class="programlisting">
-           \usepackage[]{circuitikz
+             \usepackage[]{circuitikz}[=2020/02/05]
+
+
  </pre>
 <p>
 the rollback system will load the version that was current on February 5th,&nbsp;2020 (in this case it will be <kbd>v1.0</kbd> which was released the day before).
@@ -2294,7 +2298,9 @@ Either way, you have to take care of the options that may have changed between v
 <kbd>1.1.2</kbd>, <kbd>1.2.7</kbd>, <kbd>1.4.6</kbd>, and <kbd>1.7.2</kbd> are packaged; you can use it with
 </p>
 <pre class="programlisting">
-          \usemodule[circuitikz
+           \usemodule[circuitikz-0.8.3]
+
+
  </pre>
 </li>
 </ul>
