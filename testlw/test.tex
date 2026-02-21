@@ -70,7 +70,22 @@ More text
 \end{lstlisting}
 
 
-
+\begin{itemize}
+    \item Since version \texttt{1.6.3} the default symbol for the minus sign changed from the simple \verb|$-$| to \verb|$\vphantom{+}-$|. The reason is that in some (most?) font, the minus sign is enclosed in a smaller bounding box than the plus sign and that leads to poorly aligned minus symbols in \texttt{american} and \texttt{raised} voltages. This was not noticed before because the two symbols share the same bounding box in the default Computer Modern font. You can look at \href{https://github.com/circuitikz/circuitikz/issues/721}{this issue on GitHub} for more details; if you want to go back to the previous definitions you can write
+        % notice that you have to close listings in items on the last line
+        %see https://tex.stackexchange.com/a/167315/38080
+        \begin{lstlisting}
+            \ctikzset{amplifiers/minus=$-$}
+            \ctikzset{bipoles/cvsourceam/inner minus=$-$}
+            \ctikzset{bipoles/vsourceam/inner minus=$-$}
+            \ctikzset{voltage/american minus=$-$}
+        \end{lstlisting}
+    \item Since version \texttt{1.6.3} the size of the solder dot and the connection dot of the body diodes for transistors has changed (now they are the same and are configurable). The new default scale of~\texttt{0.7} makes the dots \emph{area} more or less one half the one of the external connections. You can go back to the previous values with
+        \begin{lstlisting}
+            \ctikzset{transistor bodydiode/dot scale=0.5,
+                transistor solderdot scale=1.0}
+        \end{lstlisting}
+\end{itemize}
 
 
 \begin{ctikzExample}[varwidth=true]
