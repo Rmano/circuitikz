@@ -354,10 +354,12 @@ If you have older projects that show compatibility problems, you have two option
         To switch to use them, since \texttt{v1.4.0} you simply use the \href{https://www.latex-project.org/publications/2018-FMi-TUB-tb122mitt-version-rollback.pdf}{new LaTeX kernel rollback system}, changing your \verb|\usepackage| invocation to something like:
         \begin{lstlisting}[numbers=none]
             % or v0.4, v0.6, ...
-            \usepackage[]{circuitikz}[=v0.8.3]\end{lstlisting}
+            \usepackage[]{circuitikz}[=v0.8.3]
+        \end{lstlisting}
         You can also specify a date instead of a version number: if you write
         \begin{lstlisting}[numbers=none]
-            \usepackage[]{circuitikz}[=2020/02/05]\end{lstlisting}
+            \usepackage[]{circuitikz}[=2020/02/05]
+        \end{lstlisting}
         the rollback system will load the version that was current on February 5th,~2020 (in this case it will be \texttt{v1.0} which was released the day before).
 
         If for whatever reasons your kernel is older, you can still use the old method of loading the \emph{package-version} package; for example:
@@ -370,7 +372,8 @@ If you have older projects that show compatibility problems, you have two option
         Either way, you have to take care of the options that may have changed between versions (and sometime styles, if you use them).
     \item   if you are using  \ConTeXt, only versions \texttt{0.8.3}, \texttt{0.9.3},  \texttt{0.9.6}, \texttt{1.0}, \texttt{1.1.2}, \texttt{1.2.7}, \texttt{1.4.6}, and \texttt{1.7.2} are packaged; you can use it with
         \begin{lstlisting}[numbers=none]
-            \usemodule[circuitikz-0.8.3]\end{lstlisting}
+            \usemodule[circuitikz-0.8.3]
+        \end{lstlisting}
 \end{itemize}
 
 
