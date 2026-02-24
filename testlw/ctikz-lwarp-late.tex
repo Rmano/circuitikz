@@ -30,14 +30,18 @@
 {%
     \par\medskip\noindent
     \if\ctikz@ex@pos t
-        \ctikz@ex@onlycodeTF{}{\ctikz@ex@dohtmlbox{\linewidth}}%
+        \begin{BlockClass}{fullwidth-block}
+            \ctikz@ex@onlycodeTF{}{\ctikz@ex@dohtmlbox{\linewidth}}%
+        \end{BlockClass}
         \medskip\noindent
         \enverbListing{lstlisting}{}%
     \else
         \if\ctikz@ex@pos b
             \enverbListing{lstlisting}{}%
             \medskip\noindent
-            \ctikz@ex@onlycodeTF{}{\ctikz@ex@dohtmlbox{\linewidth}}%
+            \begin{BlockClass}{fullwidth-block}
+                \ctikz@ex@onlycodeTF{}{\ctikz@ex@dohtmlbox{\linewidth}}%
+            \end{BlockClass}
         \else
             \ctikz@ex@onlycodeTF{}{\begin{minipage}[t]{0.49\linewidth}}%
                 % this is horrible, but... trick lstlisting in thining the line is much longer,
