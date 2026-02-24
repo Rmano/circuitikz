@@ -15,24 +15,44 @@
 {\enverb{key-set=ctikz/examples, oarg-not-enverb, more-ignore=0}}
 {%
     \par\medskip\noindent
-    \ctikz@ex@onlycodeTF{}{\begin{minipage}[t]{0.49\linewidth}}%
+    \if\ctikz@ex@pos t
+        \ctikz@ex@onlycodeTF{}
+        {%
+            \begin{minipage}[t]{0.99\linewidth}
+                \fboxsep=6pt
+                \fboxrule=0.8pt
+                \fcolorbox{cyan}{white}
+                {%
+                    \begin{minipage}[t]
+                        {\dimeval{\linewidth-2\fboxsep-2\fboxrule}}%
+                        \ctikz@ex@restore\ctikz@ex@dorestore
+                        \ctikz@ex@execute
+                    \end{minipage}%
+                }%
+            \end{minipage}
+        }%
+        \medskip\noindent
         \enverbListing{lstlisting}{}%
-    \ctikz@ex@onlycodeTF{}{\end{minipage}\hfill}%
-    \ctikz@ex@onlycodeTF{}
-    {%
-        \begin{minipage}[t]{0.49\linewidth}
-            \fboxsep=6pt
-            \fboxrule=0.8pt
-            \fcolorbox{cyan}{white}
-            {%
-                \begin{minipage}[t]
-                    {\dimeval{\linewidth-2\fboxsep-2\fboxrule}}%
-                    \ctikz@ex@restore\ctikz@ex@dorestore
-                    \ctikz@ex@execute
-                \end{minipage}%
-            }%
-        \end{minipage}
-    }%
+    \else
+        \ctikz@ex@onlycodeTF{}{\begin{minipage}[t]{0.49\linewidth}}%
+            \enverbListing{lstlisting}{}%
+        \ctikz@ex@onlycodeTF{}{\end{minipage}\hfill}%
+        \ctikz@ex@onlycodeTF{}
+        {%
+            \begin{minipage}[t]{0.49\linewidth}
+                \fboxsep=6pt
+                \fboxrule=0.8pt
+                \fcolorbox{cyan}{white}
+                {%
+                    \begin{minipage}[t]
+                        {\dimeval{\linewidth-2\fboxsep-2\fboxrule}}%
+                        \ctikz@ex@restore\ctikz@ex@dorestore
+                        \ctikz@ex@execute
+                    \end{minipage}%
+                }%
+            \end{minipage}
+        }%
+    \fi
     \ctikz@ex@store\ctikz@ex@dostore
     \ctikz@ex@execOutsideTF
     {\global\let\ctikz@ex@codeOutside\enverbBody}%
