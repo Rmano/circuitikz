@@ -1,29 +1,68 @@
+@import url("lwarp.css");
 
-@import url("lwarp.css") ;
-
-html, body {
-    background: #ffffff !important;
+/* =========================================================
+   Global
+   ========================================================= */
+html, body{
+  background: #ffffff !important;
 }
 
-/* Stop minipages acting like floats (prevents “spill/wrap-around”) */
-div.minipage {
+/* =========================================================
+   Minipages
+   Goal: prevent float spill/wrap-around and keep side-by-side
+   effect (your current 42% layout).
+   ========================================================= */
+div.minipage,
+div.latex_minipage{
   float: none !important;
   display: inline-block !important;
   vertical-align: top !important;
-}
 
-/* If lwarp uses a different class name in your build, try these too: */
-div.latex_minipage {
-  float: none !important;
-  display: inline-block !important;
-  vertical-align: top !important;
+  /* Your current “two columns-ish” look */
+  width: 42% !important;
+  box-sizing: border-box;
 }
 
 /* Make framed boxes contain their children cleanly */
-div.fbox, span.fbox {
+div.fbox,
+span.fbox{
   overflow: hidden;
 }
 
+/* Full-width minipage override */
+.fullwidth-block > div.minipage,
+.fullwidth-block > div.latex_minipage{
+  width: 100% !important;
+  display: block !important;
+}
+
+/* Make the framed figure occupy the full line */
+.fullwidth-block span.fcolorbox{
+  display: block !important;
+  width: 100% !important;
+  box-sizing: border-box;
+}
+
+/* Remove TeX-style transform scaling wrapper (if present) */
+.fullwidth-block span.fcolorbox > span[style*="transform:scale"]{
+  transform: none !important;
+  -webkit-transform: none !important;
+  -ms-transform: none !important;
+
+  display: block !important;
+  width: 100% !important;
+}
+
+/* THIS is the key: force the SVG img to scale with width */
+.fullwidth-block img.lateximage{
+  width: 100% !important;      /* grow to container width */
+  height: auto !important;     /* keep aspect ratio */
+  max-width: 80% !important;
+  display: block !important;
+}
+/* =========================================================
+   Permalinks
+   ========================================================= */
 .permalink{
   margin-left: .4em;
   font-size: 0.85em;
@@ -31,14 +70,11 @@ div.fbox, span.fbox {
   opacity: 0.0;
 }
 
-.explicit-permalink {
+.explicit-permalink{
   opacity: 0.8;
   font-size: 0.8em;
 }
-
-.explicit-permalink:hover {
-  opacity: 1;
-}
+.explicit-permalink:hover{ opacity: 1; }
 
 h1:hover .permalink,
 h2:hover .permalink,
@@ -58,11 +94,21 @@ h6 .permalink:hover{
   opacity: 1.0;
 }
 
-/* Code blocks produced by lwarp/listings */
+/* =========================================================
+   Code blocks (lwarp/listings)
+   Consolidated: avoid duplication + keep your styling
+   ========================================================= */
+pre,
 pre.programlisting{
+  /* Behavior */
+  white-space: pre !important;     /* don’t wrap */
+  overflow-x: auto !important;     /* horizontal scroll */
+  max-width: 100% !important;
+  box-sizing: border-box;
+
+  /* Typography */
   font-size: clamp(0.75rem, 0.15vw + 0.55rem, 0.8rem);
   line-height: 1.3;
-
   font-family:
     ui-monospace,
     SFMono-Regular,
@@ -71,36 +117,28 @@ pre.programlisting{
     "Liberation Mono",
     monospace;
 
+  /* Box styling */
   padding: 0.75rem 0.9rem;
   margin: 0;
-
   background: rgba(20, 200, 200, 0.08);
   border: 1px solid rgba(0,0,0,0.25);
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0,0,0,0.05);
-  overflow-x: auto;
-  white-space: pre;
-}
-div.minipage pre.programlisting{
-  width: 90%;
 }
 
-div.minipage{
-  width: 42% !important;
-}
-
-/* Left-hand side TOC container */
+/* =========================================================
+   Sidebar TOC
+   ========================================================= */
 .sidetoc{
   position: sticky;
   top: 1rem;
   max-height: calc(100vh - 2rem);
   overflow-y: auto;
   padding-right: 0.5rem;
-  background: rgba(150, 150, 150, 0.1);
-}
 
-/* Optional: calm it down visually */
-.sidetoc{
+  background: rgba(150, 150, 150, 0.1);
+
+  /* “Calm it down visually” (merged from your duplicate block) */
   font-size: 1.4em;
   line-height: 1.05;
 }
@@ -114,13 +152,12 @@ div.minipage{
   padding: 0.1rem 0.25rem;
 }
 
-
-/* footnotes */
-
-a.footnote-ref { text-decoration: none; }
-a.footnote-ref:hover { text-decoration: underline; }
-a.footnote-backref { text-decoration: none; margin-left: .25em; }
-
+/* =========================================================
+   Footnotes + tooltip
+   ========================================================= */
+a.footnote-ref{ text-decoration: none; }
+a.footnote-ref:hover{ text-decoration: underline; }
+a.footnote-backref{ text-decoration: none; margin-left: .25em; }
 
 .fn-tooltip{
   position: absolute;
@@ -129,12 +166,11 @@ a.footnote-backref { text-decoration: none; margin-left: .25em; }
   padding: 0.6em 0.8em;
   border: 1px solid rgba(0,0,0,0.25);
   border-radius: 8px;
-  background: #FDF6B2; /* #FFF8B0; // var(--lwarp-background, #fff); */
+  background: #FDF6B2;
   box-shadow: 0 8px 24px rgba(0,0,0,0.18);
   font-size: 0.95em;
   line-height: 1.35;
 }
-
 .fn-tooltip p{ margin: 0; }
 .fn-tooltip a{ text-decoration: underline; }
 .fn-tooltip kbd{ padding: 0.05em 0.35em; border-radius: 4px; }
