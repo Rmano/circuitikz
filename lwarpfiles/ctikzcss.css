@@ -29,37 +29,37 @@ span.fbox{
   overflow: hidden;
 }
 
-/* Full-width minipage override */
-.fullwidth-block > div.minipage,
-.fullwidth-block > div.latex_minipage{
-  width: 100% !important;
-  display: block !important;
-}
+/* /1* Full-width minipage override *1/ */
+/* .fullwidth-block > div.minipage, */
+/* .fullwidth-block > div.latex_minipage{ */
+/*   width: 100% !important; */
+/*   display: block !important; */
+/* } */
 
-/* Make the framed figure occupy the full line */
-.fullwidth-block span.fcolorbox{
-  display: block !important;
-  width: 100% !important;
-  box-sizing: border-box;
-}
+/* /1* Make the framed figure occupy the full line *1/ */
+/* .fullwidth-block span.fcolorbox{ */
+/*   display: block !important; */
+/*   width: 100% !important; */
+/*   box-sizing: border-box; */
+/* } */
 
-/* Remove TeX-style transform scaling wrapper (if present) */
-.fullwidth-block span.fcolorbox > span[style*="transform:scale"]{
-  transform: none !important;
-  -webkit-transform: none !important;
-  -ms-transform: none !important;
+/* /1* Remove TeX-style transform scaling wrapper (if present) *1/ */
+/* .fullwidth-block span.fcolorbox > span[style*="transform:scale"]{ */
+/*   transform: none !important; */
+/*   -webkit-transform: none !important; */
+/*   -ms-transform: none !important; */
 
-  display: block !important;
-  width: 100% !important;
-}
+/*   display: block !important; */
+/*   width: 100% !important; */
+/* } */
 
-/* THIS is the key: force the SVG img to scale with width */
-.fullwidth-block img.lateximage{
-  width: 100% !important;      /* grow to container width */
-  height: auto !important;     /* keep aspect ratio */
-  max-width: 80% !important;
-  display: block !important;
-}
+/* /1* THIS is the key: force the SVG img to scale with width *1/ */
+/* .fullwidth-block img.lateximage{ */
+/*   width: 100% !important;      /1* grow to container width *1/ */
+/*   height: auto !important;     /1* keep aspect ratio *1/ */
+/*   max-width: 80% !important; */
+/*   display: block !important; */
+/* } */
 /* =========================================================
    Permalinks
    ========================================================= */
