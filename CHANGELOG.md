@@ -3,9 +3,9 @@ The major changes among the different CircuiTikZ versions are listed here. See <
 
 * Version 1.8.6 (unreleased)
 
-    A shiny new style for the manual, with a new example code implementation by Jonathan P. Spratte, based on [the package `enverb`](https://ctan.org/pkg/enverb?lang=en). The manual now avoid writing *thousands* of auxiliary files, and compiles significantly faster.
+    A shiny new style for the manual, with a new example code implementation by Jonathan P. Spratte, based on [the package `enverb`](https://ctan.org/pkg/enverb?lang=en). The manual now avoid writing *hundreds* of auxiliary files, and compiles significantly faster. Additionally, now the manual can be compiled with `lwarp`, enabling the creation of a pure-HTML version.
 
-    - New manual style, with new example code based on `enverb` (mainly by [Jonathan P. Spratte](https://github.com/circuitikz/circuitikz/pull/920)
+    - New manual style, with new example code based on `enverb` (mainly by [Jonathan P. Spratte](https://github.com/circuitikz/circuitikz/pull/920))
 
 * Version 1.8.5 (2026-02-4)
 
