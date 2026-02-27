@@ -1881,9 +1881,9 @@ You can change the scale of the power supplies by setting the key <a id="LWRinde
 </p>
 
 <p>
-Given that the power supply symbols are basically arrows, you can change them using all the options of the <kbd>arrows.meta</kbd> package (see the Ti<em>k</em>Z manual for details) by changing the keys <a id="LWRindex-105"></a><kbd>monopoles/vcc/arrow</kbd>
-and <a id="LWRindex-106"></a><kbd>monopoles/vee/arrow</kbd> (the default for both is <kbd>legacy</kbd>, which will use the old code for drawing them). Note that the anchors are at the start of the connecting lines, and that geographical anchors are just
-approximation if you change the arrow symbol!
+Given that the power supply symbols are basically arrows, you can change them using all the options of the <kbd>arrows.meta</kbd> package (see the <a href="https://tikz.dev/tikz-arrows" target="_blank" >Ti<em>k</em>Z manual</a> for details) by changing the
+keys <a id="LWRindex-105"></a><kbd>monopoles/vcc/arrow</kbd> and <a id="LWRindex-106"></a><kbd>monopoles/vee/arrow</kbd> (the default for both is <kbd>legacy</kbd>, which will use the old code for drawing them). Note that the anchors are at the start of
+the connecting lines, and that geographical anchors are just approximation if you change the arrow symbol!
 </p>
 
 <p>
@@ -3103,8 +3103,9 @@ id="LWRindex-163"></a><kbd>tunable start arrow</kbd> or <a id="LWRindex-164"></a
 </p>
 
 <p>
-You can change that globally or locally, as ever. The tip specification is the one you can find in the Ti<em>k</em>Z manual (“Arrow Tip Specifications”). For the <kbd>photoresistor</kbd> and the two “flavors” of the light-dependent resistor (<kbd>ldR</kbd>, american
-or european), the style of the arrows follow the <a id="LWRindex-165"></a><kbd>opto</kbd> commands as in the photodiodes and phototransistor: see&nbsp;<a href="node-The-components-list.html#sec:opto-arrows">4.4.3.1</a>.
+You can change that globally or locally, as ever. The tip specification is the one you can find in the Ti<em>k</em>Z manual (<a href="https://tikz.dev/tikz-arrows#sec-16.4" target="_blank" >“Arrow Tip Specifications”</a>). For the <kbd>photoresistor</kbd>
+and the two “flavors” of the light-dependent resistor (<kbd>ldR</kbd>, american or european), the style of the arrows follow the <a id="LWRindex-165"></a><kbd>opto</kbd> commands as in the photodiodes and phototransistor: see&nbsp;<a
+href="node-The-components-list.html#sec:opto-arrows">4.4.3.1</a>.
 </p>
 
 <p>
@@ -7244,7 +7245,8 @@ will change the “whiskers” of the diodes to be at a right angle<sup>34</sup>
 </p>
 
 <p>
-<sup>33</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>33</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 <p>
@@ -9490,7 +9492,8 @@ easily changeable, given that the algorithm that positions the labels depends on
 </p>
 
 <p>
-On the other hand, Ti<em>k</em>Z powerful partway coordinate calculation (around section 13.5.3 of the manual) makes it possible to easily identify points on a circle if the center and one point of the circle are known, as you can see in the following example.
+On the other hand, Ti<em>k</em>Z powerful <a href="https://tikz.dev/tikz-coordinates#sec-13.5.3" target="_blank" >partway coordinate calculation</a> (around section 13.5.3 of the manual) makes it possible to easily identify points on a circle if the center and
+one point of the circle are known, as you can see in the following example.
 </p>
 
 <p>
@@ -10572,10 +10575,10 @@ ramps   sin   square   triangle   lissajous   zero   none
  </pre>
 
 <p>
-If you want more or different shapes, you can define your owns, but you have to use low-level <kbd>pgf</kbd> commands (see part IX, “The Basic Layer”, in the PGF/Ti<em>k</em>Z manual). The code is executed into a <span class="verb">\pgfscope</span>
-&#x2026;<span class="verb">\endpgfscope</span> environment, and it must use the path built with a <span class="verb">\pgfusepath</span>. The coordinates have been scaled so that the external box of the scope is a rectangle between <kbd>(-1cm, -1cm)</kbd>
-and <kbd>(1cm, 1cm)</kbd>; the oscilloscope grid is fixed and painted between <kbd>(-0.75cm, -0.5cm)</kbd> and <kbd>(0,75cm, 0.5cm)</kbd>. If you stretch the scope with the <kbd>&#x2026;width</kbd> or <kbd>&#x2026;height</kbd> keys, the drawing will be
-stretched too.
+If you want more or different shapes, you can define your owns, but you have to use low-level <kbd>pgf</kbd> commands (see part IX, <a href="https://tikz.dev/base" target="_blank" >“The Basic Layer”</a>, in the PGF/Ti<em>k</em>Z manual). The code is
+executed into a <span class="verb">\pgfscope</span> &#x2026;<span class="verb">\endpgfscope</span> environment, and it must use the path built with a <span class="verb">\pgfusepath</span>. The coordinates have been scaled so that the external box of the
+scope is a rectangle between <kbd>(-1cm, -1cm)</kbd> and <kbd>(1cm, 1cm)</kbd>; the oscilloscope grid is fixed and painted between <kbd>(-0.75cm, -0.5cm)</kbd> and <kbd>(0,75cm, 0.5cm)</kbd>. If you stretch the scope with the <kbd>&#x2026;width</kbd> or
+<kbd>&#x2026;height</kbd> keys, the drawing will be stretched too.
 </p>
 
 <p>
@@ -10633,7 +10636,8 @@ stretched too.
 
 <a id="circuitikzmanual-autopage-1213"></a>
 <p>
-<sup>53</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>53</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 <p>
@@ -13224,7 +13228,8 @@ dash pattern:   <kbd>default</kbd> means not to change the setting for the compo
 </p>
 
 <p>
-<sup>65</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>65</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 
@@ -18166,8 +18171,8 @@ A       A
 </p>
 
 <p>
-<sup>82</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples. Notice that the dimensions are
-not exactly cm: the length are scaled so that 1&#x202f;cm is really the block width.
+<sup>82</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples. Notice that the dimensions are not exactly cm: the length are scaled so that 1&#x202f;cm is really the block width.
 </p>
 
 <p>
@@ -22040,7 +22045,8 @@ The dashed line pattern can be changed by setting the key <a id="LWRindex-843"><
 
 <a id="circuitikzmanual-autopage-2156"></a>
 <p>
-<sup>96</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>96</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 <p>
@@ -22231,7 +22237,8 @@ href="https://github.com/circuitikz/circuitikz/issues/703" target="_blank" >user
 </p>
 
 <p>
-<sup>99</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>99</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 
@@ -23907,7 +23914,8 @@ The dashed line pattern can be changed by setting the key <kbd>tubes/partial bor
 </p>
 
 <p>
-<sup>102</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>102</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 
@@ -26218,7 +26226,8 @@ id="LWRindex-915"></a><kbd>inward</kbd>, default) and the one without horizontal
 </p>
 
 <p>
-<sup>110</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>110</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 
@@ -29906,7 +29915,7 @@ means no arrow). The keys are settable with <span class="verb">\ctikzset</span> 
 </p>
 
 <p>
-You can change that globally or locally, as ever. The tip specification is the one you can find in the Ti<em>k</em>Z manual (“Arrow Tip Specifications”).
+You can change that globally or locally, as ever. The tip specification is the one you can find in the Ti<em>k</em>Z manual (<a href="https://tikz.dev/tikz-arrows#sec-16.4" target="_blank" >“Arrow Tip Specifications”</a>).
 </p>
 
 <p>
@@ -30139,7 +30148,8 @@ You can change the rotary switch arrow shape in the same way as you change the o
 
 <a id="circuitikzmanual-autopage-2809"></a>
 <p>
-<sup>119</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual for details; phase is always zero. Basically you pass pairs of dash-length – blank-length dimensions, see the examples.
+<sup>119</sup>&nbsp;Follows the syntax of the pattern sequence <kbd>\pgfsetdash</kbd> — see Ti<em>k</em>Z manual <a href="https://tikz.dev/tikz-actions#sec-15.3.2" target="_blank" >for details</a>; phase is always zero. Basically you pass pairs of
+dash-length – blank-length dimensions, see the examples.
 </p>
 
 
