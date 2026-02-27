@@ -33,9 +33,9 @@ For ConTeXt, you should be able to use
 ```latex
   \usemodule[circuitikz]
 ```
-in the preamble and compile away, both with PS and PDF target output. 
+in the preamble and compile away, both with PS and PDF target output.
 
-It is higly recommended to go through the [tutorials in the manual](https://circuitikz.github.io/circuitikz/circuitikzmanualgit.pdf#c) and to learn a bit of Ti*k*Z before for example, go through at least the [basic Ti*k*Z one](https://tikz.dev/tutorial), but there are more suggestions in the documentation.
+It is higly recommended to go through the [tutorials in the manual](https://rmano.github.io/circuitikz/node-Tutorials.html) and to learn a bit of Ti*k*Z before for example, go through at least the [basic Ti*k*Z one](https://tikz.dev/tutorial), but there are more suggestions in the documentation.
 
 *Notice* that for the time being, due to [this bug](https://bugs.launchpad.net/ubuntu/+source/context/+bug/2058409), automatic (CI) checks for ConTeXt compatibility is disabled. I (Romano) am still checking it at home, but I am not able to have it integrated in the CI.
 
@@ -61,6 +61,8 @@ You have all the code and the corresponding manual available in the  [in the git
 
 ## More Information and documentation
 More Information can be found in the manual; you can find a compiled version for the "bleeding edge" version [in the github page](http://circuitikz.github.io/circuitikz/circuitikzmanualgit.pdf) and for the various releases in the [GitHub releases](https://github.com/circuitikz/circuitikz/releases), where you can find the manual in the assets of each release (since 0.8.3, anyways).
+
+There is a on-line, hyperlinked [HTML version](https://rmano.github.io/circuitikz/index.html) of the manual, which will (hopefully) track the most recent release.
 
 ## Contact the authors
 
