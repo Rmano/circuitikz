@@ -2984,6 +2984,14 @@
 \ctikzset{transistors/arrow pos/legacy/.code={\pgf@circuit@trans@arrowatendfalse}}
 \ctikzset{transistors/arrow pos/end/.code={\pgf@circuit@trans@arrowatendtrue}}
 
+% relative thickness of the gate "bar"
+\ctikzset{transistors/gate thickness/.initial=1}
+
+% arrows at the end, the correct way
+\newif\ifpgf@circuit@trans@roundedcap
+\pgf@circuit@trans@roundedcapfalse
+\ctikzset{transistors/rounded caps/.is if=pgf@circuit@trans@roundedcap}
+
 \newif\ifpgf@circuit@trans@ntype
 \pgf@circuit@trans@ntypetrue %default true
 %\newif\ifpgf@circuit@trans@ptype
@@ -3309,6 +3317,16 @@
 \ctikzset{tripoles/pjfet/bodydiode distance/.initial=.3}
 \ctikzset{tripoles/pjfet/bodydiode conn/.initial=.6}
 \ctikzset{tripoles/pjfet/curr direction/.initial=-1}
+% set the gate height of jfet
+\ctikzset{transistors/jfet gate height/.code={%
+    \pgfmathsetmacro{\@@tmp}{\ctikzvalof{tripoles/njfet/width}*0.5*(#1)}%
+    \ctikzset{tripoles/njfet/conn height=\@@tmp}%
+    \ctikzset{tripoles/njfet/union height=\@@tmp}%
+    \pgfmathsetmacro{\@@tmp}{\ctikzvalof{tripoles/pjfet/width}*0.5*(#1)}%
+    \ctikzset{tripoles/pjfet/conn height=\@@tmp}%
+    \ctikzset{tripoles/pjfet/union height=\@@tmp}%
+    }
+}
 
 \ctikzset{tripoles/nujt/width/.initial=.7}
 \ctikzset{tripoles/nujt/gate height/.initial=.5}
@@ -4134,13 +4152,14 @@
 
         % drawing base
         \pgfscope
+            \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+            \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
             \pgfpathmoveto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@up}}
             \pgfpathlineto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@down}}
-            \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
             \ifpgf@circuit@bpt@schottky
                 % upper
                 \pgfpathmoveto{\pgfpoint
@@ -4676,6 +4695,8 @@
 
         %draw thicker gate lines
         \pgfscope
+            \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+            \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
             \pgfscope
                 \pgfpathmoveto{\pgfpoint
                     {\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left}
@@ -4684,7 +4705,6 @@
                     {\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left}
                 {\ctikzvalof{tripoles/#1/outer base height}\pgf@circ@res@down-\pgfverticaltransformationadjustment*.5\pgflinewidth}}
                 % set the normal thickness
-                \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
                 \edef\@@extrat{\ctikzvalof{tripoles/#1/outer base thickness}}
                 \pgfsetlinewidth{\@@extrat\pgflinewidth}
                 \pgfusepath{draw}
@@ -4695,7 +4715,6 @@
             \pgfpathlineto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@down-\pgfverticaltransformationadjustment*.5\pgflinewidth}}
-            \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
             \pgfusepath{draw}
         \endpgfscope
         %draw lower connection
@@ -4883,26 +4902,28 @@
         \endpgfscope
         %draw thicker gate lines
         \pgfscope
+            \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+            \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
             \pgfscope
+                % draw the gate
                 \pgfpathmoveto{\pgfpoint
                     {\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left}
                 {\ctikzvalof{tripoles/#1/outer base height}\pgf@circ@res@up+\pgfverticaltransformationadjustment*.5\pgflinewidth}}
                 \pgfpathlineto{\pgfpoint
                     {\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left}
                 {\ctikzvalof{tripoles/#1/outer base height}\pgf@circ@res@down-\pgfverticaltransformationadjustment*.5\pgflinewidth}}
-                % set the normal thickness
-                \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+                \pgfsetlinewidth{\ctikzvalof{transistors/gate thickness}\pgflinewidth}
                 \edef\@@extrat{\ctikzvalof{tripoles/#1/outer base thickness}}
                 \pgfsetlinewidth{\@@extrat\pgflinewidth}
                 \pgfusepath{draw}
             \endpgfscope
+            % draw the base (channel)
             \pgfpathmoveto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@up+\pgfverticaltransformationadjustment*.5\pgflinewidth}}
             \pgfpathlineto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@down-\pgfverticaltransformationadjustment*.5\pgflinewidth}}
-            \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
             \pgfusepath{draw}
         \endpgfscope
         %draw arrow depending on type of transistor
@@ -5027,20 +5048,27 @@
     \pgfusepath{draw}
 
     \pgfscope
+        % draw the channel
+        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
         \pgfpathmoveto{\pgfpoint
             {\ctikzvalof{tripoles/nmos/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/nmos/base height}\pgf@circ@res@up}}
         \pgfpathlineto{\pgfpoint
             {\ctikzvalof{tripoles/nmos/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/nmos/base height}\pgf@circ@res@down}}
-        \pgfpathmoveto{\pgfpoint
-            {\ctikzvalof{tripoles/nmos/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/nmos/gate height}\pgf@circ@res@up}}
-        \pgfpathlineto{\pgfpoint
-            {\ctikzvalof{tripoles/nmos/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/nmos/gate height}\pgf@circ@res@down}}
-        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
         \pgfusepath{draw}
+        \pgfscope
+            % draw the gate
+            \pgfsetlinewidth{\ctikzvalof{transistors/gate thickness}\pgflinewidth}
+            \pgfpathmoveto{\pgfpoint
+                {\ctikzvalof{tripoles/nmos/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/nmos/gate height}\pgf@circ@res@up}}
+            \pgfpathlineto{\pgfpoint
+                {\ctikzvalof{tripoles/nmos/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/nmos/gate height}\pgf@circ@res@down}}
+            \pgfusepath{draw}
+        \endpgfscope
     \endpgfscope
     \ifpgf@circuit@mos@arrows
         \pgfscope
@@ -5131,20 +5159,26 @@
     \fi
 
     \pgfscope
+        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
+        % draw the channel
         \pgfpathmoveto{\pgfpoint
             {\ctikzvalof{tripoles/pmos/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/pmos/base height}\pgf@circ@res@up}}
         \pgfpathlineto{\pgfpoint
             {\ctikzvalof{tripoles/pmos/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/pmos/base height}\pgf@circ@res@down}}
-        \pgfpathmoveto{\pgfpoint
-            {\ctikzvalof{tripoles/pmos/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/pmos/gate height}\pgf@circ@res@up}}
-        \pgfpathlineto{\pgfpoint
-            {\ctikzvalof{tripoles/pmos/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/pmos/gate height}\pgf@circ@res@down}}
-        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
         \pgfusepath{draw}
+        \pgfscope
+            \pgfsetlinewidth{\ctikzvalof{transistors/gate thickness}\pgflinewidth}
+            \pgfpathmoveto{\pgfpoint
+                {\ctikzvalof{tripoles/pmos/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/pmos/gate height}\pgf@circ@res@up}}
+            \pgfpathlineto{\pgfpoint
+                {\ctikzvalof{tripoles/pmos/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/pmos/gate height}\pgf@circ@res@down}}
+            \pgfusepath{draw}
+        \endpgfscope
     \endpgfscope
 
     \pgfpathmoveto{\pgfpoint
@@ -5251,20 +5285,26 @@
     \pgfusepath{draw}
 
     \pgfscope
+        % draw the channel
+        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
         \pgfpathmoveto{\pgfpoint
             {\ctikzvalof{tripoles/nmosd/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/nmosd/base height}\pgf@circ@res@up}}
         \pgfpathlineto{\pgfpoint
             {\ctikzvalof{tripoles/nmosd/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/nmosd/base height}\pgf@circ@res@down}}
-        \pgfpathmoveto{\pgfpoint
-            {\ctikzvalof{tripoles/nmosd/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/nmosd/gate height}\pgf@circ@res@up}}
-        \pgfpathlineto{\pgfpoint
-            {\ctikzvalof{tripoles/nmosd/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/nmosd/gate height}\pgf@circ@res@down}}
-        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
         \pgfusepath{draw}
+        \pgfscope
+            \pgfsetlinewidth{\ctikzvalof{transistors/gate thickness}\pgflinewidth}
+            \pgfpathmoveto{\pgfpoint
+                {\ctikzvalof{tripoles/nmosd/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/nmosd/gate height}\pgf@circ@res@up}}
+            \pgfpathlineto{\pgfpoint
+                {\ctikzvalof{tripoles/nmosd/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/nmosd/gate height}\pgf@circ@res@down}}
+            \pgfusepath{draw}
+        \endpgfscope
     \endpgfscope
     \ifpgf@circuit@mos@arrows
         \pgfscope
@@ -5371,20 +5411,27 @@
     \fi
 
     \pgfscope
+        % draw the channel
+        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
         \pgfpathmoveto{\pgfpoint
             {\ctikzvalof{tripoles/pmosd/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/pmosd/base height}\pgf@circ@res@up}}
         \pgfpathlineto{\pgfpoint
             {\ctikzvalof{tripoles/pmosd/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/pmosd/base height}\pgf@circ@res@down}}
-        \pgfpathmoveto{\pgfpoint
-            {\ctikzvalof{tripoles/pmosd/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/pmosd/gate height}\pgf@circ@res@up}}
-        \pgfpathlineto{\pgfpoint
-            {\ctikzvalof{tripoles/pmosd/gate width}\pgf@circ@res@left}
-        {\ctikzvalof{tripoles/pmosd/gate height}\pgf@circ@res@down}}
-        \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
         \pgfusepath{draw}
+        \pgfscope
+            % draw the gate
+            \pgfsetlinewidth{\ctikzvalof{transistors/gate thickness}\pgflinewidth}
+            \pgfpathmoveto{\pgfpoint
+                {\ctikzvalof{tripoles/pmosd/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/pmosd/gate height}\pgf@circ@res@up}}
+            \pgfpathlineto{\pgfpoint
+                {\ctikzvalof{tripoles/pmosd/gate width}\pgf@circ@res@left}
+            {\ctikzvalof{tripoles/pmosd/gate height}\pgf@circ@res@down}}
+            \pgfusepath{draw}
+        \endpgfscope
     \endpgfscope
 
     \pgfpathmoveto{\pgfpoint
@@ -5519,6 +5566,7 @@
             {\ctikzvalof{tripoles/hemt/base height}\pgf@circ@res@down}}
         \fi
         \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
         \pgfusepath{draw}
     \endpgfscope
     % draw the gate horizontal segment
@@ -5556,6 +5604,7 @@
     {\ctikzvalof{tripoles/#1/gate height}\pgf@circ@res@up}}
     \pgfusepath{draw}
     \pgfscope
+        % draw the channel (base)
         \pgfpathmoveto{\pgfpoint
             {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@up}}
@@ -5564,7 +5613,6 @@
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@down}}
         \else
-
             \pgfpathlineto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@up*0.45}}
@@ -5576,12 +5624,13 @@
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@down*0.25}}
             \pgfpathmoveto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
-            {\ctikzvalof{tripoles/nfet/base height}\pgf@circ@res@down*0.45}}
+            {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@down*0.45}}
             \pgfpathlineto{\pgfpoint
                 {\ctikzvalof{tripoles/#1/base width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/base height}\pgf@circ@res@down}}
         \fi
         \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
         \pgfusepath{draw}
     \endpgfscope
     %Bulk connection line
@@ -5608,6 +5657,8 @@
             \pgfpathlineto{\pgfpoint
             {0.3*\ctikzvalof{tripoles/#1/base width}*\pgf@circ@res@left}{\pgf@circ@res@up+1.2*\pgf@circ@res@down}}
             \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+            \pgfsetlinewidth{\ctikzvalof{transistors/gate thickness}\pgflinewidth}
+            \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
             \pgfusepath{draw}
         \endpgfscope
     \fi
@@ -5636,7 +5687,9 @@
         \pgfpathlineto{\pgfpoint
             {\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/#1/gate height}\pgf@circ@res@down-\pgfverticaltransformationadjustment*.5*\pgflinewidth}}
+        \pgfsetlinewidth{\ctikzvalof{transistors/gate thickness}\pgflinewidth}
         \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
         \pgfusepath{draw}
     \endpgfscope
     % arrows
@@ -5863,7 +5916,7 @@
             }
             \anchor{kink}{
                 \northeast
-                \pgf@ya=-\ctikzvalof{tripoles/#1/gate height 2}\pgf@y
+                \pgf@ya=-\ctikzvalof{tripoles/#1/conn height}\pgf@y
                 \left
                 \pgf@y=\ctikzvalof{tripoles/#1/curr direction}\pgf@ya
                 \pgf@x=\ctikzvalof{tripoles/#1/conn kink}\pgf@x
@@ -5902,6 +5955,7 @@
                 {\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left}
             {\ctikzvalof{tripoles/#1/gate height}\pgf@circ@res@down}}
             \pgf@circ@setlinewidth{tripoles}{\pgflinewidth}
+            \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
             \pgfusepath{draw}
         \endpgfscope
 
@@ -5928,11 +5982,11 @@
                 \pgf@circ@res@step=\ctikzvalof{tripoles/#1/conn kink}\pgf@circ@res@left
                 \pgf@circ@res@other=\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left
                 \pgf@circ@res@zero=\ctikzvalof{tripoles/#1/union height}\pgf@circ@res@down
-                \pgf@circ@res@temp=\ctikzvalof{tripoles/#1/gate height 2}\pgf@circ@res@down
+                \pgf@circ@res@temp=\ctikzvalof{tripoles/#1/conn height}\pgf@circ@res@down
             \else
                 \pgf@circ@res@step=\ctikzvalof{tripoles/#1/gate width}\pgf@circ@res@left
                 \pgf@circ@res@other=\ctikzvalof{tripoles/#1/conn kink}\pgf@circ@res@left
-                \pgf@circ@res@zero=\ctikzvalof{tripoles/#1/gate height 2}\pgf@circ@res@up
+                \pgf@circ@res@zero=\ctikzvalof{tripoles/#1/conn height}\pgf@circ@res@up
                 \pgf@circ@res@temp=\ctikzvalof{tripoles/#1/union height}\pgf@circ@res@up
             \fi
             %
@@ -6025,6 +6079,7 @@
             {\ctikzvalof{tripoles/isfet/base width}\pgf@circ@res@left}
         {\ctikzvalof{tripoles/isfet/base height}\pgf@circ@res@down}}
         \pgf@circ@setlinewidth{tripoles}{\pgflinewidth} %% added
+        \ifpgf@circuit@trans@roundedcap\pgfsetroundcap\fi
         \pgfusepath{draw} %% added
     \endpgfscope %% added
 
