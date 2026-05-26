@@ -17,16 +17,16 @@
 </clipPath>
 </defs>
 <g clip-path="url(#clip-0)">
-<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -0.00171875 0.000375 L 56.693594 0.000375 " transform="matrix(1, 0, 0, -1, -0.135, 7.266)"/>
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -0.00171875 0.000375 L 56.693594 0.000375 " transform="matrix(1, 0, 0, -1, -0.135, 7.266)"/>
 </g>
-<path fill-rule="nonzero" fill="rgb(100%, 94.898987%, 0%)" fill-opacity="1" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 8.224844 -5.464469 L 20.123281 -5.464469 L 20.123281 5.465219 L 8.224844 5.465219 Z M 8.224844 -5.464469 " transform="matrix(1, 0, 0, -1, -0.135, 7.266)"/>
-<g fill="rgb(0%, 0%, 0%)" fill-opacity="1">
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(100%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M 8.224844 -5.464469 L 20.123281 -5.464469 L 20.123281 5.465219 L 8.224844 5.465219 Z M 8.224844 -5.464469 " transform="matrix(1, 0, 0, -1, -0.135, 7.266)"/>
+<g fill="rgb(100%, 0%, 0%)" fill-opacity="1">
 <use xlink:href="#glyph-0-0" x="11.409" y="9.411"/>
 </g>
 <g clip-path="url(#clip-1)">
 <path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 67.83905%, 93.728638%)" stroke-opacity="1" stroke-miterlimit="10" d="M 36.568594 -6.433219 L 48.470938 -6.433219 L 48.470938 6.433969 L 36.568594 6.433969 Z M 36.568594 -6.433219 " transform="matrix(1, 0, 0, -1, -0.135, 7.266)"/>
 </g>
-<g fill="rgb(0%, 0%, 0%)" fill-opacity="1">
+<g fill="rgb(100%, 0%, 0%)" fill-opacity="1">
 <use xlink:href="#glyph-0-1" x="39.756" y="8.442"/>
 </g>
 </svg>

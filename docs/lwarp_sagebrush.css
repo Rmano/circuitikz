@@ -80,7 +80,7 @@ div.epigraph, div.dictum {
 .example {
     background-color: #f5f5eb ;
     background-image: linear-gradient(to bottom, #f5f5eb, #C8C8B8);
-
+    margin: 3ex 4em 2ex 4em ;
 }
 
 div.exampletitle{
@@ -98,7 +98,7 @@ div.exampletitle{
 .sidebar {
     background-color: #f5f5eb ;
     background-image: linear-gradient(to bottom, #f5f5eb, #C8C8B8);
-
+    margin: 3ex 4em 2ex 4em ;
 }
 
 div.sidebartitle{

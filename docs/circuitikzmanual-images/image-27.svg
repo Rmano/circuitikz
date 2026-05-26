@@ -179,7 +179,8 @@
 </clipPath>
 </defs>
 <path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -0.0018125 22.025844 L -0.0018125 7.639125 L -13.888531 7.639125 M -13.888531 -7.638219 L -0.0018125 -7.638219 L -0.0018125 -22.024938 " transform="matrix(1, 0, 0, -1, 135.244, 133.936)"/>
-<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -13.888531 10.912562 L -13.888531 -10.911656 M -17.224469 7.639125 L -17.224469 -7.638219 " transform="matrix(1, 0, 0, -1, 135.244, 133.936)"/>
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -13.888531 10.912562 L -13.888531 -10.911656 " transform="matrix(1, 0, 0, -1, 135.244, 133.936)"/>
+<path fill="none" stroke-width="0.797" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -17.224469 7.639125 L -17.224469 -7.638219 " transform="matrix(1, 0, 0, -1, 135.244, 133.936)"/>
 <path fill-rule="nonzero" fill="rgb(0%, 0%, 0%)" fill-opacity="1" d="M 130.332031 141.574219 L 130.332031 139.289062 L 135.441406 141.574219 L 130.332031 143.863281 Z M 130.332031 141.574219 "/>
 <path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(0%, 0%, 0%)" stroke-opacity="1" stroke-miterlimit="10" d="M -17.224469 -0.0015 L -27.978375 -0.0015 " transform="matrix(1, 0, 0, -1, 135.244, 133.936)"/>
 <g fill="rgb(0%, 0%, 0%)" fill-opacity="1">

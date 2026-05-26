@@ -1,6 +1,6 @@
 /*
   CSS stylesheet for the LaTeX Lwarp package
-  Copyright 2016-2025 Brian Dunn
+  Copyright 2016-2026 Brian Dunn
 */
 
 /* Page layout */
@@ -82,8 +82,11 @@ div.sidetoccontents {
     width: 100% ;
 }
 
-nav.sidetoc p {line-height:1.2 ; margin: 1ex .5em 1ex .5em ;
-    text-indent: 0 ; }
+nav.sidetoc p {
+    line-height:1.2 ;
+    margin: 1ex .5em 1ex .5em ;
+    text-indent: 0 ;
+}
 
 nav.sidetoc p a {color:black ; font-size: .7em ;}
 
@@ -197,8 +200,8 @@ body {
     line-height: 1.2 ;
 }
 
-p {margin: 1.5ex 0em 1.5ex 0em ;}
-table p {margin: .5ex 0em .5ex 0em ;}
+p {margin: 1.5ex 0em 1.5ex 0em ; text-indent: 0em; }
+table p {margin: .5ex 0em .5ex 0em ; text-indent: 0em ;}
 
 /* Holds a section number */
 span.sectionnumber { margin-right: 0em }
@@ -370,6 +373,8 @@ div.diagboxW {
 div.attribution p {
     text-align: right ;
     font-size: 80%
+    margin: 1.5ex 0em 1.5ex 0em ;
+    text-indent: 0em ;
 }
 
 span.poemtitle {
@@ -402,6 +407,8 @@ blockquote p, div.quotchap p {
     line-height: 1.5;
     text-align: left ;
     font-size: .85em ;
+    margin: 1.5ex 0em 1.5ex 0em ;
+    text-indent: 0em ;
 }
 
 /* qauthor is for the quotchap package */
@@ -416,6 +423,8 @@ div.qauthor {
 
 div.qauthor p {
   text-align: right ;
+    margin: 1.5ex 0em 1.5ex 0em ;
+    text-indent: 0em ;
 }
 
 div.epigraph, div.dictum {
@@ -438,13 +447,29 @@ div.epigraphsource, div.dictumauthor {
     line-height: 1.2;
 }
 
-div.epigraph p, div.dictum p { padding: .5ex ; margin: 0ex ;}
-div.epigraphsource p, div.dictumauthor p { padding: .5ex 0ex 0ex 0ex ; margin: 0ex ;}
+div.epigraph p, div.dictum p {
+    padding: .5ex ;
+    margin: 0ex ;
+    text-indent: 0em ;
+}
+
+div.epigraphsource p, div.dictumauthor p {
+    padding: .5ex 0ex 0ex 0ex ;
+    margin: 0ex ;
+    text-indent: 0em ;
+}
+
 div.dictumauthor { font-style:italic }
 
 /* copyrightbox package: */
 div.copyrightbox { margin: .5ex .5em }
-div.copyrightbox p {margin: 0px .5em ; padding: 0px}
+
+div.copyrightbox p {
+    margin: 0px .5em ;
+    padding: 0px ;
+    text-indent: 0em ;
+}
+
 div.copyrightboxnote {text-align: left ; font-size: 60%}
 
 /* lettrine package: */
@@ -677,7 +702,11 @@ body dir, body menu {
 
 li { margin: 0ex 0em 1ex 0em; }
 
-li.p { display: inline ; }
+li.p {
+    display: inline ;
+    margin: 1.5ex 0em 1.5ex 0em ;
+    text-indent: 0em;
+}
 
 html {
   margin: 0;
@@ -841,7 +870,7 @@ div.wpminipage { border: 1px solid green ; margin: .5ex ; padding: .5ex ;}
 
 /* Paragraphs in the flexbox did not collapse their margins. */
 /* Have not yet researched this. */
-.minipage p {margin: .75ex 0em .75ex 0em ;}
+.minipage p {margin: .75ex 0em .75ex 0em ; text-indent: 0em ; }
 
 .fboxBlock .minipage, .colorbox .minipage, .colorboxBlock .minipage,
 .fcolorbox .minipage, .fcolorboxBlock .minipage
@@ -900,7 +929,11 @@ div.wpminipage { border: 1px solid green ; margin: .5ex ; padding: .5ex ;}
     margin: 2ex 1em 2ex 1em ;
 }
 
-.mdframed p, .tcolorbox p { padding: 0ex .5em 0ex .5em ; }
+.mdframed p, .tcolorbox p {
+    padding: 0ex .5em 0ex .5em ;
+    margin: 1.5ex 0em 1.5ex 0em ;
+    text-indent: 0em ;
+}
 
 .mdframed dl, .tcolorbox dl { padding: 1ex .5em 0ex .5em ; }
 
@@ -966,7 +999,11 @@ div.wpminipage { border: 1px solid green ; margin: .5ex ; padding: .5ex ;}
     font-size: 130%
 }
 
-.framedtitle p { padding: .3em }
+.framedtitle p {
+    padding: .3em ;
+    margin: 1.5ex 0em 1.5ex 0em ;
+    text-indent: 0em ;
+}
 
 /* For the niceframe package: */
 
@@ -1023,7 +1060,10 @@ dl dd { display: block ; }
 
 dl dd:after { content: "" ; display: block ; clear: both }
 
-dl dd p { margin-top: 0em; }
+dl dd p {
+    margin: 0ex 0em 1.5ex 0em ;
+    text-indent: 0em ;
+}
 
 dd ul, dd ol, dd dl {
     clear: both ;
@@ -1042,6 +1082,7 @@ nav p {
     margin-top:.5ex ;
     margin-bottom:.5ex;
     font-size: .9em ;
+    text-indent: 0em ;
 }
 
 img, img.hyperimage, img.borderimage {
@@ -1113,7 +1154,11 @@ figure div.minipage, figure div.minipage div.minipage {
 
 figure figure { margin: 0pt }
 
-figure div.minipage p { font-size: 85% ; }
+figure div.minipage p {
+    font-size: 85% ;
+    margin: 1.5ex 0em 1.5ex 0em ;
+    text-indent: 0em ;
+}
 
 figure.subfigure, figure.subtable  {
     display: inline-block ; margin: 3ex 1em 3ex 1em ;
@@ -1252,12 +1297,24 @@ table td.tdrulelr {
 }
 
 /* Margins of paragraphs inside table cells: */
-td.tdp p , td.tdprule p , td.tdP p , td.tdPrule p { padding-top: 1ex ;
-    padding-bottom: 1ex ; margin: 0ex ; }
-td.tdm p , td.tmbrule p , td.tdM p , td.tdMrule p { padding-top: 1ex ;
-    padding-bottom: 1ex ; margin: 0ex ; }
-td.tdb p , td.tdbrule p , td.tdB p , td.tdBrule p { padding-top: 1ex ;
-    padding-bottom: 1ex ; margin: 0ex ; }
+td.tdp p , td.tdprule p , td.tdP p , td.tdPrule p {
+    padding-top: 1ex ;
+    padding-bottom: 1ex ;
+    margin: 0ex ;
+    text-indent: 0em ;
+}
+td.tdm p , td.tmbrule p , td.tdM p , td.tdMrule p {
+    padding-top: 1ex ;
+    padding-bottom: 1ex ;
+    margin: 0ex ;
+    text-indent: 0em ;
+}
+td.tdb p , td.tdbrule p , td.tdB p , td.tdBrule p {
+    padding-top: 1ex ;
+    padding-bottom: 1ex ;
+    margin: 0ex ;
+    text-indent: 0em ;
+}
 
 td.tdp , td.tdprule , td.tdP , td.tdPrule
     { padding: 0ex .5em 0ex .5em ; }
@@ -1279,7 +1336,10 @@ td.tdb , td.tdbrule , td.tdB , td.tdBrule
     padding: 0pt ;
 }
 
-.tnotes dl dt p {margin-bottom:0px;}
+.tnotes dl dt p {
+    margin-bottom:0px;
+    text-indent: 0em ;
+}
 
 .tnoteitemheader {margin-right: 1em;}
 
@@ -1378,7 +1438,10 @@ div.subtitle
     margin: 1ex 0em 1ex 0em ;
 }
 
-div.subtitle p { margin: 1ex ; }
+div.subtitle p {
+    margin: 1ex ;
+    text-indent: 0em;
+}
 
 div.author
 {
@@ -1437,7 +1500,10 @@ div.multicols {
     -moz-columns: 3 auto ;
     columns: 3 auto ;
 }
-div.multicols p {margin-top: 0ex}
+div.multicols p {
+    margin-top: 0ex ;
+    text-indent: 0em ;
+}
 
 /* Used for xfrac and nicefrac: */
 span.numerator {
@@ -1605,6 +1671,7 @@ div.backnaur {
 
 div.backnaur p {
     margin: .25ex 0ex .25ex 0ex ;
+    text-indent: 0em ;
 }
 
 div.backnaurprod {

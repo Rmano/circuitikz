@@ -1,5 +1,5 @@
-/* ( --- Start of project.css --- ) */
-/* ( --- A sample project-specific CSS file for lwarp --- ) */
+/* ( --- Start of sample_project.css --- ) */
+/* ( --- A sample project-specific CSS file for Lwarp --- ) */
 
 /* Uncomment one of the following: */
 @import url("lwarp.css") ;
@@ -9,4 +9,13 @@
 /* Project-specific CSS setting follow here. */
 /* . . . */
 
-/* ( --- End of project.css --- ) */
+/* To use paragraph indents, uncomment the following: */
+/*
+body p {
+    text-indent: 2em ;
+    margin-bottom: 0ex ;
+    margin-top: 0ex ;
+}
+*/
+
+/* ( --- End of sample_project.css --- ) */
