@@ -34,10 +34,10 @@
             \ctikz@ex@onlycodeTF{}{\ctikz@ex@dohtmlbox{\linewidth}}%
         \end{BlockClass}
         \medskip\noindent
-        \enverbListing{lstlisting}{}%
+        \enverbListing{lstlisting}{[xleftmargin=0pt]}%
     \else
         \if\ctikz@ex@pos b
-            \enverbListing{lstlisting}{}%
+            \enverbListing{lstlisting}{[xleftmargin=0pt]}%
             \medskip\noindent
             \begin{BlockClass}{fullwidth-block}
                 \ctikz@ex@onlycodeTF{}{\ctikz@ex@dohtmlbox{\linewidth}}%
@@ -48,7 +48,7 @@
                 % so it didn't add wraps. The code is manually trimmed in the manual, and spills
                 % are handled correctly (with a scroll bar) by html.
                 {\linewidth=1.6\linewidth % HTML linewidth is too conservative
-                    \enverbListing{lstlisting}{}%
+                    \enverbListing{lstlisting}{[xleftmargin=0pt]}%
                 }%
             \ctikz@ex@onlycodeTF{}{\end{minipage}\hfill}%
             \ctikz@ex@onlycodeTF{}{\ctikz@ex@dohtmlbox{0.49\linewidth}}%
