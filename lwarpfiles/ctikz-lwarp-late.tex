@@ -122,4 +122,12 @@
 }
 \long\def\ctikzsubcircuitactivate#1{\csname #1@setanchors\endcsname}
 
+%%% Force the style to have xleftmargin=0, otherwise there is a spurious space
+%%% at the start of every listing in HTML. Not sure why.
+
+\lstdefinestyle{expl-code}{
+  xleftmargin=0pt,
+}
+\lstset{style=expl-code}
+
 \makeatother
