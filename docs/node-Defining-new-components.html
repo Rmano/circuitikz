@@ -1427,7 +1427,7 @@ Per me si va ne la città dolente,<br />
 per me si va ne l’etterno dolore,<br />
 per me si va tra la perduta gente.<br />
 &#x2026;<br />
-Lasciate ogne speranza, voi ch’intrate.<sup>155</sup><a id="circuitikzmanual-autopage-4527"></a>
+Lasciate ogne speranza, voi ch’intrate.<sup>156</sup><a id="circuitikzmanual-autopage-4527"></a>
 </p>
 </blockquote>
 
@@ -1439,7 +1439,7 @@ class="latexlogofont"><span class="latexlogo">T<span class="latexlogosub">e</spa
 
 <a id="circuitikzmanual-autopage-4528"></a>
 <p>
-<sup>155</sup>&nbsp;<a href="https://classicsincontext.wordpress.com/2010/02/28/canto-iii-per-me-si-va-ne-la-citta-dolente/" target="_blank" >https://classicsincontext.wordpress.com/2010/02/28/canto-iii-per-me-si-va-ne-la-citta-dolente/</a>
+<sup>156</sup>&nbsp;<a href="https://classicsincontext.wordpress.com/2010/02/28/canto-iii-per-me-si-va-ne-la-citta-dolente/" target="_blank" >https://classicsincontext.wordpress.com/2010/02/28/canto-iii-per-me-si-va-ne-la-citta-dolente/</a>
 </p>
 
 
@@ -1462,43 +1462,43 @@ The suggested way to start working on a new component is to use the utilities of
 <kbd>ctikzmanutils.sty</kbd>; copy it in your directory and prepare a file like this:
 </p>
 <pre class="programlisting">
- \documentclass[a4paper, titlepage]{article}
- \usepackage{a4wide}         &percnt;smaller borders
- \usepackage[utf8]{inputenc} &percnt;not needed since LaTeX 2019
- \usepackage[T1]{fontenc}
- \parindent=0pt
- \parskip=4pt plus 6pt minus 2pt
- \usepackage[siunitx, RPvoltages]{circuitikzgit}
- \usepackage{ctikzmanutils}
- \makeatletter
- &percnt;&percnt; Test things here
- &percnt; defines
+\documentclass[a4paper, titlepage]{article}
+\usepackage{a4wide}         &percnt;smaller borders
+\usepackage[utf8]{inputenc} &percnt;not needed since LaTeX 2019
+\usepackage[T1]{fontenc}
+\parindent=0pt
+\parskip=4pt plus 6pt minus 2pt
+\usepackage[siunitx, RPvoltages]{circuitikzgit}
+\usepackage{ctikzmanutils}
+\makeatletter
+&percnt;&percnt; Test things here
+&percnt; defines
 
- &percnt; components
+&percnt; components
 
- &percnt; paths
- \makeatother
+&percnt; paths
+\makeatother
 
- \begin{document}
+\begin{document}
 
- \circuitdescbip*{damper}{Mechanical damping}{}(left/135/0.2, right/45/0.2, center/-90/0.3)
+\circuitdescbip*{damper}{Mechanical damping}{}(left/135/0.2, right/45/0.2, center/-90/0.3)
 
- \geolrcoord{dampershape, fill=yellow}
+\geolrcoord{dampershape, fill=yellow}
 
- \begin{ctikzExample}
- \begin{circuitikz}
-     \draw (0,0) to[R] ++(2,0)
-     to[damper] ++(2,0);
- \end{circuitikz}
- \end{ctikzExample}
+\begin{ctikzExample}
+\begin{circuitikz}
+    \draw (0,0) to[R] ++(2,0)
+    to[damper] ++(2,0);
+\end{circuitikz}
+\end{ctikzExample}
 \end{document}
- </pre>
+</pre>
 
 <p>
 This will compile to something like this (in this case, we are using a couple of existing components to check everything is OK):
 </p>
 
-<a id="LWRindex-1332"></a>
+<a id="LWRindex-1335"></a>
 
 <p>
 <span
@@ -1620,12 +1620,12 @@ To define the new component we will look into (in this case) <kbd>pgfcircbipoles
 historical or dependencies reasons). The first step is to check if we can use the definition already existing for similar elements (for coherence of size) or if we need to define new ones; for this you have to check into the we find
 </p>
 <pre class="programlisting">
-     \ctikzset{bipoles/spring/height/.initial=.5}
-     \ctikzset{bipoles/spring/width/.initial=.5}
-     \ctikzset{bipoles/damper/height/.initial=.35}
-     \ctikzset{bipoles/damper/length/.initial=.3}
+   \ctikzset{bipoles/spring/height/.initial=.5}
+   \ctikzset{bipoles/spring/width/.initial=.5}
+   \ctikzset{bipoles/damper/height/.initial=.35}
+   \ctikzset{bipoles/damper/length/.initial=.3}
    \ctikzset{bipoles/damper/width/.initial=.4}
- </pre>
+</pre>
 
 <p>
 We will use them; at this stage you can decide to add other parameters if you need them. (Notice, however, than although flexibility is good, these parameters should be described in the manual, otherwise they’re as good as a fixed number in the code).
@@ -1635,45 +1635,45 @@ We will use them; at this stage you can decide to add other parameters if you ne
 After that we will copy, for example, the definition of the damper into our code, just changing the name:
 </p>
 <pre class="programlisting">
-    &percnt;&percnt; mechanical resistor - damper
-    \pgfcircdeclarebipolescaled{mechanicals}
-    {}                                   &percnt; extra anchors
-    {\ctikzvalof{bipoles/damper/height}} &percnt; depth (under the path line)
-    {viscoe}                             &percnt; name
-    {\ctikzvalof{bipoles/damper/height}} &percnt; height (above the path line)
-    {\ctikzvalof{bipoles/damper/width}} &percnt; width
-    {
-        \pgfpathrectanglecorners{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}{\pgf@circ@res@down}}{\pgfpoint{\pgf@circ@res@right}{\pgf@circ@res@up}}
-        \pgf@circ@maybefill
+&percnt;&percnt; mechanical resistor - damper
+\pgfcircdeclarebipolescaled{mechanicals}
+{}                                   &percnt; extra anchors
+{\ctikzvalof{bipoles/damper/height}} &percnt; depth (under the path line)
+{viscoe}                             &percnt; name
+{\ctikzvalof{bipoles/damper/height}} &percnt; height (above the path line)
+{\ctikzvalof{bipoles/damper/width}} &percnt; width
+{
+    \pgfpathrectanglecorners{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}{\pgf@circ@res@down}}{\pgfpoint{\pgf@circ@res@right}{\pgf@circ@res@up}}
+    \pgf@circ@maybefill
 
-        &percnt; line into the damper
-        \pgfpathmoveto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@zero}}
-        \pgfpathlineto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}
-            {\pgf@circ@res@zero}}
-        \pgfusepath{stroke}
+    &percnt; line into the damper
+    \pgfpathmoveto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@zero}}
+    \pgfpathlineto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}
+        {\pgf@circ@res@zero}}
+    \pgfusepath{stroke}
 
-        &percnt; damper box
-        \pgf@circ@setlinewidth{bipoles}{\pgfstartlinewidth}
-        \pgfpathmoveto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@down}}
-        \pgfpathlineto{\pgfpoint{\pgf@circ@res@right}{\pgf@circ@res@down}}
-        \pgfpathlineto{\pgfpoint{\pgf@circ@res@right}{\pgf@circ@res@up}}
-        \pgfpathlineto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@up}}
+    &percnt; damper box
+    \pgf@circ@setlinewidth{bipoles}{\pgfstartlinewidth}
+    \pgfpathmoveto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@down}}
+    \pgfpathlineto{\pgfpoint{\pgf@circ@res@right}{\pgf@circ@res@down}}
+    \pgfpathlineto{\pgfpoint{\pgf@circ@res@right}{\pgf@circ@res@up}}
+    \pgfpathlineto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@up}}
 
-        \pgfsetrectcap
-        \pgfsetmiterjoin
-        \pgfusepath{stroke}
+    \pgfsetrectcap
+    \pgfsetmiterjoin
+    \pgfusepath{stroke}
 
-        &percnt; damper vertical element
-        \pgfpathmoveto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}
-            {.8\pgf@circ@res@down}}
-        \pgfpathlineto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}
-            {.8\pgf@circ@res@up}}
-        \pgfsetbuttcap
-        \pgfusepath{stroke}
+    &percnt; damper vertical element
+    \pgfpathmoveto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}
+        {.8\pgf@circ@res@down}}
+    \pgfpathlineto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}
+        {.8\pgf@circ@res@up}}
+    \pgfsetbuttcap
+    \pgfusepath{stroke}
 
 
 }
-    </pre>
+</pre>
 
 <p>
 This <span class="verb">\pgfcircdeclarebipolescaled</span> command will define a shape that is named <kbd>viscoeshape</kbd>, with all the correct geographical anchors based on the depth, height and width defined in the parameters: in this case we are reusing
@@ -1696,24 +1696,24 @@ more complex things.
 </p>
 <pre class="programlisting">
 \pgfcirc@activate@bipole@simple{l}{viscoe}
- </pre>
+</pre>
 
 <p>
 In the definition above, the <kbd>{l}</kbd> parameter means that using the component like <kbd>to[viscoe=A]</kbd> will be equivalent to <kbd>to[viscoe, l=A]</kbd>; you can also use <kbd>v</kbd> or <kbd>i</kbd> or <kbd>f</kbd> if your component needs it. Now
 you can show it with:
 </p>
 <pre class="programlisting">
- \circuitdescbip*{viscoe}{Mechanical viscoelastic element}{}(left/135/0.2, right/45/0.2, center/-90/0.3)
+\circuitdescbip*{viscoe}{Mechanical viscoelastic element}{}(left/135/0.2, right/45/0.2, center/-90/0.3)
 
- \geolrcoord{viscoeshape, fill=yellow}
+\geolrcoord{viscoeshape, fill=yellow}
 
- \begin{ctikzExample}
- \begin{circuitikz}
-     \draw (0,0) to[spring] ++(2,0)
-     to[viscoe] ++(2,0);
- \end{circuitikz}
+\begin{ctikzExample}
+\begin{circuitikz}
+    \draw (0,0) to[spring] ++(2,0)
+    to[viscoe] ++(2,0);
+\end{circuitikz}
 \end{ctikzExample}
- </pre>
+</pre>
 
 <p>
 Obviously, at first you just have a component that is the same as the one you copied with another name. It is now just a matter of modifying it so that it has the desired shape; in the example above you can already see the new symbol after the changes.
@@ -1729,25 +1729,25 @@ usually at \((0pt, 0pt)\).
 Looking at the implementation of the <kbd>spring</kbd> element, one possibility is changing the lines between lines&nbsp;12 and&nbsp;16 with:
 </p>
 <pre class="programlisting">
-     &percnt; spring into the damper
-     \pgfscope
-         \pgfpathmoveto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@zero}}
-         \pgf@circ@setlinewidth{bipoles}{\pgfstartlinewidth}
-         \pgfsetcornersarced{\pgfpoint{.25\pgf@circ@res@up}{.25\pgf@circ@res@up}}
-         \pgfpathlineto{\pgfpoint{.75\pgf@circ@res@left}{.75\pgf@circ@res@up}}
-         \pgfpathlineto{\pgfpoint{.5\pgf@circ@res@left}{-.75\pgf@circ@res@up}}
-         \pgfpathlineto{\pgfpoint{.25\pgf@circ@res@left}{.75\pgf@circ@res@up}}
-         \pgfpathlineto{\pgfpoint{0pt}{-.75\pgf@circ@res@up}}
-         \pgfpathlineto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}{.75\pgf@circ@res@up}}
-         \pgfusepath{stroke}
+    &percnt; spring into the damper
+    \pgfscope
+        \pgfpathmoveto{\pgfpoint{\pgf@circ@res@left}{\pgf@circ@res@zero}}
+        \pgf@circ@setlinewidth{bipoles}{\pgfstartlinewidth}
+        \pgfsetcornersarced{\pgfpoint{.25\pgf@circ@res@up}{.25\pgf@circ@res@up}}
+        \pgfpathlineto{\pgfpoint{.75\pgf@circ@res@left}{.75\pgf@circ@res@up}}
+        \pgfpathlineto{\pgfpoint{.5\pgf@circ@res@left}{-.75\pgf@circ@res@up}}
+        \pgfpathlineto{\pgfpoint{.25\pgf@circ@res@left}{.75\pgf@circ@res@up}}
+        \pgfpathlineto{\pgfpoint{0pt}{-.75\pgf@circ@res@up}}
+        \pgfpathlineto{\pgfpoint{\ctikzvalof{bipoles/damper/length}\pgf@circ@res@right}{.75\pgf@circ@res@up}}
+        \pgfusepath{stroke}
     \endpgfscope
- </pre>
+</pre>
 
 <p>
 which leads to:
 </p>
 
-<a id="LWRindex-1333"></a>
+<a id="LWRindex-1336"></a>
 
 <p>
 <span
@@ -1960,35 +1960,35 @@ Ti<em>k</em>Z positioning options (like <kbd>left</kbd>, <kbd>above</kbd>, etc.)
 To have a scalable component, for example in the <kbd>transistors</kbd> class, you should use something like
 </p>
 <pre class="programlisting">
-          \savedmacro{\ctikzclass}{\edef\ctikzclass{transistors}}
-       \saveddimen{\scaledRlen}{\pgfmathsetlength{\pgf@x}{\ctikzvalof{\ctikzclass/scale}\pgf@circ@Rlen}}
- </pre>
+         \savedmacro{\ctikzclass}{\edef\ctikzclass{transistors}}
+         \saveddimen{\scaledRlen}{\pgfmathsetlength{\pgf@x}{\ctikzvalof{\ctikzclass/scale}\pgf@circ@Rlen}}
+</pre>
 
 <p>
 at the start of anchors and macros definition, and use (for example, the exact code will change greatly depending on your component):
 </p>
 <pre class="programlisting">
-           \savedanchor\northeast{&percnt; upper right
-               \pgfmathsetlength{\pgf@circ@scaled@Rlen}{\ctikzvalof{\ctikzclass/scale}\pgf@circ@Rlen}
-               \pgf@y=\pgf@circ@scaled@Rlen
-               \pgf@y=0.5\pgf@y
-               \pgf@x=0.3\pgf@y
-       }
- </pre>
+         \savedanchor\northeast{&percnt; upper right
+             \pgfmathsetlength{\pgf@circ@scaled@Rlen}{\ctikzvalof{\ctikzclass/scale}\pgf@circ@Rlen}
+             \pgf@y=\pgf@circ@scaled@Rlen
+             \pgf@y=0.5\pgf@y
+             \pgf@x=0.3\pgf@y
+         }
+</pre>
 
 <p>
 in all the <kbd>savedanchors</kbd>.
 </p>
 
 <p>
-Then, to draw your component, you should start with<sup>156</sup><a id="circuitikzmanual-autopage-4567"></a>:
+Then, to draw your component, you should start with<sup>157</sup><a id="circuitikzmanual-autopage-4567"></a>:
 </p>
 <pre class="programlisting">
-       \pgf@circ@draw@component{&percnt;
-           \pgf@circ@scaled@Rlen=\scaledRlen
-           ...
+   \pgf@circ@draw@component{&percnt;
+       \pgf@circ@scaled@Rlen=\scaledRlen
+       ...
    }
- </pre>
+</pre>
 
 <p>
 and then use <span class="verb">\pgf@circ@scaled@Rlen</span> (or the anchors) as the default length while you draw it.
@@ -2003,7 +2003,7 @@ class="latexlogo">T<span class="latexlogosub">e</span>X</span></span> group), so
 
 <a id="circuitikzmanual-autopage-4569"></a>
 <p>
-<sup>156</sup>&nbsp;Since <kbd>v1.5.0</kbd>; component defined with this mechanism will not be compatible with older CircuiTi<em>k</em>Z.
+<sup>157</sup>&nbsp;Since <kbd>v1.5.0</kbd>; component defined with this mechanism will not be compatible with older CircuiTi<em>k</em>Z.
 </p>
 
 
@@ -2057,9 +2057,9 @@ In the same way, before leaving <span class="verb">\pgf@circ@draw@component</spa
 The only predefined hook is <kbd>\ctikz@hook@start@draw@default</kbd>, which is set to the equivalent of:
 </p>
 <pre class="programlisting">
-     \pgfsetshortenstart{+0pt}\pgfsetshortenend{+0pt}\pgfsetarrows{-}&percnt;
+   \pgfsetshortenstart{+0pt}\pgfsetshortenend{+0pt}\pgfsetarrows{-}&percnt;
    \def\pgf@circ@reset@rounded{\pgfsetcornersarced{\pgfpointorigin}}&percnt;
- </pre>
+</pre>
 
 <p>
 which means that, by default, arrows parameters are reset to the default (no shorten, no arrows) and that corners are not rounded. If you want to override them, just define the appropriate hook for your component/class and the generic one will not be called.

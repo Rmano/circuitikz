@@ -1441,10 +1441,10 @@ All the shapes defined by CircuiTi<em>k</em>Z are <kbd>pgf</kbd> nodes, so they 
 The path-style components are used as shown below:
 </p>
 <pre class="programlisting">
-    \begin{circuitikz}
-    \draw (0,0) to[#1=#2, options] (2,0);
+   \begin{circuitikz}
+   \draw (0,0) to[#1=#2, options] (2,0);
    \end{circuitikz}
- </pre>
+</pre>
 
 <p>
 where <span class="verb">#1</span> is the name of the component, <span class="verb">#2</span> is an (optional) label, and <span class="verb">options</span> are optional labels, annotations, style specifier that will be explained in the rest of the manual.
@@ -1797,20 +1797,20 @@ capacitivesens
 The above diagram has been obtained with the code:
 </p>
 <pre class="programlisting">
- \def\showbordersfornode#1{&percnt;
- \begin{circuitikz}[baseline, scale=0.8, transform shape]
-     \node[#1shape, name=bip] at(0,0) {};
-     \foreach \a in {0,30,...,359} \draw[red] (bip.\a) -- ++(\a:0.7)
-         node[font=\tiny, fill=white, inner sep=0.5pt]{\a};
-     \foreach \a in {15,45,...,359} \draw[red] (bip.\a) -- ++(\a:0.4);
-     \node [font=\ttfamily\small, black, below] at (bip.-90)
-         {\detokenize\expandafter{#1}};
- \end{circuitikz}}
- \ctikzset{bipoles/border margin=1}
- \showbordersfornode{generic} \showbordersfornode{resistor}
- \showbordersfornode{fulldiode} \showbordersfornode{vsource}
+\def\showbordersfornode#1{&percnt;
+\begin{circuitikz}[baseline, scale=0.8, transform shape]
+    \node[#1shape, name=bip] at(0,0) {};
+    \foreach \a in {0,30,...,359} \draw[red] (bip.\a) -- ++(\a:0.7)
+        node[font=\tiny, fill=white, inner sep=0.5pt]{\a};
+    \foreach \a in {15,45,...,359} \draw[red] (bip.\a) -- ++(\a:0.4);
+    \node [font=\ttfamily\small, black, below] at (bip.-90)
+        {\detokenize\expandafter{#1}};
+\end{circuitikz}}
+\ctikzset{bipoles/border margin=1}
+\showbordersfornode{generic} \showbordersfornode{resistor}
+\showbordersfornode{fulldiode} \showbordersfornode{vsource}
 \showbordersfornode{capacitivesens}
- </pre>
+</pre>
 <div role="note" class="footnotes">
 
 <a id="circuitikzmanual-autopage-263"></a>
@@ -2587,10 +2587,10 @@ description of each component.
 Node-style components (monopoles, multipoles) can be drawn at a specified point with this syntax, where <span class="verb">#1</span> is the name of the component:
 </p>
 <pre class="programlisting">
- \begin{circuitikz}
-     \draw (0,0) node[#1,#2] (#3) {#4};
+\begin{circuitikz}
+    \draw (0,0) node[#1,#2] (#3) {#4};
 \end{circuitikz}
- </pre>
+</pre>
 
 <p>
 Explanation of the parameters:<br />
@@ -2931,23 +2931,23 @@ class.
 Let’s see the effect over a simple circuit<sup>11</sup>.
 </p>
 <pre class="programlisting">
- \begin{circuitikz}[american, cute inductors]
-     \node [op amp](A1){\texttt{OA1}};
-     \draw (A1.-) to[short] ++(0,1) coordinate(tmp) to[R, l_=$R$] (tmp -| A1.out) to[short] (A1.out);
-     \draw (tmp) to[short] ++(0,1) coordinate(tmp) to[C=$C$] (tmp -| A1.out) to[short] (A1.out);
-     \draw (A1.+) to [battery2, invert] ++(0,-2.5) node[ground](GND){};
-     \draw (A1.-) to [L=$L$] ++(-2,0) coordinate(tmp) to[sV, l=$v_s$, fill=yellow] (tmp |-GND) node[ground]{};
-     \draw (A1.out) to[R=$R_s$] ++(2,0) coordinate(bb) to[I, l_=$I_B$, invert] ++(0,2) node[vcc](VCC){};
-     \draw (bb) to[D, l=$D$, *-] ++(0,-2) coordinate(bb1) to[R=$R_m$] ++(0,-2) node[vee](VEE){};
-     \draw (bb) --++(1,0) node[npn, anchor=B](Q1){Q1};
-     \draw (bb1) --++(1,0) node[pnp, anchor=B](Q2){Q2};
-     \draw (Q1.E) -- (Q2.E) ($(Q1.E)!0.5!(Q2.E)$) to [short, *-o, name=S] ++(2.5,0)
-     node[right]{$v_{o_Q}$};
-     \draw (S.s) to[european resistor, l=$Z_L$, *-] (S.s|-GND) node[ground]{};
-     \draw (Q1.C) -- (Q1.C|-VCC) node[vcc]{\SI{5}{V}};
-     \draw (Q2.C) -- (Q2.C|-VEE) node[vee]{\SI{-5}{V}};
+\begin{circuitikz}[american, cute inductors]
+    \node [op amp](A1){\texttt{OA1}};
+    \draw (A1.-) to[short] ++(0,1) coordinate(tmp) to[R, l_=$R$] (tmp -| A1.out) to[short] (A1.out);
+    \draw (tmp) to[short] ++(0,1) coordinate(tmp) to[C=$C$] (tmp -| A1.out) to[short] (A1.out);
+    \draw (A1.+) to [battery2, invert] ++(0,-2.5) node[ground](GND){};
+    \draw (A1.-) to [L=$L$] ++(-2,0) coordinate(tmp) to[sV, l=$v_s$, fill=yellow] (tmp |-GND) node[ground]{};
+    \draw (A1.out) to[R=$R_s$] ++(2,0) coordinate(bb) to[I, l_=$I_B$, invert] ++(0,2) node[vcc](VCC){};
+    \draw (bb) to[D, l=$D$, *-] ++(0,-2) coordinate(bb1) to[R=$R_m$] ++(0,-2) node[vee](VEE){};
+    \draw (bb) --++(1,0) node[npn, anchor=B](Q1){Q1};
+    \draw (bb1) --++(1,0) node[pnp, anchor=B](Q2){Q2};
+    \draw (Q1.E) -- (Q2.E) ($(Q1.E)!0.5!(Q2.E)$) to [short, *-o, name=S] ++(2.5,0)
+    node[right]{$v_{o_Q}$};
+    \draw (S.s) to[european resistor, l=$Z_L$, *-] (S.s|-GND) node[ground]{};
+    \draw (Q1.C) -- (Q1.C|-VCC) node[vcc]{\SI{5}{V}};
+    \draw (Q2.C) -- (Q2.C|-VEE) node[vee]{\SI{-5}{V}};
 \end{circuitikz}
- </pre>
+</pre>
 
 <p>
 This code, with the default parameters, will render like the following image.
@@ -3086,11 +3086,11 @@ vs
 Using relative sizes as described in section&nbsp;<a href="node-The-components-usage.html#sec:pgfcircRlen">3.1.4.1</a> enables your style for the circuit. For example, setting:
 </p>
 <pre class="programlisting">
-     \ctikzset{resistors/scale=0.8,     &percnt; smaller R
-         capacitors/scale=0.7,          &percnt; even smaller C
-         diodes/scale=0.6,              &percnt; small diodes
-       transistors/scale=1.3}          &percnt; bigger BJTs
- </pre>
+   \ctikzset{resistors/scale=0.8,      &percnt; smaller R
+       capacitors/scale=0.7,           &percnt; even smaller C
+       diodes/scale=0.6,               &percnt; small diodes
+         transistors/scale=1.3}        &percnt; bigger BJTs
+</pre>
 
 <p>
 Will result in a (much more readable in Romano’s opinion) circuit:
@@ -3149,13 +3149,13 @@ You can also set a default fill color for the components. You can use the keys <
 If you add to the previous styles the following commands:
 </p>
 <pre class="programlisting">
-    \ctikzset{
-        amplifiers/fill=cyan,
-        sources/fill=green,
-        diodes/fill=red,
-        resistors/fill=violet,
+\ctikzset{
+    amplifiers/fill=cyan,
+    sources/fill=green,
+    diodes/fill=red,
+    resistors/fill=violet,
 }
-    </pre>
+</pre>
 
 <p>
 you will have the following circuit (note that the first generator is <em>explicitly</em> set to be yellow, so if will not be colored green!):
@@ -3217,7 +3217,7 @@ For example, <em>amplifiers</em> have the legacy class of <kbd>tripoles</kbd>, a
 </p>
 <pre class="programlisting">
    \ctikzset{amplifier/thickness=4}
- </pre>
+</pre>
 
 <p>
 <span
@@ -3271,26 +3271,26 @@ id="LWRindex-85"></a><kbd></kbd>. For example, in the distribution you have a nu
 <kbd><em>name</em> circuit style</kbd> that you can apply to your circuits. The last style loaded is not enacted — you have to explicitly do it if you want the style used by default, by putting for example in the preamble:
 </p>
 <pre class="programlisting">
-     \ctikzloadstyle{romano}
+    \ctikzloadstyle{romano}
     \tikzset{romano circuit style}
- </pre>
+</pre>
 
 <p>
 Please notice that the style is at Ti<em>k</em>Z level, not CircuiTi<em>k</em>Z— that let’s you use it in the top option of the circuit, like:
 </p>
 <pre class="programlisting">
-     \begin{circuitikz}[legacy circuit style,
-     ..., ]
-     ...
+   \begin{circuitikz}[legacy circuit style,
+   ..., ]
+   ...
    \end{circuitikz}
- </pre>
+</pre>
 
 <p>
 If you just want to use one style, you can load and activate it in one command with
 </p>
 <pre class="programlisting">
       \ctikzsetstyle{romano}
- </pre>
+</pre>
 
 <p>
 The <kbd>example</kbd> style file will simply make the amplifiers filled with light blue:
@@ -3446,52 +3446,52 @@ The best option is to start from <kbd>ctikzstyle-legacy.tex</kbd> and edit your 
 Basically, to write the style <kbd>example</kbd>, you edit a file named <kbd>ctikzstyle-romano.tex</kbd> with will define and enact Ti<em>k</em>Z style with name <kbd>example circuit style</kbd>; basically it has to be something along this:
 </p>
 <pre class="programlisting">
- &percnt; example style for circuits
- &percnt; Do not use LaTeX commands if you want it to be compatible with ConTeXt
- &percnt; Do not add spurious spaces
- \tikzset{example circuit style/.style={&percnt;
-     \circuitikzbasekey/.cd,&percnt;
-     amplifiers/fill=blue!20!white,
- },&percnt; end .style
- }&percnt; end \tikzset
- &percnt;
+&percnt; example style for circuits
+&percnt; Do not use LaTeX commands if you want it to be compatible with ConTeXt
+&percnt; Do not add spurious spaces
+\tikzset{example circuit style/.style={&percnt;
+    \circuitikzbasekey/.cd,&percnt;
+    amplifiers/fill=blue!20!white,
+},&percnt; end .style
+}&percnt; end \tikzset
+&percnt;
 \endinput
- </pre>
+</pre>
 
 <p>
 This kind of style will <em>add</em> to the existing style. If you want to have a style that <em>substitutes</em> the current style, you should do like this:
 </p>
 <pre class="programlisting">
- \ctikzloadstyle{legacy}&percnt; start from a known state
- \tikzset{romano circuit style/.style={&percnt;
-     legacy circuit style, &percnt; load the legacy style
-     \circuitikzbasekey/.cd,&percnt;
-     &percnt; Resistors
-     resistors/scale=0.8,
- [...]
-   }}
- </pre>
+\ctikzloadstyle{legacy}&percnt; start from a known state
+\tikzset{romano circuit style/.style={&percnt;
+    legacy circuit style, &percnt; load the legacy style
+    \circuitikzbasekey/.cd,&percnt;
+    &percnt; Resistors
+    resistors/scale=0.8,
+[...]
+    }}
+</pre>
 
 <p>
 If you want to add a setting to your style file that has been recently added to the package (for example, the thyristor compact shapes added in <kbd>1.3.5</kbd>), but you want your style file to be still compatible with older versions of CircuiTi<em>k</em>Z, you can use
 the <kbd>.try</kbd> statement:
 </p>
 <pre class="programlisting">
-     &percnt; Diodes
-     diodes/scale=0.6,
-     diodes/thickness=1.0,
+    &percnt; Diodes
+    diodes/scale=0.6,
+    diodes/thickness=1.0,
     thyristor style/.try=compact,
- </pre>
+</pre>
 
 <p>
 Or, in case of new values of existing “choice” keys, you can use the syntax:
 </p>
 <pre class="programlisting">
-    &percnt; Logic ports
-    logic ports/ieee/.try,
-    &percnt; this way of setting the key does nothing if ieee option
-    &percnt; does not exist; logic ports/.try=ieee does not work
-    &percnt; if the key exists but the value is not defined
+   &percnt; Logic ports
+   logic ports/ieee/.try,
+   &percnt; this way of setting the key does nothing if ieee option
+   &percnt; does not exist; logic ports/.try=ieee does not work
+   &percnt; if the key exists but the value is not defined
    logic ports/scale=1.0,
 </pre>
 <!--
@@ -3895,7 +3895,7 @@ target="_blank" ><kbd>tikzmark</kbd> library</a> provides that function. You hav
 </p>
 <pre class="programlisting">
       ... pic[pic anchor=(-corner)] {divider=...}
- </pre>
+</pre>
 
 <p>
 For example, suppose you want to attach your divider to a BJT base:
@@ -3961,7 +3961,7 @@ id="LWRindex-90"></a><kbd>tikzmark</kbd><sup>14</sup> you can avoid this by roun
 </p>
 <pre class="programlisting">
       ... pic[tikzmark round=2, rotate=45, pic anchor=(-corner)] {divider=...}
- </pre>
+</pre>
 
 <p>
 Finally, if you want to rotate the pic (warning: lightly tested!) remember that you need <kbd>transform shape</kbd> to have a correct behavior.

@@ -1446,7 +1446,7 @@ in your preamble.
 </p>
 
 <p>
-But really, your circuit definition is buggy, so the best thing to do is fix that; if you want to name a point in your circuit, you should use a <kbd>coordinate</kbd>, not a <kbd>node</kbd>.<sup>150</sup> Here is a small tutorial on <em>why</em> you should change your
+But really, your circuit definition is buggy, so the best thing to do is fix that; if you want to name a point in your circuit, you should use a <kbd>coordinate</kbd>, not a <kbd>node</kbd>.<sup>151</sup> Here is a small tutorial on <em>why</em> you should change your
 circuit.
 </p>
 
@@ -1638,17 +1638,17 @@ href="https://github.com/circuitikz/circuitikz/issues/76#issuecomment-652980687"
 </p>
 
 <p>
-So finally it was decided<sup>151</sup><a id="circuitikzmanual-autopage-4470"></a> to remove the change, to simplify the code and to make the package more maintainable.
+So finally it was decided<sup>152</sup><a id="circuitikzmanual-autopage-4470"></a> to remove the change, to simplify the code and to make the package more maintainable.
 </p>
 <div role="note" class="footnotes">
 
 <a id="circuitikzmanual-autopage-4471"></a>
 <p>
-<sup>150</sup>&nbsp;Yes, I understand from where the confusion arise — in circuit theory they are called nodes.
+<sup>151</sup>&nbsp;Yes, I understand from where the confusion arise — in circuit theory they are called nodes.
 </p>
 
 <p>
-<sup>151</sup>&nbsp;well, Romano decided, so you can blame him. <em>I do not think that workarounds to correct malformed circuits are really maintainable; just see the bunch of code removed by the patch! — Romano.</em>
+<sup>152</sup>&nbsp;well, Romano decided, so you can blame him. <em>I do not think that workarounds to correct malformed circuits are really maintainable; just see the bunch of code removed by the patch! — Romano.</em>
 </p>
 
 
@@ -1755,7 +1755,7 @@ Nor this one, which is even stranger:
 </div>
 
 <p>
-<b>A: </b>This is an effect on how Ti<em>k</em>Z builds and draws path. As explained in the Ti<em>k</em>Z manual,<sup>152</sup><a id="circuitikzmanual-autopage-4482"></a> most path options are globally valid for the whole path; color and dash/dot is one of
+<b>A: </b>This is an effect on how Ti<em>k</em>Z builds and draws path. As explained in the Ti<em>k</em>Z manual,<sup>153</sup><a id="circuitikzmanual-autopage-4482"></a> most path options are globally valid for the whole path; color and dash/dot is one of
 this. You have two options in this case. The first one is to use two paths.
 </p>
 
@@ -1802,7 +1802,7 @@ this. You have two options in this case. The first one is to use two paths.
 </div>
 
 <p>
-The other one is to use <kbd>edge</kbd> operations<sup>153</sup><a id="circuitikzmanual-autopage-4487"></a>; be sure to read about it on the Ti<em>k</em>Z manual<sup>154</sup> — but basically this is similar to the <kbd>to</kbd> operation but it builds
+The other one is to use <kbd>edge</kbd> operations<sup>154</sup><a id="circuitikzmanual-autopage-4487"></a>; be sure to read about it on the Ti<em>k</em>Z manual<sup>155</sup> — but basically this is similar to the <kbd>to</kbd> operation but it builds
 another path (added at the end of the current path, like nodes are). This means that it can use different options, and that it <b>does not</b> move the path coordinates.
 </p>
 
@@ -2010,15 +2010,15 @@ A more complex example can be seen (look at the comments!) in the following circ
 
 <a id="circuitikzmanual-autopage-4508"></a>
 <p>
-<sup>152</sup>&nbsp;in 3.1.5b, section&nbsp;14, <a href="https://tikz.dev/tikz-paths" target="_blank" >“syntax for path specification”</a>
+<sup>153</sup>&nbsp;in 3.1.5b, section&nbsp;14, <a href="https://tikz.dev/tikz-paths" target="_blank" >“syntax for path specification”</a>
 </p>
 
 <p>
-<sup>153</sup>&nbsp;I took the idea form <a href="https://tex.stackexchange.com/a/554905/38080" target="_blank" >this answer by <kbd>@LaTeXdraw-com</kbd> user on TeX.SE</a>, thanks!
+<sup>154</sup>&nbsp;I took the idea form <a href="https://tex.stackexchange.com/a/554905/38080" target="_blank" >this answer by <kbd>@LaTeXdraw-com</kbd> user on TeX.SE</a>, thanks!
 </p>
 
 <p>
-<sup>154</sup>&nbsp;in 3.1.5b, section&nbsp;17.12, <a href="https://tikz.dev/tikz-shapes#sec-17.12.1" target="_blank" >“connecting nodes: use the <kbd>edge</kbd> operation”</a>
+<sup>155</sup>&nbsp;in 3.1.5b, section&nbsp;17.12, <a href="https://tikz.dev/tikz-shapes#sec-17.12.1" target="_blank" >“connecting nodes: use the <kbd>edge</kbd> operation”</a>
 </p>
 
 
@@ -2148,7 +2148,7 @@ class="verb">to[ospst = open{,} 3s]</span> or <span class="verb">ospst=\mbox{ope
 </p>
 
 <p>
-<b>Q: </b>I tried to put a diode in a <a id="LWRindex-1330"></a><kbd>pic</kbd>, but it’s coming out badly rotated.
+<b>Q: </b>I tried to put a diode in a <a id="LWRindex-1333"></a><kbd>pic</kbd>, but it’s coming out badly rotated.
 </p>
 
 <p>
@@ -2173,7 +2173,7 @@ class="verb">to[ospst = open{,} 3s]</span> or <span class="verb">ospst=\mbox{ope
 
 <p>
 Version 1.3.3 fixes the direction of the arrows in tunable elements; before this version, they were more or less random, now the arrow goes from bottom left to top right. You have the option to go back to the old behavior with <a
-id="LWRindex-1331"></a><kbd></kbd><kbd>\ctikzset{bipoles/fix tunable direction=false}</kbd>. As a compensation for the fuss, now the arrows are configurable.
+id="LWRindex-1334"></a><kbd></kbd><kbd>\ctikzset{bipoles/fix tunable direction=false}</kbd>. As a compensation for the fuss, now the arrows are configurable.
 </p>
 
 <p>

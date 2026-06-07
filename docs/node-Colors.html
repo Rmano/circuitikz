@@ -1482,7 +1482,7 @@ path is completed, and color is applied to the path at the end. Look at this cod
 </div>
 
 <p>
-So the path is drawn with the last “effective” (in current group) color. The deferred behavior of the color properties is very difficult to track for CircuiTi<em>k</em>Z, especially when the shorthand <a id="LWRindex-1322"></a><kbd>color-name</kbd> (e.g.,
+So the path is drawn with the last “effective” (in current group) color. The deferred behavior of the color properties is very difficult to track for CircuiTi<em>k</em>Z, especially when the shorthand <a id="LWRindex-1325"></a><kbd>color-name</kbd> (e.g.,
 <kbd>red</kbd> instead of <kbd>color=red</kbd>) is used. CircuiTi<em>k</em>Z will try to keep track of the colors specified by <kbd>color=...</kbd> and <kbd>fill=...</kbd>, but if you use the implicit way (<kbd>\draw[red]...</kbd>) it often fails.
 </p>
 
@@ -1491,11 +1491,11 @@ If you’re adventurous, you can try to add
 </p>
 <pre class="programlisting">
       \usepackage{regexpatch}\ctikzPatchImplicitColor
- </pre>
+</pre>
 
 <p>
 after loading CircuiTi<em>k</em>Z, and it will try to patch the default commands to keep track of the “current color”; if it fails will give a warning like <kbd>patch failed, use only explicit color=...</kbd>. This is, unfortunately, not compatible with package
-<kbd>xpatch</kbd> (and much others, which load <kbd>xpatch</kbd>).<sup>149</sup><a id="circuitikzmanual-autopage-4355"></a>.
+<kbd>xpatch</kbd> (and much others, which load <kbd>xpatch</kbd>).<sup>150</sup><a id="circuitikzmanual-autopage-4355"></a>.
 </p>
 
 <p>
@@ -1605,7 +1605,7 @@ Black text
 </pre>
 
 <p>
-CircuiTi<em>k</em>Z components that are fillable will inherit the <a id="LWRindex-1323"></a><kbd>fill</kbd> property of the path (it is almost impossible to do otherwise) as if the <kbd>fill</kbd> flag was present. “Full”-type elements (for example, full diodes or
+CircuiTi<em>k</em>Z components that are fillable will inherit the <a id="LWRindex-1326"></a><kbd>fill</kbd> property of the path (it is almost impossible to do otherwise) as if the <kbd>fill</kbd> flag was present. “Full”-type elements (for example, full diodes or
 similar) are filled with the draw color; elements with intrinsic labels (i.e., labels that are part of the shape, like signs on amplifiers and pin numbers in chips) are drawn with the “draw” colors.
 </p>
 
@@ -1655,7 +1655,7 @@ voltage source signs</a>).
 
 <a id="circuitikzmanual-autopage-4370"></a>
 <p>
-<sup>149</sup>&nbsp;version <kbd>1.5.0</kbd> loaded it unconditionally for LaTeX; please do not use it
+<sup>150</sup>&nbsp;version <kbd>1.5.0</kbd> loaded it unconditionally for LaTeX; please do not use it
 </p>
 
 
@@ -2097,7 +2097,7 @@ Since version 0.9.0, you can also fill most shapes with a color (the manual spec
 
 <p>
 This fill color will override any color defined by the style (see section&nbsp;<a href="node-The-components-usage.html#sec:styling-fillcolor">3.3.2</a>). If you want to override a style fill color with no-fill for a specific component, you need to override the style — it’s
-a bit unfortunate, but should be an exceptional thing anyway. Notice that in simple case <a id="LWRindex-1324"></a><kbd>fill opacity</kbd> works, but don’t count too much on it.
+a bit unfortunate, but should be an exceptional thing anyway. Notice that in simple case <a id="LWRindex-1327"></a><kbd>fill opacity</kbd> works, but don’t count too much on it.
 </p>
 
 <p>
@@ -2365,7 +2365,7 @@ Note, however, that if you choose a colored background, for example with the <sp
 </div>
 
 <p>
-You have two solutions for this. You can redefine the <a id="LWRindex-1325"></a><kbd>o-o</kbd> (and the similar commands <a id="LWRindex-1326"></a><kbd>-o</kbd>, <a id="LWRindex-1327"></a><kbd>o-</kbd>, <a id="LWRindex-1328"></a><kbd>*-o</kbd> and
+You have two solutions for this. You can redefine the <a id="LWRindex-1328"></a><kbd>o-o</kbd> (and the similar commands <a id="LWRindex-1329"></a><kbd>-o</kbd>, <a id="LWRindex-1330"></a><kbd>o-</kbd>, <a id="LWRindex-1331"></a><kbd>*-o</kbd> and
 so on) with a blue filled “open” pole:
 </p>
 
@@ -2415,7 +2415,7 @@ so on) with a blue filled “open” pole:
 </div>
 
 <p>
-Also, since <kbd>v1.2.3</kbd>, you can set the key <a id="LWRindex-1329"></a><kbd>open poles fill</kbd> (default: <kbd>white</kbd> which works for <kbd>ocirc</kbd>, <kbd>odiamondpole</kbd> and <kbd>osquarepole</kbd>):
+Also, since <kbd>v1.2.3</kbd>, you can set the key <a id="LWRindex-1332"></a><kbd>open poles fill</kbd> (default: <kbd>white</kbd> which works for <kbd>ocirc</kbd>, <kbd>odiamondpole</kbd> and <kbd>osquarepole</kbd>):
 </p>
 
 <p>

@@ -1456,7 +1456,7 @@ Said that, to draw a circuit, you have to load the CircuiTi<em>k</em>Z package; 
 </p>
 <pre class="programlisting">
    \usepackage[siunitx, RPvoltages]{circuitikz}
- </pre>
+</pre>
 
 <p>
 somewhere in your document preamble. It will load automatically the needed packages if not already done before.
@@ -1971,7 +1971,7 @@ coordinate: in other words, we <em>move</em> 1&nbsp;unit to the right drawing a 
 </p>
 <pre class="programlisting">
    \draw (0,0) node[above]{$v_i$} node[ocirc]{} -- ++(1,0) ...
- </pre>
+</pre>
 
 <p>
 with the same result.
@@ -2107,7 +2107,7 @@ We are only missing the feedback resistor now. We will use <em>orthogonal coordi
 </p>
 <pre class="programlisting">
       \draw (FB) to[R=$R_2$] (FB -| OA.out) -- (OA.out)
- </pre>
+</pre>
 
 <p>
 The meaning is the following:
@@ -2761,48 +2761,48 @@ will move <em>all</em> the grounds down).
 This is the final circuit, with the nodes still marked:
 </p>
 <pre class="programlisting">
- &percnt; this is for the blue brackets under the circuit
- \tikzset{blockdef/.style={&percnt;
-     {Straight Barb[harpoon, reversed, right, length=0.2cm]}-{Straight Barb[harpoon, reversed, left, length=0.2cm]},
-     blue,
- }}
- \def\killdepth#1{{\raisebox{0pt}[\height][0pt]{#1}}}
- \def\coord(#1){coordinate(#1)}
- \def\coord(#1){coordinate(#1) node[circle, red, draw, inner sep=1pt,
-     pin={[red, overlay, inner sep=0.5pt, font=\tiny, pin distance=0.1cm,
-     &percnt; we reset the arrow in pin edge to avoid carrying over the path one!
-     pin edge={red, overlay,-}]45:#1}](#1-node){}}
- \begin{circuitikz}[american, ]
-     \draw (0,0) node[nmos,](Q1){\killdepth{Q1}};
-     \draw (Q1.S) to[R, l2^=$R_S$ and \SI{5}{k\ohm}] ++(0,-3) node[vee](VEE){$V_{EE}=\SI{-10}{V}$}; &percnt;define VEE level
-     \draw (Q1.S) to[short] ++(2,0) to[C=$C_1$] ++(0,-1.5) node[ground](GND){};
-     \draw (Q1.G) to[short] ++(-1,0) \coord (in) to[R, l2^=$R_G$ and \SI{1}{M\ohm}] (in |- GND) node[ground]{};
-     \draw (in) to[C, l_=$C_2$,*-o] ++(-1.5,0) node[left](vi1){$v_i=v_{i1}$};
-     \draw (Q1.D) to[R, l2_=$R_D$ and \SI{10}{k\ohm}] ++(0,3) node[vcc](VCC){$V_{CC}=\SI{10}{V}$};
-     \draw (Q1.D) to[short, -o] ++(1,0) node[right](vo1){$v_{o1}$};
-     &percnt;
-     \path (vo1) -- ++(2,0) \coord(bjt);
-     &percnt;
-     \draw (bjt) node[npn, anchor=B](Q2){\killdepth{Q2}};
-     \draw (Q2.B) to[short, -o] ++(-0.5,0) node[left](vi2){$v_{12}$};
-     \draw (Q2.E) to[R,l2^=$R_E$ and \SI{9.3}{k\ohm}] (Q2.E |- VEE) node[vee]{};
-     \draw (Q2.E) to[short, -o] ++(1,0) node[right](vo2){$v_{o2}$};
-     \draw (Q2.C) to[short] (Q2.C |- VCC) node[vcc]{};
-     &percnt;
-     \path (vo2) ++(1.5,0) \coord(load);
-     \draw (load) to[C=$C_3$] ++(1,0) \coord(tmp) to[R=$R_L$] (tmp |- GND) node[ground]{};
-     \draw [densely dashed] (vo2) -- (load);
-     &percnt;
-     \draw [densely dashed] (vo1) -- (vi2);
-     &percnt;
-     \draw [blockdef](vi1|-VEE) ++(0,-2) \coord(tmp)
-           -- node[midway, fill=white]{bloque 1} (vo1|- tmp);
-           \draw [blockdef] (vi2|-VEE) ++(0,-2) \coord(tmp)
-           -- node[midway, fill=white]{bloque 2} (vo2|- tmp);
+&percnt; this is for the blue brackets under the circuit
+\tikzset{blockdef/.style={&percnt;
+    {Straight Barb[harpoon, reversed, right, length=0.2cm]}-{Straight Barb[harpoon, reversed, left, length=0.2cm]},
+    blue,
+}}
+\def\killdepth#1{{\raisebox{0pt}[\height][0pt]{#1}}}
+\def\coord(#1){coordinate(#1)}
+\def\coord(#1){coordinate(#1) node[circle, red, draw, inner sep=1pt,
+    pin={[red, overlay, inner sep=0.5pt, font=\tiny, pin distance=0.1cm,
+    &percnt; we reset the arrow in pin edge to avoid carrying over the path one!
+    pin edge={red, overlay,-}]45:#1}](#1-node){}}
+\begin{circuitikz}[american, ]
+    \draw (0,0) node[nmos,](Q1){\killdepth{Q1}};
+    \draw (Q1.S) to[R, l2^=$R_S$ and \SI{5}{k\ohm}] ++(0,-3) node[vee](VEE){$V_{EE}=\SI{-10}{V}$}; &percnt;define VEE level
+    \draw (Q1.S) to[short] ++(2,0) to[C=$C_1$] ++(0,-1.5) node[ground](GND){};
+    \draw (Q1.G) to[short] ++(-1,0) \coord (in) to[R, l2^=$R_G$ and \SI{1}{M\ohm}] (in |- GND) node[ground]{};
+    \draw (in) to[C, l_=$C_2$,*-o] ++(-1.5,0) node[left](vi1){$v_i=v_{i1}$};
+    \draw (Q1.D) to[R, l2_=$R_D$ and \SI{10}{k\ohm}] ++(0,3) node[vcc](VCC){$V_{CC}=\SI{10}{V}$};
+    \draw (Q1.D) to[short, -o] ++(1,0) node[right](vo1){$v_{o1}$};
+    &percnt;
+    \path (vo1) -- ++(2,0) \coord(bjt);
+    &percnt;
+    \draw (bjt) node[npn, anchor=B](Q2){\killdepth{Q2}};
+    \draw (Q2.B) to[short, -o] ++(-0.5,0) node[left](vi2){$v_{12}$};
+    \draw (Q2.E) to[R,l2^=$R_E$ and \SI{9.3}{k\ohm}] (Q2.E |- VEE) node[vee]{};
+    \draw (Q2.E) to[short, -o] ++(1,0) node[right](vo2){$v_{o2}$};
+    \draw (Q2.C) to[short] (Q2.C |- VCC) node[vcc]{};
+    &percnt;
+    \path (vo2) ++(1.5,0) \coord(load);
+    \draw (load) to[C=$C_3$] ++(1,0) \coord(tmp) to[R=$R_L$] (tmp |- GND) node[ground]{};
+    \draw [densely dashed] (vo2) -- (load);
+    &percnt;
+    \draw [densely dashed] (vo1) -- (vi2);
+    &percnt;
+    \draw [blockdef](vi1|-VEE) ++(0,-2) \coord(tmp)
+          -- node[midway, fill=white]{bloque 1} (vo1|- tmp);
+          \draw [blockdef] (vi2|-VEE) ++(0,-2) \coord(tmp)
+          -- node[midway, fill=white]{bloque 2} (vo2|- tmp);
 
 
 \end{circuitikz}
- </pre>
+</pre>
 
 <p>
 <span
@@ -2854,11 +2854,11 @@ You can see that after having found the place where we want to put the BJT trans
 Finally, if you like a more compact drawing, you can add the options (for example):
 </p>
 <pre class="programlisting">
- \begin{circuitikz}[american, scale=0.8] &percnt; this will scale only the coordinates
-     \ctikzset{resistors/scale=0.7, capacitors/scale=0.6}
-     ...
+\begin{circuitikz}[american, scale=0.8] &percnt; this will scale only the coordinates
+    \ctikzset{resistors/scale=0.7, capacitors/scale=0.6}
+    ...
 \end{circuitikz}
- </pre>
+</pre>
 
 <p>
 and you will obtain the following diagram with the exact same code (I just removed the second <span class="verb">\coord</span> definition to hide the coordinates markings).
@@ -2924,11 +2924,11 @@ with the flip-flop and then add the rest of the block.
 The shapes are very similar to the IEEE logic gates (see section&nbsp;<a href="node-The-components-list.html#sec:ieeestdports">4.22.2</a>); after a first check, the standard size of the port is a bit too big with respect to the flip-flop, so I scale them down a bit.
 </p>
 <pre class="programlisting">
-    \ctikzset{
-            logic ports=ieee,
-            logic ports/scale=0.7,
+\ctikzset{
+        logic ports=ieee,
+        logic ports/scale=0.7,
 }
-    </pre>
+</pre>
 </div>
 
 &#x2003;
@@ -2992,11 +2992,11 @@ I want a reusable block, so I will start from a coordinate and then use only rel
 The first thing is to define a suitable flip-flop. The standard SR&nbsp;(see <a href="node-The-components-list.html#sec:flipflops">4.23</a>) is <em>almost</em> what we need, but not exactly the same. So let’s define a new one:
 </p>
 <pre class="programlisting">
-    \tikzset{sr-ff/.style={flipflop, flipflop def={
-        t1=S, t2=CP, t3=R, t4={\ctikztextnot{Q}},
-        t6=Q, nd=1}},
+\tikzset{sr-ff/.style={flipflop, flipflop def={
+    t1=S, t2=CP, t3=R, t4={\ctikztextnot{Q}},
+    t6=Q, nd=1}},
 }
-    </pre>
+</pre>
 
 </div>
 
@@ -3208,27 +3208,27 @@ R       Q
 In earlier versions, you should have found the center point between the two terminal, position the “not” shape and ten connect it, like for example (this code must stay into the <span class="verb">\draw</span> command):
 </p>
 <pre class="programlisting">
-     &percnt; let&apos;s position the NOT in the center
-     &percnt; this is using the calc tikz library
-     ($(in)!0.5!(in |- AND2.in 2)$) node[not port, rotate=-90](NOT){}
-     &percnt; and connect it
+    &percnt; let&apos;s position the NOT in the center
+    &percnt; this is using the calc tikz library
+    ($(in)!0.5!(in |- AND2.in 2)$) node[not port, rotate=-90](NOT){}
+    &percnt; and connect it
     (in) -- (NOT.in) (NOT.out) |- (AND2.in 2)
- </pre>
+</pre>
 
 <p>
 Now we have the basic block; we have to use it twice, so one of the possible ways to do it is to prepare a command. We will change the names of the nodes and the coordinates to be different for any “call” of the block (another option is to use a <kbd>pic</kbd>; but this is
 more straightforward).
 </p>
 <pre class="programlisting">
-    \newcommand*{\myblock}[1]{&percnt; Add #1- to the node and coord names
-        node[sr-ff](#1-FF){} (#1-FF.bup) node[above]{SR-FF}
-            (#1-FF.pin 1) -- ++(-1,0) node[and port, anchor=out](#1-AND1){}
-            (#1-FF.pin 3) -- (#1-FF.pin 3 -| #1-AND1.out)
-            node[and port, anchor=out](#1-AND2){}
-            (#1-AND1.in 1) to[short, -*] ++(-1,0) coordinate(#1-in)
-            to[inline not] (#1-in |- #1-AND2.in 2) -- (#1-AND2.in 2)
+\newcommand*{\myblock}[1]{&percnt; Add #1- to the node and coord names
+    node[sr-ff](#1-FF){} (#1-FF.bup) node[above]{SR-FF}
+        (#1-FF.pin 1) -- ++(-1,0) node[and port, anchor=out](#1-AND1){}
+        (#1-FF.pin 3) -- (#1-FF.pin 3 -| #1-AND1.out)
+        node[and port, anchor=out](#1-AND2){}
+        (#1-AND1.in 1) to[short, -*] ++(-1,0) coordinate(#1-in)
+        to[inline not] (#1-in |- #1-AND2.in 2) -- (#1-AND2.in 2)
 }
-    </pre>
+</pre>
 <div class="minipage" style="vertical-align:bottom ; justify-content:flex-start ; width:221pt ; ">
 
 <a id="circuitikzmanual-autopage-210"></a>
@@ -3236,9 +3236,9 @@ more straightforward).
 So now we can draw two of our blocks:
 </p>
 <pre class="programlisting">
-     \draw (0,0) \myblock{A};
+   \draw (0,0) \myblock{A};
    \draw (0,-4) \myblock{B};
- </pre>
+</pre>
 <p>
 Part of the anchors and coordinates that we have accessible are marked in red in the diagram at the side.
 </p>
@@ -3246,9 +3246,9 @@ Part of the anchors and coordinates that we have accessible are marked in red in
 Now we have to just connect the relevant parts and add the labels. The names of the inputs are quite easy:
 </p>
 <pre class="programlisting">
-     \draw (A-in) -- ++(-0.5, 0) node[below]{$a_0$};
+    \draw (A-in) -- ++(-0.5, 0) node[below]{$a_0$};
     \draw (B-in) -- ++(-0.5, 0) node[below]{$a_1$};
- </pre>
+</pre>
 <p>
 And finally:
 </p>
@@ -3300,15 +3300,15 @@ B-in                  SR-FF
 
 </div>
 <pre class="programlisting">
-     \draw (A-AND1.in 2) to[short, -*] (A-AND2.in 1)
-         to[short, -*] (B-AND1.in 2) to[short, -*] (B-AND2.in 1)
-         -- ++(0, -2) coordinate(down) node[below]{ENABLE};
-     \draw (A-FF.pin 2) to[short, -*] (B-FF.pin 2)
-         -- (B-FF.pin 2 |- down) node[below]{CP};
-     \draw (B-FF.down) to[short, -*] ++(0,-0.3) coordinate(dd);
-     \draw (A-FF.down) -- ++(0,-.5) -- ++(1.5,0) |- (dd)
-        -- (dd |- down) node[below]{RESET};
- </pre>
+    \draw (A-AND1.in 2) to[short, -*] (A-AND2.in 1)
+        to[short, -*] (B-AND1.in 2) to[short, -*] (B-AND2.in 1)
+        -- ++(0, -2) coordinate(down) node[below]{ENABLE};
+    \draw (A-FF.pin 2) to[short, -*] (B-FF.pin 2)
+        -- (B-FF.pin 2 |- down) node[below]{CP};
+    \draw (B-FF.down) to[short, -*] ++(0,-0.3) coordinate(dd);
+    \draw (A-FF.down) -- ++(0,-.5) -- ++(1.5,0) |- (dd)
+         -- (dd |- down) node[below]{RESET};
+</pre>
 
 <p>
 Will create the final diagram:
