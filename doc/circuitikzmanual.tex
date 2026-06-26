@@ -9254,16 +9254,16 @@ The \texttt{l2} and \texttt{a2} will only work in LaTeX because they use a \text
 \begin{ctikzExample}[varwidth=true, pos=t, keepspaces, basicstyle=\footnotesize\ttfamily]
 \begin{circuitikz}[american]
     %
-    % default for l2 is: l2 halign=l, l2 valign=c. DO NOT USE the <...> notation
+    % the default for l2 is: l2 halign=l, l2 valign=c. DO NOT USE the <...> notation
     %
-    \draw (0,0) to[R, l2_=$R_{CC}$ and \SI{4.7}{k\ohm},            , l2 valign=t] ++(2,0);
-    \draw (0,0) to[R, l2_=$R_{CC}$ and \SI{4.7}{k\ohm},            ,            ] ++(0,2);
-    \draw (0,0) to[R, l2_=$R_{CC}$ and \SI{4.7}{k\ohm}, l2 halign=c, l2 valign=b] ++(-2,0);
-    \draw (0,0) to[R, l2_=$R_{CC}$ and \SI{4.7}{k\ohm}, l2 halign=r, l2 valign=c] ++(0,-2);
-    \draw (5,0) to[R, l2^=$R_{CC}$ and \SI{4.7}{k\ohm}, l2 halign=c, l2 valign=b] ++(2,0);
-    \draw (5,0) to[R, l2^=$R_{CC}$ and \SI{4.7}{k\ohm}, l2 halign=c,            ] ++(0,2);
-    \draw (5,0) to[R, l2^=$R_{CC}$ and \SI{4.7}{k\ohm},            , l2 valign=t] ++(-2,0);
-    \draw (5,0) to[R, l2^=$R_{CC}$ and \SI{4.7}{k\ohm}, l2 halign=c, l2 valign=t] ++(0,-2);
+    \draw (0,0) to[R, l2_=$R_1$ and \SI{4.7}{k\ohm},            , l2 valign=t] ++(2,0);
+    \draw (0,0) to[R, l2_=$R_2$ and \SI{4.7}{k\ohm},            ,            ] ++(0,2);
+    \draw (0,0) to[R, l2_=$R_3$ and \SI{4.7}{k\ohm}, l2 halign=c, l2 valign=b] ++(-2,0);
+    \draw (0,0) to[R, l2_=$R_4$ and \SI{4.7}{k\ohm}, l2 halign=r, l2 valign=c] ++(0,-2);
+    \draw (5,0) to[R, l2^=$R_5$ and \SI{4.7}{k\ohm}, l2 halign=c, l2 valign=b] ++(2,0);
+    \draw (5,0) to[R, l2^=$R_6$ and \SI{4.7}{k\ohm}, l2 halign=c,            ] ++(0,2);
+    \draw (5,0) to[R, l2^=$R_7$ and \SI{4.7}{k\ohm},            , l2 valign=t] ++(-2,0);
+    \draw (5,0) to[R, l2^=$R_8$ and \SI{4.7}{k\ohm}, l2 halign=c, l2 valign=t] ++(0,-2);
     \draw (10,2) to[R, l2={A=B} and X, a2={C=D} and Y] ++(0,-4);
 \end{circuitikz}
 \end{ctikzExample}
