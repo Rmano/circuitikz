@@ -11,6 +11,7 @@ permissions:
 jobs:
   build-and-deploy:
     name: Build manual and deploy
+    if: github.repository == 'circuitikz/circuitikz'
     runs-on: ubuntu-24.04
 
     steps:
